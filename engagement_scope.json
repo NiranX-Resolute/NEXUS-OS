@@ -1,0 +1,47 @@
+{
+  "domains": [
+    "localhost",
+    "*.local.nexus",
+    "127.0.0.1",
+    "github.com",
+    "*.github.com",
+    "reddit.com",
+    "*.reddit.com",
+    "youtube.com",
+    "*.youtube.com",
+    "youtu.be",
+    "twitter.com",
+    "*.twitter.com",
+    "x.com",
+    "*.x.com",
+    "bilibili.com",
+    "*.bilibili.com",
+    "agentreach.cfd",
+    "*.agentreach.cfd"
+  ],
+  "ips": [
+    "127.0.0.1"
+  ],
+  "cidrs": [
+    "127.0.0.0/8",
+    "192.168.1.0/24"
+  ],
+  "allowed_tools": [
+    "nuclei",
+    "nmap",
+    "semgrep",
+    "gitleaks",
+    "obscura",
+    "reticle",
+    "reticle_session",
+    "reticle_look",
+    "reticle_act",
+    "reticle_act_and_wait",
+    "reticle_assert",
+    "agent_reach",
+    "agent-reach",
+    "scout_reach",
+    "scout_reach_read",
+    "scout_reach_search"
+  ]
+}

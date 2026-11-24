@@ -1,0 +1,25 @@
+# ==============================================================================
+# Cloudflare Pages Configuration: Nexus Scholar (Accessible Student Studio)
+# 100% Zero-Cost Serverless Edge Architecture
+# ==============================================================================
+
+name = "nexus-scholar"
+pages_build_output_dir = "frontend"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 Serverless Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "nexus-scholar-db"
+database_id = "scholar-local-dev-id"
+
+# Cloudflare Workers AI Binding (Zero-Key Edge Neural Inference)
+[ai]
+binding = "AI"
+
+[vars]
+ENVIRONMENT = "production"
+APP_NAME = "Nexus Scholar"
+DEFAULT_TUTOR_MODE = "socratic"
+DEFAULT_DWELL_MS = "1200"

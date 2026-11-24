@@ -1,0 +1,388 @@
+import { useState, useEffect, Suspense, lazy } from 'react'
+import {
+  RiWifiLine,
+  RiShieldFlashLine,
+  RiBrainLine,
+  RiFolderOpenLine,
+  RiPhoneLine,
+  RiSettings4Line,
+  RiBatteryChargeLine,
+  RiCameraLine,
+  RiComputerLine,
+  RiCloseLine,
+  RiImageLine,
+  RiChatSmile3Line,
+  RiGlobalLine,
+  RiPencilLine,
+  RiDashboardLine,
+  RiUserLine
+} from 'react-icons/ri'
+import { getSystemStatus } from '@renderer/services/system-info'
+import { getHistory } from '@renderer/services/nexus-ai-brain'
+import { nexusService } from '@renderer/services/nexus-voice-ai'
+import { trackSiteVisit } from '@renderer/services/analytics'
+import ViewSkeleton from '@renderer/components/ViewSkelrton'
+
+import DashboardView from '../views/Dashboard'
+import PhoneView from '../views/Phone'
+import { VisionMode } from '@renderer/IndexRoot'
+
+const AppsView = lazy(() => import('../views/APP'))
+const WorkFlowEditorView = lazy(() => import('../views/WorkFlowEditor'))
+const AiChatView = lazy(() => import('../views/AiChat'))
+const NotesView = lazy(() => import('../views/Notes'))
+const SettingsView = lazy(() => import('../views/Settings'))
+const ProfileView = lazy(() => import('../views/Profile'))
+const GalleryView = lazy(() => import('../views/Gallery'))
+const BrowserControlView = lazy(() => import('../views/BrowserControl'))
+const ObscuraInspectorView = lazy(() => import('../views/ObscuraInspectorView'))
+const WhiteboardView = lazy(() => import('../views/Whiteboard'))
+const AgenticView = lazy(() => import('../views/AgenticView'))
+import VisionSourceModal, { StartVisionOptions } from '../components/VisionSourceModal'
+
+interface NexusProps {
+  isSystemActive: boolean
+  isSystemStarting: boolean
+  toggleSystem: () => void | Promise<void>
+  isMicMuted: boolean
+  toggleMic: () => void
+  isVideoOn: boolean
+  visionMode: VisionMode
+  startVision: (mode: 'camera' | 'screen' | 'dual', options?: StartVisionOptions) => void
+  stopVision: () => void
+  activeStream: MediaStream | null
+  activeCameraStream?: MediaStream | null
+}
+
+const glassPanel =
+  'rounded-xl border border-white/10 bg-zinc-950/55 shadow-[0_18px_60px_rgba(0,0,0,0.42)] backdrop-blur-2xl'
+
+const NEXUS = (props: NexusProps) => {
+  const [activeTab, setActiveTab] = useState('DASHBOARD')
+  const [stats, setStats] = useState<any>(null)
+  const [time, setTime] = useState<Date>(new Date())
+  const [chatHistory, setChatHistory] = useState<any[]>([])
+  const [showSourceModal, setShowSourceModal] = useState(false)
+  const [browserSubTab, setBrowserSubTab] = useState<'webview' | 'obscura'>('obscura')
+
+  useEffect(() => {
+    getSystemStatus().then(setStats)
+    const timer = setInterval(() => {
+      setTime(new Date())
+      getSystemStatus().then(setStats)
+    }, 2000)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const history = await getHistory()
+      if (Array.isArray(history)) setChatHistory(history.slice(-15))
+    }
+    fetchHistory()
+    const interval = setInterval(fetchHistory, 2000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleVisionClick = () => {
+    if (props.isVideoOn) {
+      props.stopVision()
+    } else {
+      setShowSourceModal(true)
+    }
+  }
+
+  const tabs = [
+    { id: 'DASHBOARD', icon: <RiDashboardLine />, label: 'Agent' },
+    { id: 'AGENTIC', icon: <RiShieldFlashLine />, label: 'Agentic' },
+    { id: 'PROFILE', icon: <RiUserLine />, label: 'Profile' },
+    { id: 'AI CHAT', icon: <RiChatSmile3Line />, label: 'AI Chat' },
+    { id: 'Macros', icon: <RiBrainLine />, label: 'Macros' },
+    { id: 'Apps', icon: <RiFolderOpenLine />, label: 'Apps' },
+    { id: 'BROWSER CONTROL', icon: <RiGlobalLine />, label: 'Browser' },
+    { id: 'WHITEBOARD', icon: <RiPencilLine />, label: 'Board' },
+    { id: 'NOTES', icon: <RiFolderOpenLine />, label: 'Notes' },
+    { id: 'GALLERY', icon: <RiImageLine />, label: 'Gallery' },
+    // Phone tab temporarily removed from sidebar while bridge link is unlinked
+    { id: 'SETTINGS', icon: <RiSettings4Line />, label: 'Settings' }
+  ]
+
+  useEffect(() => {
+    const pageMap: Record<string, string> = {
+      agent: 'DASHBOARD',
+      dashboard: 'DASHBOARD',
+      agentic: 'AGENTIC',
+      autonomous: 'AGENTIC',
+      profile: 'PROFILE',
+      account: 'PROFILE',
+      chat: 'AI CHAT',
+      'ai chat': 'AI CHAT',
+      macros: 'Macros',
+      apps: 'Apps',
+      files: 'Apps',
+      browser: 'BROWSER CONTROL',
+      whiteboard: 'WHITEBOARD',
+      board: 'WHITEBOARD',
+      notes: 'NOTES',
+      gallery: 'GALLERY',
+      phone: 'PHONE',
+      settings: 'SETTINGS'
+    }
+
+    const sendTextToAgent = async (text: string) => {
+      const cleaned = text.trim()
+      if (!cleaned) return
+
+      try {
+        if (!props.isSystemActive && !props.isSystemStarting) {
+          await props.toggleSystem()
+        }
+        await nexusService.sendTextPrompt(cleaned, 'steer')
+      } catch {
+        localStorage.setItem(
+          'nexus_pending_dock_command',
+          JSON.stringify({ text: cleaned, intent: 'steer', createdAt: Date.now() })
+        )
+      }
+    }
+
+    const handleMobileCommand = async (_event: unknown, command: any) => {
+      const type = String(command?.type || '').trim()
+      const payload = String(command?.payload || '').trim()
+      if (!type) return
+
+      localStorage.setItem(
+        'nexus_last_mobile_command',
+        JSON.stringify({ ...command, receivedAt: Date.now() })
+      )
+
+      if (type === 'page') {
+        setActiveTab(pageMap[payload.toLowerCase()] || 'DASHBOARD')
+        return
+      }
+
+      if (type === 'voice') {
+        setActiveTab('DASHBOARD')
+        if (payload === 'online' && !props.isSystemActive && !props.isSystemStarting) {
+          await props.toggleSystem()
+        }
+        if ((payload === 'offline' || payload === 'off') && props.isSystemActive) {
+          await props.toggleSystem()
+          return
+        }
+        if ((payload === 'online' || payload === 'unmuted') && props.isMicMuted) {
+          props.toggleMic()
+        }
+        if (payload === 'muted' && !props.isMicMuted) {
+          props.toggleMic()
+        }
+        return
+      }
+
+      if (type.startsWith('whiteboard')) {
+        setActiveTab('WHITEBOARD')
+        window.dispatchEvent(new CustomEvent('nexus-mobile-command', { detail: command }))
+        return
+      }
+
+      if (type.startsWith('files')) {
+        setActiveTab('Apps')
+        window.dispatchEvent(new CustomEvent('nexus-mobile-command', { detail: command }))
+        return
+      }
+
+      if (['weather', 'stocks', 'maps', 'research'].includes(type)) {
+        setActiveTab('DASHBOARD')
+        await sendTextToAgent(`${type}: ${payload}`)
+        return
+      }
+
+      if (type === 'command') {
+        await sendTextToAgent(payload)
+      }
+    }
+
+    window.electron.ipcRenderer.on('mobile-command', handleMobileCommand)
+    return () => window.electron.ipcRenderer.removeAllListeners('mobile-command')
+  }, [
+    props.isSystemActive,
+    props.isSystemStarting,
+    props.isMicMuted,
+    props.toggleMic,
+    props.toggleSystem
+  ])
+
+  useEffect(() => {
+    const handleSwitchTab = (e: any) => {
+      const tabId = e.detail?.tab
+      if (tabId) setActiveTab(tabId)
+    }
+    window.addEventListener('nexus-switch-tab', handleSwitchTab)
+    return () => window.removeEventListener('nexus-switch-tab', handleSwitchTab)
+  }, [])
+
+  useEffect(() => {
+    void trackSiteVisit(`nexus-tab:${activeTab}`, {
+      surface: 'nexus-tab',
+      tab: activeTab
+    }).catch(() => {})
+  }, [activeTab])
+
+  return (
+    <div className="nexus-shell-bg nexus-shell-scan h-full w-full text-zinc-100 font-sans overflow-hidden select-none flex flex-col relative">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:48px_48px] opacity-35" />
+
+      <div className="group/sidebar absolute left-0 top-14 bottom-0 z-70 w-16 hover:w-56 transition-all duration-200 border-r border-emerald-400/20 bg-zinc-950/82 backdrop-blur-2xl overflow-hidden shadow-[18px_0_35px_rgba(0,0,0,0.55)]">
+        <div className="border-b border-white/5 p-2">
+          <div className="flex h-10 items-center gap-3 rounded-lg border border-emerald-300/15 bg-emerald-300/[0.08] px-2">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-400 text-[10px] font-black text-black shadow-[0_0_18px_rgba(52,211,153,0.4)]">
+              NX
+            </span>
+            <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity text-[9px] font-black uppercase tracking-[0.22em] text-emerald-100 whitespace-nowrap">
+              Nexus 9.1
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5 p-2 overflow-y-auto overflow-x-hidden scrollbar-none h-[calc(100%-56px)]">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`group/nav relative h-11 rounded-lg flex items-center gap-3 px-3 transition-all border ${
+                activeTab === tab.id
+                  ? 'bg-emerald-400/[0.14] border-emerald-300/30 text-emerald-200 shadow-[0_0_24px_rgba(16,185,129,0.09)]'
+                  : 'bg-white/[0.025] border-transparent text-zinc-500 hover:border-white/10 hover:text-zinc-200 hover:bg-white/[0.055]'
+              }`}
+              title={tab.label}
+            >
+              {activeTab === tab.id && (
+                <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.7)]" />
+              )}
+              <span className="text-xl shrink-0">{tab.icon}</span>
+              <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity text-[10px] font-black tracking-widest uppercase whitespace-nowrap">
+                {tab.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="relative z-50 h-14 w-full flex items-center justify-between pl-20 pr-6 border-b border-emerald-300/10 bg-zinc-950/75 shadow-[0_14px_32px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+        <div className="hidden lg:flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-300/20 bg-emerald-300/10 text-emerald-300 shadow-[0_0_22px_rgba(16,185,129,0.14)]">
+            <RiShieldFlashLine className="text-xl animate-pulse" />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="font-black tracking-[0.2em] text-sm text-zinc-100">Nexus AI</span>
+            <span className="text-[11px] font-mono text-emerald-500/60 tracking-widest">
+              NEURAL INTERFACE
+            </span>
+          </div>
+        </div>
+
+        <div className="hidden md:flex gap-2 bg-black/45 p-1 rounded-lg border border-white/10 shadow-inner">
+          {activeTab === 'BROWSER CONTROL' ? (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setBrowserSubTab('obscura')}
+                className={`px-3 py-1 text-[10px] font-bold tracking-widest rounded-md transition ${
+                  browserSubTab === 'obscura'
+                    ? 'text-cyan-200 border border-cyan-400/40 bg-cyan-500/20 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                OBSCURA STUDIO
+              </button>
+              <button
+                onClick={() => setBrowserSubTab('webview')}
+                className={`px-3 py-1 text-[10px] font-bold tracking-widest rounded-md transition ${
+                  browserSubTab === 'webview'
+                    ? 'text-emerald-200 border border-emerald-400/40 bg-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                LIVE WEBVIEW
+              </button>
+            </div>
+          ) : (
+            <span className="px-5 py-1.5 text-[10px] font-bold tracking-widest rounded-md text-emerald-200 border border-emerald-400/20 bg-emerald-400/10">
+              {tabs.find((tab) => tab.id === activeTab)?.label || activeTab}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3 sm:gap-6 text-[11px] font-mono font-bold">
+          <div className="flex items-center gap-2 text-emerald-500">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
+            <RiWifiLine /> <span className="hidden sm:inline">LINKED</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 text-zinc-400">
+            <RiBatteryChargeLine /> <span>100%</span>
+          </div>
+          <div className="rounded-md border border-white/10 bg-black/45 px-2 py-1 text-zinc-300">
+            {time.toLocaleTimeString()}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-hidden relative ml-16 bg-[radial-gradient(circle_at_center,#11182780_0%,#020202_62%,#000_100%)]">
+        <div className={`absolute inset-0 ${activeTab === 'DASHBOARD' ? 'block' : 'hidden'}`}>
+          <DashboardView
+            props={props}
+            stats={stats}
+            chatHistory={chatHistory}
+            onVisionClick={handleVisionClick}
+          />
+        </div>
+
+        <div className={`absolute inset-0 ${activeTab === 'PHONE' ? 'block' : 'hidden'}`}>
+          <PhoneView glassPanel={glassPanel} />
+        </div>
+
+        <Suspense fallback={<ViewSkeleton />}>
+          {activeTab === 'AGENTIC' && <AgenticView />}
+          {activeTab === 'AI CHAT' && (
+            <AiChatView
+              isSystemActive={props.isSystemActive}
+              isSystemStarting={props.isSystemStarting}
+              isMicMuted={props.isMicMuted}
+              toggleSystem={props.toggleSystem}
+              toggleMic={props.toggleMic}
+            />
+          )}
+          {activeTab === 'PROFILE' && <ProfileView />}
+          {activeTab === 'Macros' && <WorkFlowEditorView />}
+          {activeTab === 'Apps' && <AppsView />}
+          {activeTab === 'BROWSER CONTROL' &&
+            (browserSubTab === 'obscura' ? (
+              <ObscuraInspectorView />
+            ) : (
+              <BrowserControlView
+                isSystemActive={props.isSystemActive}
+                isSystemStarting={props.isSystemStarting}
+                isMicMuted={props.isMicMuted}
+                toggleSystem={props.toggleSystem}
+                toggleMic={props.toggleMic}
+                sendTextCommand={async (command) => {
+                  if (!props.isSystemActive) await props.toggleSystem()
+                  await nexusService.sendTextPrompt(command, 'steer')
+                }}
+              />
+            ))}
+          {activeTab === 'WHITEBOARD' && <WhiteboardView />}
+          {activeTab === 'NOTES' && <NotesView glassPanel={glassPanel} />}
+          {activeTab === 'SETTINGS' && <SettingsView isSystemActive={props.isSystemActive} />}
+          {activeTab === 'GALLERY' && <GalleryView />}
+        </Suspense>
+      </div>
+
+      <VisionSourceModal
+        isOpen={showSourceModal}
+        onClose={() => setShowSourceModal(false)}
+        onSelect={(mode, options) => props.startVision(mode, options)}
+      />
+    </div>
+  )
+}
+
+export default NEXUS

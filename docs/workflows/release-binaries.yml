@@ -1,0 +1,108 @@
+name: Build & Publish Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag (e.g. v5.0.0)'
+        required: false
+        default: 'v5.0.0'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-release-artifacts:
+    name: Build Cross-Platform Release Matrix
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - name: Install Desktop Dependencies
+        run: |
+          cd apps/desktop
+          npm install
+
+      - name: Build Electron Vite Bundle
+        run: |
+          cd apps/desktop
+          npx electron-vite build
+
+      - name: Execute Master Release Orchestrator
+        run: |
+          python scripts/build_all_releases.py --targets all --output-dir dist/release
+
+      - name: Verify Release Artifacts & SHA-256 Checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path dist/release
+          Get-Content dist/release/SHA256SUMS.txt
+
+      - name: Upload Release Binaries to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ github.ref_name || inputs.tag_name || 'v5.0.0' }}
+          name: "NEXUS OS v5.0.0 Production Release"
+          draft: false
+          prerelease: false
+          files: |
+            dist/release/NEXUS-OS-v5.0-Setup.exe
+            dist/release/NEXUS-OS-v5.0-Windows-Portable.exe
+            dist/release/NEXUS-OS-v5.0-Linux-x86_64.img
+            dist/release/NEXUS-OS-v5.0-Linux-x86_64.iso
+            dist/release/NEXUS-OS-v5.0-x86_64.AppImage
+            dist/release/NEXUS-OS-v5.0-macOS-Universal.dmg
+            dist/release/NEXUS-OS-v5.0-macOS.app.zip
+            dist/release/SHA256SUMS.txt
+            dist/release/release-manifest.json
+          generate_release_notes: true
+          body: |
+            ## NEXUS OS v5.0.0 — Zero-Card Autonomous Edge-to-Desktop Operating Environment
+
+            ### 🚀 Official Release Artifacts
+
+            | Platform | File | Type |
+            | :--- | :--- | :--- |
+            | **Windows (x64)** | `NEXUS-OS-v5.0-Setup.exe` | NSIS Installer |
+            | **Windows (x64)** | `NEXUS-OS-v5.0-Windows-Portable.exe` | Standalone Executable |
+            | **Linux (x86_64)** | `NEXUS-OS-v5.0-Linux-x86_64.img` | Raw Bootable Disk Image |
+            | **Linux (x86_64)** | `NEXUS-OS-v5.0-Linux-x86_64.iso` | ISO-9660 Standard Image |
+            | **Linux (x86_64)** | `NEXUS-OS-v5.0-x86_64.AppImage` | Standalone AppImage |
+            | **macOS (Universal)** | `NEXUS-OS-v5.0-macOS-Universal.dmg` | Apple Disk Image |
+            | **macOS (Universal)** | `NEXUS-OS-v5.0-macOS.app.zip` | Application Bundle Archive |
+
+            ### 🔐 Integrity Verification
+            Verify the SHA-256 checksums from `SHA256SUMS.txt`:
+            ```bash
+            # Windows PowerShell
+            Get-FileHash NEXUS-OS-v5.0-Setup.exe -Algorithm SHA256
+
+            # Linux / macOS
+            sha256sum -c SHA256SUMS.txt
+            ```
+
+            ### 🌐 Portals & Telemetry
+            - **Official Download Hub:** [https://nexus-landing.pages.dev/download](https://nexus-landing.pages.dev/download)
+            - **Platform Status:** [https://nexus-status.pages.dev](https://nexus-status.pages.dev)
+            - **Skills Marketplace:** [https://nexus-skills.pages.dev](https://nexus-skills.pages.dev)

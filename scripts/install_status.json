@@ -1,0 +1,40 @@
+{
+  "tools": {
+    "winget": "C:\\Users\\NiranX\\AppData\\Local\\Microsoft\\WindowsApps\\winget.EXE",
+    "gcloud": null,
+    "ollama": null,
+    "tailscale": null,
+    "bun": "C:\\Users\\NiranX\\AppData\\Roaming\\npm\\bun.CMD",
+    "git": "C:\\Users\\NiranX\\AppData\\Local\\Programs\\Git\\cmd\\git.EXE",
+    "node": "C:\\Program Files\\nodejs\\node.EXE",
+    "uv": "C:\\Users\\NiranX\\.local\\bin\\uv.EXE"
+  },
+  "pyside6": {
+    "status": "FAILED",
+    "log": {
+      "returncode": -1,
+      "stdout": "",
+      "stderr": "Command '['C:\\\\Users\\\\NiranX\\\\Documents\\\\antigravity\\\\Nexus Desktop\\\\.venv\\\\Scripts\\\\python.exe', '-m', 'pip', 'install', 'PySide6']' timed out after 120 seconds"
+    }
+  },
+  "command_center_bun_install": {
+    "status": "ALREADY_INSTALLED"
+  },
+  "winget_installations": {
+    "Google Cloud SDK": {
+      "package_id": "Google.CloudSDK",
+      "returncode": -1,
+      "output": "Command '['C:\\\\Users\\\\NiranX\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\winget.EXE', 'install', '--id', 'Google.CloudSDK', '-e', '--source', 'winget', '--accept-package-agreements', '--accept-source-agreements', '--silent']' timed out after 120 seconds"
+    },
+    "Ollama": {
+      "package_id": "Ollama.Ollama",
+      "returncode": -1,
+      "output": "Command '['C:\\\\Users\\\\NiranX\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\winget.EXE', 'install', '--id', 'Ollama.Ollama', '-e', '--source', 'winget', '--accept-package-agreements', '--accept-source-agreements', '--silent']' timed out after 120 seconds"
+    },
+    "Tailscale": {
+      "package_id": "Tailscale.Tailscale",
+      "returncode": 0,
+      "output": "Found Tailscale [Tailscale.Tailscale] Version 1.104.7\nThis application is licensed to you by its owner.\nMicrosoft is not responsible for, nor does it grant any licenses to, third-party packages.\nDownloading https://pkgs.tailscale.com/stable/tailscale-setup-1.104.7-amd64.msi\nSuccessfully verified installer hash\nStarting package install...\nSuccessfully installed"
+    }
+  }
+}

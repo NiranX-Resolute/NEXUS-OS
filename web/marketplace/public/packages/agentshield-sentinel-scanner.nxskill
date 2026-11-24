@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "slug": "agentshield-sentinel-scanner",
+  "name": "AgentShield Sentinel & Invariant Auditor",
+  "type": "skill",
+  "orbiter_group": "SEC-01",
+  "category": "security",
+  "permission_scope": [
+    "FILESYSTEM_READ",
+    "SECURITY_AUDIT"
+  ],
+  "instructions_md": "# AgentShield Sentinel & Invariant Auditor\n\nVerifies 6 Sovereign Invariants, audits shell commands, and prevents secret exfiltration.\n\n## Invariant Enforcement\n\n- NO_SYSTEM32_MODIFICATION\n- NO_RAW_CREDENTIAL_EXPOSURE\n- NO_UNAUTHORIZED_NETWORK_LISTENERS\n- NO_DESTRUCTIVE_FORCE_REBOOT\n- NO_DPAPI_VAULT_DUMP\n- REQUIRE_HUMAN_APPROVAL_FOR_PAYMENTS\n",
+  "references": [
+    "core/mcp/agent_shield.py"
+  ],
+  "sha256": "9c081ccfd5ab69dff76bd0b141aad5963a6c9364e6069613bb8dc2d09f3d8845"
+}

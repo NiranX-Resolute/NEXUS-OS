@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "slug": "infinity-slice-scheduler",
+  "name": "Infinity Slice Coroutine Scheduler",
+  "type": "skill",
+  "orbiter_group": "OPS-01",
+  "category": "orchestration",
+  "permission_scope": [
+    "COROUTINE_SCHEDULE",
+    "WAL_PERSISTENCE"
+  ],
+  "instructions_md": "# Infinity Slice Coroutine Scheduler\n\nPersistent execution-slice coroutine runner with sub-2ms state suspension and WAL hydration.\n\n## Slicing Paradigm\n\nBreaks long-running agent reasoning loops into deterministic slices with SQLite state check-pointing.\n",
+  "references": [
+    "core/runtime/slice_engine.py"
+  ],
+  "sha256": "c38a07ebc6e9ade3e6942ab137c4dc00621b31f497b71107ea42b159ca4c22cb"
+}

@@ -1,0 +1,25 @@
+# ==============================================================================
+# Cloudflare Pages Configuration: Nexus Companion (Daily Living Agent)
+# 100% Zero-Cost Serverless Edge Architecture
+# ==============================================================================
+
+name = "nexus-companion"
+pages_build_output_dir = "frontend"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 Serverless Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "nexus-companion-db"
+database_id = "companion-local-dev-id"
+
+# Cloudflare Workers AI Binding (Zero-Key Edge Vision & Speech Fallback)
+[ai]
+binding = "AI"
+
+[vars]
+ENVIRONMENT = "production"
+APP_NAME = "Nexus Companion"
+DEFAULT_THEME = "high-contrast-yellow"
+DEFAULT_DWELL_MS = "1200"

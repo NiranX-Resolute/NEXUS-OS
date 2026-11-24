@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Nexus Scholar — Accessible Student Studio</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#07090e">
+  <meta name="description" content="Accessible AI study ecosystem for disabled students with Diagram Sonification, Gaze Flashcards, Bionic Reading, and Socratic Audio Tutor.">
+
+  <!-- Accessible Fonts: Atkinson Hyperlegible & OpenDyslexic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/opendyslexic@2.1.0/css/opendyslexic.min.css">
+
+  <style>
+    /* ==========================================================================
+       WCAG 2.2 AAA Accessible Styling for Disabled Students
+       ========================================================================== */
+    :root {
+      --bg-color: #07090e;
+      --surface-color: #0e1322;
+      --surface-elevated: #151d33;
+      --text-main: #f0f4fc;
+      --text-muted: #94a3b8;
+      --accent-primary: #38bdf8; /* Accessible Sky Blue */
+      --accent-yellow: #ffff00;  /* High Contrast Yellow */
+      --accent-emerald: #10b981; /* High Contrast Success */
+      --danger-color: #f87171;
+      --border-color: #38bdf8;
+      --border-thick: 2px solid #38bdf8;
+      --focus-ring: 4px solid #ffff00;
+      --font-family: 'Atkinson Hyperlegible', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body[data-theme="yellow-contrast"] {
+      --bg-color: #000000;
+      --surface-color: #111111;
+      --surface-elevated: #1a1a1a;
+      --text-main: #ffffff;
+      --text-muted: #e2e8f0;
+      --accent-primary: #ffff00;
+      --border-color: #ffffff;
+      --border-thick: 3px solid #ffffff;
+      --focus-ring: 5px solid #ffff00;
+    }
+
+    body[data-theme="light"] {
+      --bg-color: #f8fafc;
+      --surface-color: #ffffff;
+      --surface-elevated: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #334155;
+      --accent-primary: #0284c7;
+      --border-color: #0f172a;
+      --border-thick: 2px solid #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .dyslexia-font, .dyslexia-font * {
+      font-family: 'OpenDyslexic', sans-serif !important;
+      letter-spacing: 0.12em !important;
+      word-spacing: 0.18em !important;
+      line-height: 2.1 !important;
+    }
+
+    /* Accessibility Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 10px;
+      background: var(--accent-yellow);
+      color: #000;
+      padding: 8px 16px;
+      z-index: 99999;
+      font-weight: bold;
+    }
+    .skip-link:focus { top: 10px; }
+
+    /* ==========================================================================
+       App Header & Status HUD
+       ========================================================================== */
+    .app-header {
+      background-color: var(--surface-color);
+      border-bottom: var(--border-thick);
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      font-size: 32px;
+      background: var(--accent-primary);
+      color: #000;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--accent-primary);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hud-pill {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .hud-pill.active {
+      background-color: var(--accent-primary);
+      color: #000;
+    }
+
+    .hud-btn {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+    }
+
+    .hud-btn:hover, .hud-btn:focus-visible {
+      outline: var(--focus-ring);
+      background-color: var(--accent-primary);
+      color: #000;
+    }
+
+    /* ==========================================================================
+       Navigation Ribbon
+       ========================================================================== */
+    .nav-tabs-ribbon {
+      background-color: var(--surface-color);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      padding: 10px 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .nav-tab-btn {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 68px;
+    }
+
+    .nav-tab-btn .tab-icon { font-size: 24px; }
+
+    .nav-tab-btn.active {
+      background-color: var(--accent-primary);
+      color: #000;
+      border-color: var(--accent-primary);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 16px;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .view-section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       Cognitive Reader Engine Styles
+       ========================================================================== */
+    .reader-toolbar {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 14px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tool-toggle-btn {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+    }
+
+    .tool-toggle-btn.active {
+      background-color: var(--accent-yellow);
+      color: #000;
+      border-color: var(--accent-yellow);
+    }
+
+    .reading-content-card {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 24px;
+      min-height: 400px;
+    }
+
+    .accessible-article h2 {
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: var(--accent-primary);
+    }
+
+    .accessible-article .article-body {
+      font-size: 21px;
+      line-height: 1.8;
+      max-width: 850px;
+    }
+
+    .article-body b {
+      color: var(--accent-yellow);
+      font-weight: 900;
+    }
+
+    /* Micro-Chunks Concept Cards */
+    .micro-chunks-container {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .chunk-card {
+      background-color: var(--surface-color);
+      border: 2px solid var(--accent-primary);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* ==========================================================================
+       Gaze Flashcards (Leitner 5-Box Spaced Repetition)
+       ========================================================================== */
+    .flashcard-arena {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .flashcard-box {
+      background-color: var(--surface-elevated);
+      border: 4px solid var(--accent-primary);
+      border-radius: 20px;
+      width: 100%;
+      min-height: 320px;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .fc-badge {
+      background: var(--accent-primary);
+      color: #000;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .fc-content {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .fc-hint {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .flashcard-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .gaze-action-btn {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 3px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px 12px;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+    }
+
+    .gaze-action-btn.flip {
+      background-color: var(--accent-primary);
+      color: #000;
+    }
+
+    .gaze-action-btn.easy { border-color: var(--accent-emerald); color: var(--accent-emerald); }
+    .gaze-action-btn.medium { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+    .gaze-action-btn.hard { border-color: var(--danger-color); color: var(--danger-color); }
+
+    /* ==========================================================================
+       Diagram & Formula Sonifier
+       ========================================================================== */
+    .sonifier-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 850px) { .sonifier-grid { grid-template-columns: 1fr; } }
+
+    .diagram-upload-card, .diagram-audio-card {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .diagram-preview {
+      width: 100%;
+      height: 260px;
+      object-fit: contain;
+      background: #000;
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+    }
+
+    .tier-box {
+      background: var(--surface-color);
+      border-left: 4px solid var(--accent-primary);
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+    }
+
+    /* ==========================================================================
+       Socratic Oral & Non-Verbal Quiz Tutor
+       ========================================================================== */
+    .tutor-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) { .tutor-layout { grid-template-columns: 1fr; } }
+
+    .tutor-speech-card, .tutor-quiz-card {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .quiz-tiles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .quiz-tile {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+      border: 3px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 120px;
+      text-align: center;
+    }
+
+    .quiz-tile .tile-icon { font-size: 36px; }
+
+    .quiz-tile:hover, .quiz-tile:focus-visible {
+      border-color: var(--accent-yellow);
+      transform: scale(1.03);
+    }
+
+    /* ==========================================================================
+       Gaze Cursor & Animations
+       ========================================================================== */
+    #scholar-gaze-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 64px;
+      height: 64px;
+      pointer-events: none;
+      z-index: 999999;
+      transform: translate3d(-100px, -100px, 0);
+      will-change: transform;
+    }
+
+    .dwell-svg {
+      width: 64px;
+      height: 64px;
+      transform: rotate(-90deg);
+    }
+
+    .dwell-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.2);
+      stroke-width: 6;
+    }
+
+    .dwell-progress {
+      fill: none;
+      stroke: var(--accent-yellow);
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.05s linear;
+    }
+
+    .gaze-dot {
+      position: absolute;
+      top: 26px;
+      left: 26px;
+      width: 12px;
+      height: 12px;
+      background-color: var(--accent-yellow);
+      border-radius: 50%;
+    }
+
+    .gaze-hover {
+      outline: var(--focus-ring) !important;
+      transform: scale(1.03);
+    }
+
+    .gaze-activated {
+      outline: 6px solid var(--accent-emerald) !important;
+    }
+
+    .switch-highlight {
+      outline: 5px solid var(--accent-yellow) !important;
+      background-color: rgba(255, 255, 0, 0.2) !important;
+    }
+
+    /* Settings Modal */
+    .settings-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      z-index: 999990;
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .settings-modal.active { display: flex; }
+  </style>
+</head>
+<body data-theme="oled">
+
+  <a href="#main-content" class="skip-link">Skip to Accessible Study Workspace</a>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="brand-logo" aria-hidden="true">S</div>
+      <div>
+        <h1 class="brand-title">Nexus Scholar</h1>
+        <div class="brand-subtitle">Accessible Student Studio & EdTech Suite</div>
+      </div>
+    </div>
+
+    <div class="hud-controls">
+      <span class="hud-pill active" id="scholar-gaze-status">Webcam Eye-Gaze Standby</span>
+      <button class="hud-btn gaze-target" id="btn-toggle-gaze" aria-label="Toggle Webcam Pupil Tracker">
+        👁️ Eye Tracker
+      </button>
+      <button class="hud-btn gaze-target" id="btn-open-settings" aria-label="Open Settings">
+        ⚙️ Settings
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Ribbon -->
+  <nav class="nav-tabs-ribbon" aria-label="Study Modules">
+    <button class="gaze-target nav-tab-btn active" data-tab="reader" aria-label="Cognitive and Neurodivergent Reader">
+      <span class="tab-icon">📖</span>
+      <span>Cognitive Reader</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="flashcards" aria-label="Hands-Free Gaze Flashcards">
+      <span class="tab-icon">🎴</span>
+      <span>Gaze Flashcards</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="sonifier" aria-label="Diagram and Formula Sonifier">
+      <span class="tab-icon">🔬</span>
+      <span>Diagram Sonifier</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="tutor" aria-label="Socratic Oral and Non-Verbal Quiz Tutor">
+      <span class="tab-icon">🎓</span>
+      <span>Socratic Tutor</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="ingest" aria-label="Textbook and Notes Ingestion">
+      <span class="tab-icon">📚</span>
+      <span>Course Library</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="agentic" aria-label="Agentic Nexus Autonomous Engine" style="border-color: rgba(16, 185, 129, 0.5);">
+      <span class="tab-icon">🤖</span>
+      <span style="color: #10b981; font-weight: 700;">Agentic Nexus</span>
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- 1. COGNITIVE & NEURODIVERGENT READER -->
+    <section id="view-reader" class="view-section active">
+      <!-- Accessibility Toolbar -->
+      <div class="reader-toolbar">
+        <button class="gaze-target tool-toggle-btn" id="btn-toggle-dyslexia">
+          🔤 Dyslexia Font: Off
+        </button>
+        <button class="gaze-target tool-toggle-btn" id="btn-toggle-bionic">
+          ⚡ Bionic Reading: Off
+        </button>
+        <button class="gaze-target tool-toggle-btn" id="btn-toggle-ruler">
+          📏 ADHD Focus Ruler: Off
+        </button>
+        <button class="gaze-target hud-btn" id="btn-read-aloud">
+          🔊 Read Aloud
+        </button>
+      </div>
+
+      <!-- Reading Pane -->
+      <div class="reading-content-card">
+        <div id="study-reading-pane">
+          <!-- Populated by reader.js -->
+        </div>
+
+        <!-- Micro-Chunks Concept Deck -->
+        <div class="micro-chunks-container" id="micro-chunks-deck">
+          <h3 style="color: var(--accent-primary); margin-top: 10px;">⚡ 3-Minute Concept Micro-Cards</h3>
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. HANDS-FREE GAZE FLASHCARDS (LEITNER 5-BOX) -->
+    <section id="view-flashcards" class="view-section">
+      <div class="flashcard-arena">
+        <div style="display: flex; justify-content: space-between; width: 100%;">
+          <span class="hud-pill" id="flashcard-counter">Card 1 of 3</span>
+          <span class="hud-pill active" id="flashcard-leitner-box">Leitner Box 1 / 5</span>
+        </div>
+
+        <div class="flashcard-box" id="study-flashcard">
+          <!-- Rendered by gaze_study.js -->
+        </div>
+
+        <div class="flashcard-actions">
+          <button class="gaze-target gaze-action-btn flip" id="btn-flip-card">
+            🔄 Flip Card
+          </button>
+          <button class="gaze-target gaze-action-btn easy" id="btn-rate-easy">
+            😊 Easy (Box 3)
+          </button>
+          <button class="gaze-target gaze-action-btn medium" id="btn-rate-medium">
+            🤔 Medium (Box 2)
+          </button>
+          <button class="gaze-target gaze-action-btn hard" id="btn-rate-hard">
+            😣 Hard (Box 1)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. DIAGRAM & FORMULA SONIFIER -->
+    <section id="view-sonifier" class="view-section">
+      <div class="sonifier-grid">
+        <div class="diagram-upload-card">
+          <h2>🔬 Upload Diagram / Formula</h2>
+          <p style="color: var(--text-muted);">Textbook charts, math equations, biology anatomical structures, or circuit graphs.</p>
+          <input type="file" id="file-diagram-upload" accept="image/*" class="hud-btn" style="width: 100%;">
+          <img id="img-diagram-preview" class="diagram-preview" alt="Uploaded diagram preview" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><text x='20' y='55' fill='%23666'>Preview</text></svg>">
+          <button class="gaze-target hud-btn" id="btn-sonify-diagram" style="background: var(--accent-primary); color: #000; font-size: 18px; justify-content: center;">
+            🎧 Generate Audio Sonification Walkthrough
+          </button>
+        </div>
+
+        <div class="diagram-audio-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>🎧 Audio Walkthrough</h2>
+            <button class="hud-btn gaze-target" id="btn-play-sonified-audio">🔊 Play Audio</button>
+          </div>
+
+          <div class="tier-box">
+            <strong>Tier 1: High-Level Overview</strong>
+            <p id="sonify-tier1" style="margin-top: 6px;">Upload a diagram on the left to begin.</p>
+          </div>
+
+          <div class="tier-box">
+            <strong>Tier 2: Granular Data Breakdown</strong>
+            <div id="sonify-tier2" style="margin-top: 6px;">Awaiting diagram...</div>
+          </div>
+
+          <div class="tier-box">
+            <strong>Tier 3: Contextual Exam Takeaway</strong>
+            <p id="sonify-tier3" style="margin-top: 6px;">Awaiting diagram...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SOCRATIC ORAL & AAC QUIZ TUTOR -->
+    <section id="view-tutor" class="view-section">
+      <div class="tutor-layout">
+        <!-- Voice Tutor Dialogue -->
+        <div class="tutor-speech-card">
+          <h2>🎙️ Socratic Voice Tutor</h2>
+          <p style="color: var(--text-muted);">High-tolerance speech mode accepts stuttered or dysarthric input without cutting you off.</p>
+          
+          <div style="display: flex; gap: 8px;">
+            <button class="gaze-target hud-btn" id="btn-mic-tutor" style="flex: 1; justify-content: center;">
+              🎙️ Speak to Tutor
+            </button>
+            <button class="gaze-target hud-btn" id="btn-replay-tutor">
+              🔊 Hear Reply
+            </button>
+          </div>
+
+          <div id="tutor-speech-output" style="background: var(--surface-color); border: 2px solid var(--accent-primary); border-radius: 12px; padding: 16px; min-height: 140px; font-size: 20px;">
+            "Hello! I am your Socratic companion. What concept in cellular respiration shall we explore together?"
+          </div>
+
+          <div id="tutor-question-box" style="color: var(--accent-yellow); font-weight: bold; font-size: 18px;">
+            Follow-up: "How does the proton gradient drive ATP synthesis?"
+          </div>
+        </div>
+
+        <!-- Non-Verbal 4-Tile Quiz Arena -->
+        <div class="tutor-quiz-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>🎛️ Non-Verbal Quiz Arena</h2>
+            <button class="gaze-target hud-btn" id="btn-next-quiz">Next Question</button>
+          </div>
+
+          <div id="quiz-question-text" style="font-size: 20px; font-weight: bold;">
+            Which organelle is responsible for generating the majority of cellular ATP?
+          </div>
+
+          <div class="quiz-tiles-grid" id="quiz-tiles-grid">
+            <button class="gaze-target quiz-tile" data-opt="A">
+              <span class="tile-icon">🧬</span>
+              <span>A: Nucleus (DNA Vault)</span>
+            </button>
+            <button class="gaze-target quiz-tile" data-opt="B">
+              <span class="tile-icon">⚡</span>
+              <span>B: Mitochondria (Powerhouse)</span>
+            </button>
+            <button class="gaze-target quiz-tile" data-opt="C">
+              <span class="tile-icon">🧱</span>
+              <span>C: Ribosome (Proteins)</span>
+            </button>
+            <button class="gaze-target quiz-tile" data-opt="D">
+              <span class="tile-icon">📦</span>
+              <span>D: Golgi Body (Packaging)</span>
+            </button>
+          </div>
+
+          <div id="quiz-feedback-box" style="display: none; padding: 12px; border-radius: 10px; font-weight: bold;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. COURSE LIBRARY & INGESTION -->
+    <section id="view-ingest" class="view-section">
+      <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;">
+        <h2>📚 Ingest Textbook Chapter or Notes</h2>
+        <input type="text" id="input-doc-title" placeholder="Document Title (e.g., Photosynthesis & Light Reactions)" class="hud-btn" style="text-align: left;">
+        <textarea id="input-doc-text" placeholder="Paste textbook text, notes, or chapter excerpt here..." style="background: var(--surface-elevated); color: var(--text-main); border: var(--border-thick); border-radius: 12px; padding: 16px; min-height: 200px; font-size: 18px;"></textarea>
+        <button class="gaze-target hud-btn" id="btn-ingest-doc" style="background: var(--accent-primary); color: #000; font-size: 20px; justify-content: center;">
+          ⚡ Ingest & Generate 3-Minute Micro-Chunks
+        </button>
+      </div>
+    </section>
+
+    <!-- 6. AGENTIC NEXUS AUTONOMOUS ENGINE VIEW -->
+    <section id="view-agentic" class="view-section">
+      <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.12); border: 2px solid #10b981; border-radius: 16px; padding: 18px;">
+        <div>
+          <h2 style="color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
+            🤖 Agentic Nexus Autonomous Engine
+          </h2>
+          <p style="margin: 6px 0 0 0; color: #cbd5e1; font-size: 0.95rem;">Autonomous scholar research coordinator running in isolated local worktrees with Cloudflare D1 queueing.</p>
+        </div>
+        <div>
+          <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 0.9rem;">
+            PC: ONLINE (100% Free Tier)
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Action Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <button class="gaze-target scholar-agent-btn" data-cmd="Run full test suite and self-correct compiler errors" style="background: var(--surface-card); border: 2px solid var(--border-color); border-radius: 14px; padding: 16px; font-size: 1rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left;">
+          🧪 Run Test Suite & Self-Heal
+        </button>
+        <button class="gaze-target scholar-agent-btn" data-cmd="Compile Kinematics formula sheet and generate review artifact" style="background: var(--surface-card); border: 2px solid var(--border-color); border-radius: 14px; padding: 16px; font-size: 1rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left;">
+          📄 LaTeX Formula Sheet Generator
+        </button>
+        <button class="gaze-target scholar-agent-btn" data-cmd="Verify local research surface http://localhost:3000 and capture DOM console audit" style="background: var(--surface-card); border: 2px solid var(--border-color); border-radius: 14px; padding: 16px; font-size: 1rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left;">
+          🌐 Playwright Browser Verifier
+        </button>
+        <button class="gaze-target scholar-agent-btn" data-cmd="Create isolated Git worktree and check branch integrity" style="background: var(--surface-card); border: 2px solid var(--border-color); border-radius: 14px; padding: 16px; font-size: 1rem; font-weight: 700; color: var(--text-main); cursor: pointer; text-align: left;">
+          🌿 Worktree Sandbox Harness
+        </button>
+      </div>
+
+      <!-- Command Input -->
+      <div style="background: var(--surface-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="scholar-agent-input" placeholder="Type or scan instructions for autonomous research agent..." style="flex: 1; background: #000; border: 2px solid var(--border-color); border-radius: 12px; padding: 14px; font-size: 1rem; color: #fff; outline: none;" />
+          <button class="gaze-target hud-btn" id="btn-scholar-dispatch" style="background: #10b981; color: #000; font-weight: 800; font-size: 1rem; padding: 0 24px; border: none;">
+            ⚡ Dispatch Task
+          </button>
+        </div>
+      </div>
+
+      <!-- Agent Trace Timeline -->
+      <div style="background: var(--surface-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h3 style="margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">
+            Inspectable Agent Execution Trace
+          </h3>
+          <span id="scholar-trace-counter" style="font-family: monospace; font-size: 0.85rem; color: #10b981;">Ready</span>
+        </div>
+        <div id="scholar-trace-container" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="padding: 24px; text-align: center; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: 12px;">
+            Select any research preset above or enter a task to observe the live thought formulation and tool execution milestones.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div class="settings-modal" id="scholar-settings-modal">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>⚙️ Scholar Settings</h2>
+      <button class="hud-btn" id="btn-close-scholar-settings">✕ Close</button>
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">Input Mode</label>
+      <select id="select-scholar-mode" class="hud-btn" style="width: 100%;">
+        <option value="gaze">WebGazer Webcam Pupil Gaze</option>
+        <option value="switch">Single Switch Scanning (Space / Enter)</option>
+        <option value="touch">Touch & Mouse</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">Theme</label>
+      <select id="select-scholar-theme" class="hud-btn" style="width: 100%;">
+        <option value="oled">Dark OLED Blue</option>
+        <option value="yellow-contrast">High Contrast Yellow on Black (WCAG AAA)</option>
+        <option value="light">High Contrast Light</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">Custom Developer Key (Groq or Gemini)</label>
+      <input type="password" id="input-scholar-key" placeholder="gsk_... or AIza..." class="hud-btn" style="width: 100%; text-align: left;">
+    </div>
+
+    <button class="hud-btn gaze-target" id="btn-save-scholar-settings" style="background: var(--accent-primary); color: #000; justify-content: center;">
+      Save Settings
+    </button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="reader.js"></script>
+  <script src="gaze_study.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(e => console.log(e));
+    }
+  </script>
+</body>
+</html>

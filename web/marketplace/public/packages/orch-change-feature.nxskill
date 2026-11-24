@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "slug": "orch-change-feature",
+  "name": "orch-change-feature",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "community",
+  "permission_scope": [
+    "FILESYSTEM_READ"
+  ],
+  "instructions_md": "---\nname: orch-change-feature\ndescription: Orchestrate altering an existing, working feature to new desired behavior \u2014 update its tests to the new spec, change the implementation to match, review, and gated commit. Use when behavior is not broken but should be different.\nmetadata:\n  origin: ECC\n---\n\n# orch-change-feature\n\nActor \u00b7 action \u00b7 target: **orch \u00b7 change \u00b7 feature**. Thin wrapper over the\nshared engine in [`orch-pipeline`](../orch-pipeline/SKILL.md).\n\n## When to Use\n\n- An existing feature **works**, but the desired behavior is different (\"change\",\n  \"adjust\", \"make it also \u2026\", \"instead of X do Y\").\n- Distinguish from siblings:\n  - **not** broken \u2192 not `orch-fix-defect` (no bug to reproduce).\n  - **not** new \u2192 not `orch-add-feature` (the capability already exists).\n\n## Operation settings\n\n- **Default size floor:** small \u2014 most tweaks are a function or two.\n- **Phase mask:** 0 \u2192 (1 only if the new behavior needs research) \u2192 light 2 \u2192\n  4 \u2192 5 \u2192 6.\n- **First move (phase 4):** update the *existing* tests to express the new\n  desired behavior, then change the implementation until they pass. Changing the\n  tests first is what separates a tweak from a fix.\n\n## How It Works\n\n1. Run the `orch-pipeline` engine with the settings above.\n2. Keep the plan light \u2014 only `standard`+ size warrants the full `planner` pass.\n3. Stop at **Gate 1** (plan / changed-test approval) and **Gate 2** (pre-commit).\n4. Add `security-reviewer` if the change touches a security trigger.\n\n## Example\n\n```\norch-change-feature: make nws-poller alert at 2 warnings instead of 3\n\u2192 update threshold tests to new spec \u2192 change impl to green\n\u2192 code-review \u2192 commit  [GATE 2: confirm]\n```\n",
+  "references": [],
+  "sha256": "c35411c14f97ca61bc7044f820a4274e8a16c7ab727ae9ce42cc3236472ad1a8"
+}

@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="dark" />
+    <title>NEXUS OS v5.0 Sovereign</title>
+    <link rel="icon" type="image/png" href="./icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+    default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
+    script-src * 'unsafe-inline' 'unsafe-eval' data: blob: https://cdn.jsdelivr.net https://js.puter.com;
+    worker-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
+    connect-src * data: blob: 'unsafe-inline';
+    img-src * data: blob: file: 'unsafe-inline';
+    media-src * data: blob: file: 'unsafe-inline';
+    style-src * 'unsafe-inline';
+  "
+    />
+    <script src="https://js.puter.com/v2/"></script>
+  </head>
+
+  <body class="text-white overflow-hidden bg-transparent">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "slug": "reticle-verify-ui",
+  "name": "Reticle Runtime UI & IPC Verifier",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "verification",
+  "permission_scope": [
+    "FILESYSTEM_READ"
+  ],
+  "instructions_md": "Deterministic runtime DOM, UI state, and Electron IPC verification using Reticle MCP tools (reticle_session -> reticle_act_and_wait / reticle_assert requiring verified: yes).",
+  "references": [],
+  "sha256": "88ec17c779bdc3f8b18918c0faad89a993fa9486075b17b4ede9fbcec68f04e6"
+}

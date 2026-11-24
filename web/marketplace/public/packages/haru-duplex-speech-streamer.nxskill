@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "slug": "haru-duplex-speech-streamer",
+  "name": "Haru Duplex Voice & Audio Streamer",
+  "type": "skill",
+  "orbiter_group": "SYS-01",
+  "category": "voice",
+  "permission_scope": [
+    "AUDIO_CAPTURE",
+    "AUDIO_PLAYBACK"
+  ],
+  "instructions_md": "# Haru Duplex Voice & Audio Streamer\n\nReal-time conversational voice pipeline with barge-in interruption and Silero VAD gating.\n\n## Audio Stack\n\n- Sub-200ms latency duplex dialogue\n- Kokoro TTS local neural synthesis\n- Voice persona prosody tuning\n",
+  "references": [],
+  "sha256": "ad59ec3202349fe8a90571f4b1fdc07b1b6c1d60f1993cfdb1d27d4b0e48690b"
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "slug": "orchestrator-agent",
+  "name": "Orchestrator",
+  "type": "agent",
+  "orbiter_group": "OPS-01",
+  "category": "orchestration",
+  "permission_scope": [
+    "COROUTINE_SCHEDULE",
+    "WAL_PERSISTENCE",
+    "D1_DATABASE_WRITE"
+  ],
+  "instructions_md": "# Orchestrator Agent\n\nManages coroutine slices, dynamic multi-agent mitosis, and learned instincts distillation.",
+  "references": [],
+  "sha256": "c9e96e81e8989074f7b642410c85a04db3cacb88c726742709d95b23e3950e87"
+}

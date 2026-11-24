@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexus-desktop"
+version = "5.0.0"
+description = "Nexus OS Sovereign Edge-to-Desktop Autonomous Engine & Workstation"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "NiranX-Resolute", email = "niranx.resolute@users.noreply.github.com" }
+]
+dependencies = [
+    "qrcode[pil]>=7.4.2",
+    "google-api-python-client>=2.100.0",
+    "google-auth-oauthlib>=1.1.0",
+    "google-genai>=0.1.1",
+    "sounddevice>=0.4.6",
+    "silero-vad>=5.1.0",
+    "PySide6-Essentials>=6.5.0",
+    "playwright>=1.40.0",
+    "sherpa-onnx>=2.0.0",
+    "pycaw>=20240210",
+]
+
+[project.urls]
+Homepage = "https://nexus-landing.pages.dev"
+Repository = "https://github.com/NiranX-Resolute/NEXUS-OS"
+Issues = "https://github.com/NiranX-Resolute/NEXUS-OS/issues"
+Releases = "https://github.com/NiranX-Resolute/NEXUS-OS/releases"
+
+[tool.setuptools]
+packages = ["core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "core/tests"]
+pythonpath = ["core", "."]
+norecursedirs = [".git", ".nexus-agent", "node_modules", "apps/*/node_modules", "web/*/node_modules", "dist", "build", ".venv", "agents/research", "agents"]

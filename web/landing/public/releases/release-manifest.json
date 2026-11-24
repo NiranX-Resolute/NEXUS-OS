@@ -1,0 +1,76 @@
+{
+  "version": "5.0.0",
+  "release_tag": "v5.0.0",
+  "release_name": "NEXUS OS v5.0.0 Production Release",
+  "author": "NiranX (Niranjan Barhate)",
+  "published_at": "2026-11-24T13:15:07.831240+00:00",
+  "github_profile": "https://github.com/NiranX-Resolute",
+  "github_repo": "https://github.com/NiranX-Resolute/NEXUS-OS",
+  "download_hub_url": "https://nexus-landing.pages.dev/download",
+  "total_artifacts": 7,
+  "artifacts": {
+    "NEXUS-OS-v5.0-Setup.exe": {
+      "filename": "NEXUS-OS-v5.0-Setup.exe",
+      "platform": "Windows (x64)",
+      "type": "NSIS Installer (.exe)",
+      "size_bytes": 190767693,
+      "size_formatted": "181.9 MB",
+      "sha256": "c164f46c95d87e78040c3e90439ab47b3db7cd5b92832f47110eab34d21df244",
+      "direct_download_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/latest/download/NEXUS-OS-v5.0-Setup.exe"
+    },
+    "NEXUS-OS-v5.0-Windows-Portable.exe": {
+      "filename": "NEXUS-OS-v5.0-Windows-Portable.exe",
+      "platform": "Windows (x64)",
+      "type": "Standalone Executable (.exe)",
+      "size_bytes": 190138778,
+      "size_formatted": "181.3 MB",
+      "sha256": "284243ce92dd1c0301dc2d184359b95bb9f1dbe0f814d671d94f748ea45f2d69",
+      "direct_download_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/latest/download/NEXUS-OS-v5.0-Windows-Portable.exe"
+    },
+    "NEXUS-OS-v5.0-Linux-x86_64.img": {
+      "filename": "NEXUS-OS-v5.0-Linux-x86_64.img",
+      "platform": "Linux (x86_64)",
+      "type": "Raw Bootable Disk Image (.img)",
+      "size_bytes": 578813952,
+      "size_formatted": "552.0 MB",
+      "sha256": "9bd6a54a7a91b3fb9488c6e58a88c3b556a57875b92666d6ffe4fc2290a20783",
+      "direct_download_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/latest/download/NEXUS-OS-v5.0-Linux-x86_64.img"
+    },
+    "NEXUS-OS-v5.0-Linux-x86_64.iso": {
+      "filename": "NEXUS-OS-v5.0-Linux-x86_64.iso",
+      "platform": "Linux (x86_64)",
+      "type": "ISO-9660 Standard Image (.iso)",
+      "size_bytes": 314263552,
+      "size_formatted": "299.7 MB",
+      "sha256": "c4545c1624e6a236eb08cce39943baae4759f64355369001800d5a8112be3516",
+      "direct_download_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/latest/download/NEXUS-OS-v5.0-Linux-x86_64.iso"
+    },
+    "NEXUS-OS-v5.0-x86_64.AppImage": {
+      "filename": "NEXUS-OS-v5.0-x86_64.AppImage",
+      "platform": "Linux (x86_64)",
+      "type": "Standalone AppImage (.AppImage)",
+      "size_bytes": 314355712,
+      "size_formatted": "299.8 MB",
+      "sha256": "db079a993b8c317e06799ca30c877d352fcaadd208a8d94f0d5420ab86b9f20b",
+      "direct_download_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/latest/download/NEXUS-OS-v5.0-x86_64.AppImage"
+    },
+    "NEXUS-OS-v5.0-macOS-Universal.dmg": {
+      "filename": "NEXUS-OS-v5.0-macOS-Universal.dmg",
+      "platform": "macOS (Apple Silicon & Intel Universal)",
+      "type": "Apple Disk Image (.dmg)",
+      "size_bytes": 52308480,
+      "size_formatted": "49.9 MB",
+      "sha256": "fca763ca0dce577a2217638346f648bb108a4cb55f221616b1a615b2f75a8d18",
+      "direct_download_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/latest/download/NEXUS-OS-v5.0-macOS-Universal.dmg"
+    },
+    "NEXUS-OS-v5.0-macOS.app.zip": {
+      "filename": "NEXUS-OS-v5.0-macOS.app.zip",
+      "platform": "macOS (Application Bundle Archive)",
+      "type": "Universal .app Bundle",
+      "size_bytes": 52267609,
+      "size_formatted": "49.8 MB",
+      "sha256": "19f6fe00ae50ff705687f45739143f8ade3582e6d814a4a03b0c0738f8f2f313",
+      "direct_download_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/latest/download/NEXUS-OS-v5.0-macOS.app.zip"
+    }
+  }
+}

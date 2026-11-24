@@ -1,0 +1,80 @@
+appId: io.github.niranx-resolute.nexus-os
+productName: NEXUS OS
+copyright: Copyright © 2026 NiranX-Resolute
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**/*
+  - build/icon.ico
+  - package.json
+  - '!**/node_modules/{monaco-editor,@xenova,three,@react-three,tldraw,@tldraw,katex,lucide-react,react-icons,recharts,reactflow,face-api.js,pdf-parse,mammoth,roughjs,xterm,xterm-addon-fit,tesseract.js}/**'
+  - '!**/*.{map,ts,tsx}'
+asarUnpack:
+  - resources/**
+  - node_modules/**/*.node
+
+extraResources:
+  - from: ../../bin/obscura.exe
+    to: bin/obscura.exe
+    filter:
+      - '**/*'
+
+win:
+  executableName: NEXUS-OS
+  icon: build/icon.ico
+  signAndEditExecutable: false
+  target:
+    - target: nsis
+    - target: portable
+nsis:
+  artifactName: NEXUS-OS-v${version}-Setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  differentialPackage: false
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  runAfterFinish: true
+portable:
+  artifactName: NEXUS-OS-v${version}-Windows-Portable.${ext}
+
+mac:
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  target:
+    - target: dmg
+      arch:
+        - universal
+    - target: zip
+      arch:
+        - universal
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera for biometric verification.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone for voice commands.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  notarize: false
+dmg:
+  artifactName: NEXUS-OS-v${version}-macOS-Universal.${ext}
+
+linux:
+  target:
+    - AppImage
+    - deb
+  maintainer: NiranX-Resolute
+  category: Utility
+appImage:
+  artifactName: NEXUS-OS-v${version}-x86_64.${ext}
+
+npmRebuild: false
+publish:
+  - provider: github
+    owner: NiranX-Resolute
+    repo: NEXUS-OS

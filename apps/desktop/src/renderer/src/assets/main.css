@@ -1,0 +1,464 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: dark !important;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  background: transparent !important;
+  background-color: transparent !important;
+  color-scheme: dark !important;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  background: transparent;
+  color-scheme: dark !important;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes nexus-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes nexus-orbit-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes nexus-scanline {
+  0% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.5;
+  }
+  48% {
+    opacity: 0.12;
+  }
+  100% {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+}
+
+.nexus-core-grid {
+  border-radius: 9999px;
+  background:
+    linear-gradient(rgba(45, 212, 191, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.08) 1px, transparent 1px),
+    radial-gradient(circle, rgba(16, 185, 129, 0.16), transparent 62%);
+  background-size: 26px 26px, 26px 26px, 100% 100%;
+  mask-image: radial-gradient(circle, black 0%, black 58%, transparent 72%);
+}
+
+.nexus-shell-bg {
+  background:
+    radial-gradient(circle at 48% 18%, rgba(16, 185, 129, 0.14), transparent 34%),
+    radial-gradient(circle at 80% 82%, rgba(6, 182, 212, 0.09), transparent 32%),
+    linear-gradient(180deg, #050908 0%, #020202 100%);
+}
+
+.nexus-shell-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(52, 211, 153, 0.08) 50%,
+    transparent 100%
+  );
+  animation: nexus-scanline 7s ease-in-out infinite;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+button {
+  -webkit-app-region: no-drag;
+}
+
+/* ==========================================================================
+   NEXUS SCI-FI CYBERPUNK SCROLLBAR SUITE
+   ========================================================================== */
+
+/* Standard CSS scrollbar styling for non-WebKit browsers (e.g. Firefox) */
+@supports not selector(::-webkit-scrollbar) {
+  *,
+  html,
+  body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.45) transparent;
+  }
+
+  *:hover {
+    scrollbar-color: rgba(16, 185, 129, 0.75) transparent;
+  }
+
+  .scrollbar-zinc,
+  .scrollbar-thumb-zinc-800 {
+    scrollbar-color: rgba(113, 113, 122, 0.5) transparent;
+  }
+
+  .scrollbar-cyan {
+    scrollbar-color: rgba(6, 182, 212, 0.5) transparent;
+  }
+}
+
+/* Global Chromium / WebKit scrollbar styling applied across entire app */
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track:hover,
+*::-webkit-scrollbar-track:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.7);
+  border-color: rgba(52, 211, 153, 0.6);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5), inset 0 0 4px rgba(52, 211, 153, 0.3);
+}
+
+::-webkit-scrollbar-thumb:active,
+*::-webkit-scrollbar-thumb:active {
+  background: #10b981;
+  border-color: #34d399;
+  box-shadow: 0 0 14px rgba(52, 211, 153, 0.85), inset 0 0 6px rgba(255, 255, 255, 0.4);
+}
+
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Specialized & Component-level Scrollbar Helpers */
+.scrollbar-small::-webkit-scrollbar,
+.scrollbar-thin::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+
+.scrollbar-small::-webkit-scrollbar-track,
+.scrollbar-thin::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-small::-webkit-scrollbar-track:hover,
+.scrollbar-thin::-webkit-scrollbar-track:hover,
+.custom-scrollbar::-webkit-scrollbar-track:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.scrollbar-small::-webkit-scrollbar-thumb,
+.scrollbar-thin::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.35);
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scrollbar-small::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.75);
+  border-color: rgba(52, 211, 153, 0.7);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), inset 0 0 4px rgba(52, 211, 153, 0.3);
+}
+
+.scrollbar-small::-webkit-scrollbar-thumb:active,
+.scrollbar-thin::-webkit-scrollbar-thumb:active,
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #10b981;
+  border-color: #34d399;
+  box-shadow: 0 0 14px rgba(52, 211, 153, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.4);
+}
+
+.scrollbar-small::-webkit-scrollbar-button,
+.scrollbar-thin::-webkit-scrollbar-button,
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Subtle / Muted Zinc Scrollbar (e.g. for code blocks, terminal, secondary widgets) */
+.scrollbar-zinc::-webkit-scrollbar,
+.scrollbar-thumb-zinc-800::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+
+.scrollbar-zinc::-webkit-scrollbar-track,
+.scrollbar-thumb-zinc-800::-webkit-scrollbar-track,
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.scrollbar-zinc::-webkit-scrollbar-thumb,
+.scrollbar-thumb-zinc-800::-webkit-scrollbar-thumb {
+  background: rgba(63, 63, 70, 0.6) !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.scrollbar-zinc::-webkit-scrollbar-thumb:hover,
+.scrollbar-thumb-zinc-800::-webkit-scrollbar-thumb:hover {
+  background: rgba(113, 113, 122, 0.85) !important;
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Cyan Glowing Variant */
+.scrollbar-cyan::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+
+.scrollbar-cyan::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-cyan::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.35);
+  border-radius: 9999px;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scrollbar-cyan::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.75);
+  border-color: rgba(103, 232, 249, 0.7);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.6), inset 0 0 4px rgba(103, 232, 249, 0.3);
+}
+
+.scrollbar-cyan::-webkit-scrollbar-thumb:active {
+  background: #06b6d4;
+  border-color: #67e8f9;
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.9);
+}
+
+/* Scrollbar Hiding Utilities */
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Terminal xterm.js custom scrollbar styling */
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.35);
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.react-flow__controls {
+  background-color: #111113 !important;
+  border: 1px solid #27272a !important;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.react-flow__controls-button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #27272a !important;
+  fill: #71717a !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #18181b !important;
+}
+
+.react-flow__controls-button svg:hover {
+  fill: #a1a1aa !important;
+}
+
+.nexus-tldraw-board {
+  --color-background: #f8fff8;
+  --color-panel: rgba(248, 255, 248, 0.96);
+  --color-low: rgba(16, 185, 129, 0.12);
+  --color-muted-1: rgba(13, 148, 136, 0.18);
+  --color-muted-2: rgba(15, 118, 110, 0.22);
+  --color-accent: #10b981;
+  --color-selected: #10b981;
+}
+
+.nexus-tldraw-board .tl-container {
+  background:
+    linear-gradient(rgba(16, 185, 129, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.08) 1px, transparent 1px),
+    #f8fff8;
+  background-size: 38px 38px, 38px 38px, 100% 100%;
+}
+
+.nexus-tldraw-board .tlui-layout {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ==========================================================================
+   DYNAMIC ISLAND KEYFRAMES & UTILITIES
+   ========================================================================== */
+@keyframes island-wave-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+@keyframes island-wave-2 {
+  0%, 100% { height: 6px; }
+  50% { height: 18px; }
+}
+
+@keyframes island-wave-3 {
+  0%, 100% { height: 3px; }
+  50% { height: 12px; }
+}
+
+@keyframes island-beacon {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.35;
+  }
+}
+
+/* ==========================================================================
+   CYBER LINE DOCK (2MM STEALTH NOTCH) KEYFRAMES
+   ========================================================================== */
+@keyframes cyber-line-scan {
+  0% {
+    left: -25%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
+  }
+}
+
+@keyframes cyber-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.7), 0 0 16px rgba(6, 182, 212, 0.4);
+    opacity: 0.88;
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.95), 0 0 26px rgba(6, 182, 212, 0.7), 0 0 38px rgba(52, 211, 153, 0.5);
+    opacity: 1;
+  }
+}
+
+@keyframes cyber-laser-travel {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+

@@ -1,0 +1,13 @@
+﻿# ==============================================================================
+# Cloudflare Pages Configuration: Nexus Sovereign System Status & Radar Portal
+# Project Name: nexus-status
+# ==============================================================================
+
+name = "nexus-status"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-09-23"
+
+[vars]
+SITE_ROLE = "STATUS_RADAR"
+ENVIRONMENT = "production"
+BRIDGE_API_URL = "https://nexus-bridge-7l1.pages.dev/api/status/summary"

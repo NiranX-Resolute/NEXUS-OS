@@ -1,0 +1,26 @@
+{
+  "name": "nexus-desktop-bun",
+  "version": "1.0.0",
+  "description": "Nexus AI Sovereign Desktop Workstation powered by Bun.js, native SQLite, WebSockets, and Edge-to-Desktop Autonomous Engine.",
+  "type": "module",
+  "main": "src/server/index.ts",
+  "scripts": {
+    "dev": "bun --watch src/server/index.ts",
+    "build:client": "bun run src/build.ts",
+    "build": "bun run build:client",
+    "start": "bun run src/server/index.ts",
+    "desktop": "bun run src/server/index.ts --desktop",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^1.16.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "bun-types": "latest",
+    "typescript": "^5.7.0"
+  }
+}

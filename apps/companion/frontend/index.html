@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Nexus Companion — Universal Daily Living Assistive Agent</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Universal Daily Living Assistive Web Agent for motor, visual, non-verbal, and cognitive accessibility.">
+
+  <!-- Accessible Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       WCAG 2.2 AAA Accessible High-Contrast Theme System
+       ========================================================================== */
+    :root {
+      --bg-color: #000000;
+      --surface-color: #121212;
+      --surface-elevated: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #e0e0e0;
+      --accent-color: #ffff00; /* High Contrast Primary Yellow */
+      --accent-text: #000000;
+      --danger-color: #ff3333;
+      --success-color: #00ff66;
+      --warning-color: #ffaa00;
+      --border-color: #ffffff;
+      --border-thick: 3px solid #ffffff;
+      --focus-ring: 4px solid #ffff00;
+      --font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --tile-min-size: 80px;
+    }
+
+    /* Theme Variants */
+    body[data-theme="dark-oled"] {
+      --bg-color: #07090e;
+      --surface-color: #0f1422;
+      --surface-elevated: #172036;
+      --text-main: #f0f4fc;
+      --text-muted: #94a3b8;
+      --accent-color: #00f2fe;
+      --accent-text: #000000;
+      --border-color: #38bdf8;
+      --border-thick: 2px solid #38bdf8;
+      --focus-ring: 4px solid #00f2fe;
+    }
+
+    body[data-theme="light"] {
+      --bg-color: #f8fafc;
+      --surface-color: #ffffff;
+      --surface-elevated: #e2e8f0;
+      --text-main: #090d16;
+      --text-muted: #334155;
+      --accent-color: #0284c7;
+      --accent-text: #ffffff;
+      --border-color: #0f172a;
+      --border-thick: 3px solid #0f172a;
+      --focus-ring: 4px solid #0284c7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    /* Accessibility Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 10px;
+      background: var(--accent-color);
+      color: var(--accent-text);
+      padding: 8px 16px;
+      z-index: 99999;
+      font-weight: bold;
+      border: 2px solid #000;
+      transition: top 0.2s;
+    }
+    .skip-link:focus {
+      top: 10px;
+    }
+
+    /* ==========================================================================
+       Top App Header & Accessibility HUD
+       ========================================================================== */
+    .app-header {
+      background-color: var(--surface-color);
+      border-bottom: var(--border-thick);
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      font-size: 32px;
+      background: var(--accent-color);
+      color: var(--accent-text);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--accent-color);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hud-pill {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hud-pill.active {
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+      border-color: var(--accent-color);
+    }
+
+    .hud-btn {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+    }
+
+    .hud-btn:hover, .hud-btn:focus-visible {
+      outline: var(--focus-ring);
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+    }
+
+    /* ==========================================================================
+       Primary Accessible Navigation Tabs
+       ========================================================================== */
+    .nav-tabs-ribbon {
+      background-color: var(--surface-color);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      padding: 10px 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .nav-tab-btn {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 10px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 72px;
+      transition: transform 0.1s, background-color 0.1s;
+    }
+
+    .nav-tab-btn .tab-icon {
+      font-size: 26px;
+    }
+
+    .nav-tab-btn.active {
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+      border-color: var(--accent-color);
+      transform: scale(1.02);
+      box-shadow: 0 4px 15px rgba(255,255,0,0.3);
+    }
+
+    .nav-tab-btn:focus-visible {
+      outline: var(--focus-ring);
+    }
+
+    /* ==========================================================================
+       Main Workspace Content
+       ========================================================================== */
+    main {
+      flex: 1;
+      padding: 16px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       AAC Communication Board Styles
+       ========================================================================== */
+    .aac-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Sentence Strip */
+    .sentence-strip-box {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 84px;
+    }
+
+    .sentence-strip-content {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+    }
+
+    .strip-placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 18px;
+    }
+
+    .strip-item {
+      background-color: var(--surface-color);
+      border: 2px solid var(--accent-color);
+      padding: 6px 14px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .sentence-strip-box.speaking-active {
+      border-color: var(--success-color);
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+    }
+
+    .strip-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .strip-action-btn {
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-weight: 900;
+      font-size: 18px;
+      cursor: pointer;
+      min-height: 54px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .strip-action-btn.secondary {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+    }
+
+    /* Predictive AI Strips */
+    .predictive-dock {
+      background-color: var(--surface-color);
+      border: 2px solid var(--accent-color);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .predictive-header {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .predictive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .aac-predict-btn {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 58px;
+      text-align: left;
+    }
+
+    .aac-predict-btn:hover, .aac-predict-btn:focus-visible {
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+    }
+
+    /* Category Nav */
+    .aac-cat-nav {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .aac-cat-btn {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 48px;
+    }
+
+    .aac-cat-btn.active {
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+      border-color: var(--accent-color);
+    }
+
+    /* Pictogram Grid */
+    .aac-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 14px;
+    }
+
+    .aac-tile {
+      background-color: var(--surface-elevated);
+      color: var(--text-main);
+      border: 3px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 120px;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+
+    .aac-tile .aac-tile-icon {
+      font-size: 44px;
+      line-height: 1;
+    }
+
+    .aac-tile .aac-tile-label {
+      font-size: 18px;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    .aac-tile:hover, .aac-tile:focus-visible {
+      transform: scale(1.05);
+      border-color: var(--accent-color);
+      box-shadow: 0 6px 20px rgba(255, 255, 0, 0.4);
+    }
+
+    /* ==========================================================================
+       Visual Scene & Object Describer
+       ========================================================================== */
+    .scene-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .scene-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .camera-card {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .video-viewport {
+      background: #000;
+      border-radius: 12px;
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      border: 2px solid var(--border-color);
+    }
+
+    .scene-mode-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 8px;
+    }
+
+    .scene-mode-btn {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      min-height: 48px;
+    }
+
+    .scene-mode-btn.active {
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+      border-color: var(--accent-color);
+    }
+
+    .capture-btn {
+      background-color: var(--accent-color);
+      color: var(--accent-text);
+      border: 3px solid #000;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 64px;
+    }
+
+    .analysis-card {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .readout-box {
+      background-color: var(--surface-color);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      padding: 18px;
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.6;
+      min-height: 180px;
+    }
+
+    .safety-alert-banner {
+      background-color: var(--danger-color);
+      color: #ffffff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: bold;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       Emergency SOS Dispatcher
+       ========================================================================== */
+    .sos-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .sos-giant-button {
+      background-color: var(--danger-color);
+      color: #ffffff;
+      border: 6px solid #ffffff;
+      border-radius: 50%;
+      width: 260px;
+      height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 50px rgba(255, 51, 51, 0.6);
+      transition: transform 0.15s;
+    }
+
+    .sos-giant-button:hover, .sos-giant-button:focus-visible {
+      transform: scale(1.08);
+      outline: 6px solid #ffff00;
+    }
+
+    .sos-giant-button .sos-label {
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .sos-giant-button .sos-sub {
+      font-size: 15px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .sos-telemetry-box {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ==========================================================================
+       Daily Routines & Care Cue Cards
+       ========================================================================== */
+    .routines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .routine-card {
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .routine-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .routine-time {
+      background: var(--accent-color);
+      color: var(--accent-text);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+
+    .routine-complete-btn {
+      background: transparent;
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      min-height: 48px;
+    }
+
+    .routine-complete-btn.done {
+      background: var(--success-color);
+      color: #000;
+      border-color: var(--success-color);
+    }
+
+    /* ==========================================================================
+       Universal Gaze Cursor & Dwell Progress Ring
+       ========================================================================== */
+    #nexus-gaze-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 64px;
+      height: 64px;
+      pointer-events: none;
+      z-index: 999999;
+      transform: translate3d(-100px, -100px, 0);
+      will-change: transform;
+    }
+
+    .dwell-svg {
+      width: 64px;
+      height: 64px;
+      transform: rotate(-90deg);
+    }
+
+    .dwell-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.2);
+      stroke-width: 6;
+    }
+
+    .dwell-progress {
+      fill: none;
+      stroke: var(--accent-color, #ffff00);
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.05s linear;
+    }
+
+    .gaze-dot {
+      position: absolute;
+      top: 26px;
+      left: 26px;
+      width: 12px;
+      height: 12px;
+      background-color: var(--accent-color, #ffff00);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-color);
+    }
+
+    /* Gaze Hover & Switch Highlight Animations */
+    .gaze-hover {
+      outline: var(--focus-ring) !important;
+      transform: scale(1.03);
+    }
+
+    .gaze-activated {
+      outline: 6px solid var(--success-color) !important;
+      animation: pulsePop 0.3s ease-out;
+    }
+
+    .switch-highlight {
+      outline: 5px solid var(--accent-color) !important;
+      background-color: rgba(255, 255, 0, 0.2) !important;
+      transform: scale(1.04);
+      box-shadow: 0 0 25px rgba(255, 255, 0, 0.7);
+    }
+
+    .switch-activated {
+      outline: 6px solid var(--success-color) !important;
+      animation: pulsePop 0.25s ease-out;
+    }
+
+    @keyframes pulsePop {
+      0% { transform: scale(1.04); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    /* ==========================================================================
+       9-Point Calibration Modal
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 999998;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px;
+    }
+
+    .calib-instructions {
+      text-align: center;
+      color: #ffff00;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .calib-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 80px 1fr 80px;
+      grid-template-rows: 80px 1fr 80px;
+      padding: 40px;
+      pointer-events: auto;
+    }
+
+    .calib-dot {
+      width: 44px;
+      height: 44px;
+      background-color: #ff3333;
+      border: 4px solid #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      justify-self: center;
+      align-self: center;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .calib-dot:hover {
+      transform: scale(1.3);
+    }
+    .calib-dot.calibrated {
+      background-color: #00ff66;
+      border-color: #ffffff;
+    }
+
+    /* Settings Modal */
+    .settings-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: var(--surface-elevated);
+      border: var(--border-thick);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      z-index: 999990;
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .settings-modal.active {
+      display: flex;
+    }
+  </style>
+</head>
+<body data-theme="high-contrast-yellow">
+
+  <a href="#main-content" class="skip-link">Skip to Accessible Main Content</a>
+
+  <!-- Top Accessible App Header -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="brand-icon" aria-hidden="true">N</div>
+      <div>
+        <h1 class="brand-title">Nexus Companion</h1>
+        <div class="brand-subtitle">Universal Daily Living Assistive Agent</div>
+      </div>
+    </div>
+
+    <div class="hud-controls">
+      <span class="hud-pill active" id="input-mode-pill">GAZE MODE</span>
+      <span class="hud-pill" id="gaze-status-pill">Webcam Standby</span>
+      <button class="hud-btn gaze-target" id="btn-toggle-camera" aria-label="Toggle Webcam Pupil Tracker">
+        👁️ Eye Tracker
+      </button>
+      <button class="hud-btn gaze-target" id="btn-open-calibration" aria-label="Calibrate 9-Point Eye Tracker">
+        🎯 Calibrate
+      </button>
+      <button class="hud-btn gaze-target" id="btn-open-settings" aria-label="Open Settings">
+        ⚙️ Settings
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Ribbon (WCAG Large Targets) -->
+  <nav class="nav-tabs-ribbon" aria-label="Main Navigation">
+    <button class="gaze-target nav-tab-btn active" data-tab="aac" aria-label="AAC Communication Board">
+      <span class="tab-icon">🗣️</span>
+      <span>AAC Board</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="scene" aria-label="Visual Scene and Medicine Describer">
+      <span class="tab-icon">📷</span>
+      <span>Scene Describer</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="sos" aria-label="Emergency Assistance SOS Dispatcher">
+      <span class="tab-icon">🚨</span>
+      <span>Emergency SOS</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="routines" aria-label="Daily Routines and Medication Cue Cards">
+      <span class="tab-icon">⏰</span>
+      <span>Daily Routines</span>
+    </button>
+    <button class="gaze-target nav-tab-btn" data-tab="agentic" aria-label="Agentic Nexus Autonomous Engine" style="border-color: rgba(16, 185, 129, 0.5);">
+      <span class="tab-icon">🤖</span>
+      <span style="color: #10b981; font-weight: 700;">Agentic Nexus</span>
+    </button>
+  </nav>
+
+  <!-- Main View Area -->
+  <main id="main-content">
+    
+    <!-- 1. AAC COMMUNICATION BOARD VIEW -->
+    <section id="view-aac" class="view-section active">
+      <div class="aac-container">
+        
+        <!-- Sentence Strip -->
+        <div class="sentence-strip-box" id="aac-sentence-strip">
+          <div class="sentence-strip-content" id="aac-sentence-content">
+            <span class="strip-placeholder">Select or gaze at tiles to build your phrase...</span>
+          </div>
+          <div class="strip-actions">
+            <button class="gaze-target strip-action-btn" id="btn-speak-strip" aria-label="Speak Entire Sentence">
+              🔊 Speak All
+            </button>
+            <button class="gaze-target strip-action-btn secondary" id="btn-backspace-strip" aria-label="Remove Last Tile">
+              ⌫ Back
+            </button>
+            <button class="gaze-target strip-action-btn secondary" id="btn-clear-strip" aria-label="Clear Sentence">
+              🗑️ Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Generative AI Dynamic Predictive Tiles -->
+        <div class="predictive-dock">
+          <div class="predictive-header">
+            <span>✨ Generative Quick-Response Tiles (Dynamic AI Suggestions)</span>
+          </div>
+          <div class="predictive-grid" id="aac-predictive-tiles">
+            <!-- Rendered by aac_board.js -->
+          </div>
+        </div>
+
+        <!-- Category Switcher Tabs -->
+        <div class="aac-cat-nav" id="aac-category-nav">
+          <!-- Rendered by aac_board.js -->
+        </div>
+
+        <!-- High-Contrast Mulberry Pictogram Tiles Grid -->
+        <div class="aac-grid" id="aac-tiles-grid">
+          <!-- Rendered by aac_board.js -->
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button class="hud-btn gaze-target" id="btn-add-custom-aac">
+            ➕ Add Custom AAC Phrase
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. VISUAL SCENE & OBJECT DESCRIBER VIEW -->
+    <section id="view-scene" class="view-section">
+      <div class="scene-container">
+        <!-- Live Camera Viewport -->
+        <div class="camera-card">
+          <h2>📷 Assistive Camera</h2>
+          <video id="scene-video" class="video-viewport" autoplay playsinline muted></video>
+          <canvas id="scene-canvas" style="display: none;"></canvas>
+
+          <div class="scene-mode-selector">
+            <button class="gaze-target scene-mode-btn active" data-mode="medication">💊 Medicine</button>
+            <button class="gaze-target scene-mode-btn" data-mode="household">🏠 Object</button>
+            <button class="gaze-target scene-mode-btn" data-mode="obstacle">⚠️ Hazard</button>
+            <button class="gaze-target scene-mode-btn" data-mode="reading">📖 Text</button>
+            <button class="gaze-target scene-mode-btn" data-mode="general">👁️ Room</button>
+          </div>
+
+          <button class="gaze-target capture-btn" id="btn-capture-scene" aria-label="Snapshot & Describe Image">
+            <span>📸 Describe Snapshot</span>
+          </button>
+        </div>
+
+        <!-- Audio & Text High-Contrast Readout -->
+        <div class="analysis-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>📝 Scene Readout</h2>
+            <button class="hud-btn gaze-target" id="btn-speak-scene" aria-label="Replay Audio Readout">
+              🔊 Read Aloud
+            </button>
+          </div>
+
+          <div id="safety-warning-banner" class="safety-alert-banner">
+            ⚠️ <span id="safety-warning-text">Warning detected</span>
+          </div>
+
+          <div class="readout-box" id="scene-readout-text">
+            Align camera with medicine label, surroundings, or household item and dwell/click "Describe Snapshot".
+          </div>
+
+          <div id="scene-details-list" style="color: var(--text-muted); font-size: 16px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. EMERGENCY SOS DISPATCHER VIEW -->
+    <section id="view-sos" class="view-section">
+      <div class="sos-container">
+        <div>
+          <h2 style="font-size: 32px; margin-bottom: 8px;">🚨 Emergency Assistance SOS</h2>
+          <p style="color: var(--text-muted);">Dwell on the SOS tile to trigger emergency telemetry & alert your caregivers.</p>
+        </div>
+
+        <button class="gaze-target sos-giant-button" id="btn-trigger-sos" aria-label="Trigger Emergency SOS">
+          <span class="sos-label">SOS</span>
+          <span class="sos-sub">Emergency Alert</span>
+        </button>
+
+        <div id="sos-countdown-banner" style="display: none; background: #ffff00; color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 900; font-size: 20px;">
+          SOS Triggering in <span id="sos-countdown-secs">3</span>s... <button id="btn-abort-sos" class="hud-btn" style="margin-left: 10px;">Abort</button>
+        </div>
+
+        <div class="sos-telemetry-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>📡 Location & Dispatch Telemetry</h3>
+            <span class="hud-pill" id="sos-gps-status">GPS Ready</span>
+          </div>
+          <div id="sos-telemetry-info" style="font-family: var(--font-mono); font-size: 15px; color: var(--accent-color);">
+            Coordinates: Awaiting telemetry sync...
+          </div>
+          <div id="sos-contacts-list" style="font-size: 16px;">
+            Default Caregivers: Primary Nurse (+1-800-555-0199), Emergency Services (911).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DAILY ROUTINES & REMINDERS VIEW -->
+    <section id="view-routines" class="view-section">
+      <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <h2>⏰ Daily Care Routines & Medication Reminders</h2>
+        <button class="hud-btn gaze-target" id="btn-reset-routines">🔄 Reset For Today</button>
+      </div>
+
+      <div class="routines-grid" id="routines-grid">
+        <!-- Rendered by app.js -->
+      </div>
+    </section>
+
+    <!-- 5. AGENTIC NEXUS AUTONOMOUS ENGINE VIEW -->
+    <section id="view-agentic" class="view-section">
+      <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.12); border: 2px solid #10b981; border-radius: 16px; padding: 16px;">
+        <div>
+          <h2 style="color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
+            🤖 Agentic Nexus Autonomous Engine
+          </h2>
+          <p style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 0.9rem;">Accessible, eye-gaze and switch-compatible autonomous development coordinator.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.85rem;">
+            PC: ONLINE (Free Tier)
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Gaze/Switch Target Buttons -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <button class="gaze-target companion-agent-btn" data-cmd="Run full test suite and self-correct on failures" style="background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 16px; padding: 18px; font-size: 1rem; font-weight: 700; color: var(--text-color); cursor: pointer; text-align: left;">
+          🧪 Run Test Suite & Self-Heal
+        </button>
+        <button class="gaze-target companion-agent-btn" data-cmd="Verify local development surface http://localhost:3000 and capture screenshot proof" style="background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 16px; padding: 18px; font-size: 1rem; font-weight: 700; color: var(--text-color); cursor: pointer; text-align: left;">
+          🌐 Playwright Browser Audit
+        </button>
+        <button class="gaze-target companion-agent-btn" data-cmd="Speak spoken status: Nexus companion agent is online and fully synchronized" style="background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 16px; padding: 18px; font-size: 1rem; font-weight: 700; color: var(--text-color); cursor: pointer; text-align: left;">
+          🔊 Edge-TTS Spoken Status
+        </button>
+        <button class="gaze-target companion-agent-btn" data-cmd="Create isolated Git worktree and check branch integrity" style="background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 16px; padding: 18px; font-size: 1rem; font-weight: 700; color: var(--text-color); cursor: pointer; text-align: left;">
+          🌿 Worktree & Diff Inspector
+        </button>
+      </div>
+
+      <!-- Custom Command Input -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="companion-agent-input" placeholder="Type or scan instruction for Autonomous Agent..." style="flex: 1; background: #000; border: 2px solid var(--border-color); border-radius: 12px; padding: 14px; font-size: 1rem; color: #fff; outline: none;" />
+          <button class="gaze-target strip-action-btn" id="btn-companion-dispatch" style="font-size: 1rem; padding: 0 24px;">
+            ⚡ Dispatch Task
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Agent Execution Trace Feed -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h3 style="margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">
+            Agent Execution Trace Stream
+          </h3>
+          <span id="companion-trace-counter" style="font-family: monospace; font-size: 0.85rem; color: #10b981;">0 Actions</span>
+        </div>
+        <div id="companion-trace-container" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="padding: 24px; text-align: center; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: 12px;">
+            Select any action card above or enter a task to monitor autonomous agent execution milestones in real time.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 9-Point Eye-Gaze Calibration Modal -->
+  <div class="modal-overlay" id="calibration-modal">
+    <div class="calib-instructions">
+      Look directly at each red dot and click/dwell 4 times until it turns green.
+      <br><small style="color: #fff; font-size: 16px;">Keep head steady. Move only your eyes.</small>
+    </div>
+    <div class="calib-grid">
+      <div class="calib-dot" style="grid-column: 1; grid-row: 1;"></div>
+      <div class="calib-dot" style="grid-column: 2; grid-row: 1;"></div>
+      <div class="calib-dot" style="grid-column: 3; grid-row: 1;"></div>
+      <div class="calib-dot" style="grid-column: 1; grid-row: 2;"></div>
+      <div class="calib-dot" style="grid-column: 2; grid-row: 2;"></div>
+      <div class="calib-dot" style="grid-column: 3; grid-row: 2;"></div>
+      <div class="calib-dot" style="grid-column: 1; grid-row: 3;"></div>
+      <div class="calib-dot" style="grid-column: 2; grid-row: 3;"></div>
+      <div class="calib-dot" style="grid-column: 3; grid-row: 3;"></div>
+    </div>
+    <div style="text-align: center;">
+      <button class="hud-btn" onclick="window.universalInput.closeCalibration()">Cancel Calibration</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="settings-modal" id="settings-modal">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>⚙️ Accessibility & AI Settings</h2>
+      <button class="hud-btn" id="btn-close-settings">✕ Close</button>
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">Input Navigation Mode</label>
+      <select id="select-input-mode" class="hud-btn" style="width: 100%;">
+        <option value="gaze">WebGazer Webcam Pupil Gaze (Dwell Click)</option>
+        <option value="switch">Single-Switch Auto-Scanning (Space / Enter)</option>
+        <option value="touch">Standard Touch & Mouse</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">
+        Gaze Dwell Duration: <span id="dwell-display">1200ms</span>
+      </label>
+      <input type="range" id="range-dwell" min="800" max="2500" step="100" value="1200" style="width: 100%;">
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">
+        Single-Switch Scan Speed: <span id="switch-display">1500ms</span>
+      </label>
+      <input type="range" id="range-switch-speed" min="1000" max="3000" step="250" value="1500" style="width: 100%;">
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">High-Contrast Theme</label>
+      <select id="select-theme" class="hud-btn" style="width: 100%;">
+        <option value="high-contrast-yellow">High Contrast Yellow on Black (WCAG AAA)</option>
+        <option value="dark-oled">Dark OLED Blue</option>
+        <option value="light">High Contrast Light</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="font-weight: bold; display: block; margin-bottom: 6px;">Custom Developer AI Key (Groq or Gemini)</label>
+      <input type="password" id="input-api-key" placeholder="gsk_... or AIza..." class="hud-btn" style="width: 100%; text-align: left;">
+      <small style="color: var(--text-muted); display: block; margin-top: 4px;">Supports Groq Cloud free keys or Google Gemini Pro/Flash keys.</small>
+    </div>
+
+    <button class="strip-action-btn gaze-target" id="btn-save-settings" style="width: 100%; justify-content: center;">
+      Save Preferences
+    </button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="gaze_input.js"></script>
+  <script src="aac_board.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration error:', err));
+    }
+  </script>
+</body>
+</html>

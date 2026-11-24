@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "slug": "cloudflare-d1-mesh-sync",
+  "name": "Cloudflare D1 Mesh & KV Syncer",
+  "type": "skill",
+  "orbiter_group": "OPS-01",
+  "category": "cloud",
+  "permission_scope": [
+    "NETWORK_OUTBOUND",
+    "D1_DATABASE_WRITE"
+  ],
+  "instructions_md": "# Cloudflare D1 Mesh & KV Syncer\n\nBidirectional synchronization between local SQLite WAL and Cloudflare D1 serverless edge.\n\n## Protocol\n\nPerforms delta replication using row versioning and SHA-256 state hashing over CF Worker endpoints.\n",
+  "references": [],
+  "sha256": "5a7fd2ffa3da53caf744fa2ea9e7c5636020c59a5f40f90e94b50b1944175f33"
+}

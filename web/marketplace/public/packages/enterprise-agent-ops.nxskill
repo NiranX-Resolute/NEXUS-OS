@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "slug": "enterprise-agent-ops",
+  "name": "Enterprise Agent Ops",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "community",
+  "permission_scope": [
+    "FILESYSTEM_READ"
+  ],
+  "instructions_md": "---\nname: enterprise-agent-ops\ndescription: \u30aa\u30d6\u30b6\u30fc\u30d0\u30d3\u30ea\u30c6\u30a3\u3001\u30bb\u30ad\u30e5\u30ea\u30c6\u30a3\u5883\u754c\u3001\u304a\u3088\u3073\u30e9\u30a4\u30d5\u30b5\u30a4\u30af\u30eb\u7ba1\u7406\u3092\u5099\u3048\u305f\u9577\u5bff\u547d\u30a8\u30fc\u30b8\u30a7\u30f3\u30c8\u30ef\u30fc\u30af\u30ed\u30fc\u30c9\u3092\u904b\u7528\u3057\u307e\u3059\u3002\norigin: ECC\n---\n\n# Enterprise Agent Ops\n\nUse this skill for cloud-hosted or continuously running agent systems that need operational controls beyond single CLI sessions.\n\n## Operational Domains\n\n1. runtime lifecycle (start, pause, stop, restart)\n2. observability (logs, metrics, traces)\n3. safety controls (scopes, permissions, kill switches)\n4. change management (rollout, rollback, audit)\n\n## Baseline Controls\n\n- immutable deployment artifacts\n- least-privilege credentials\n- environment-level secret injection\n- hard timeout and retry budgets\n- audit log for high-risk actions\n\n## Metrics to Track\n\n- success rate\n- mean retries per task\n- time to recovery\n- cost per successful task\n- failure class distribution\n\n## Incident Pattern\n\nWhen failure spikes:\n1. freeze new rollout\n2. capture representative traces\n3. isolate failing route\n4. patch with smallest safe change\n5. run regression + security checks\n6. resume gradually\n\n## Deployment Integrations\n\nThis skill pairs with:\n- PM2 workflows\n- systemd services\n- container orchestrators\n- CI/CD gates\n",
+  "references": [],
+  "sha256": "389df0e37d570829720b34f7fd8004e9c0089441287d90d7169d24e98c87a0ca"
+}

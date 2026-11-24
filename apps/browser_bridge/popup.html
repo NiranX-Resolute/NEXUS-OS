@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Browser Bridge</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text-main: #f3f4f6;
+      --text-dim: #9ca3af;
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --purple: #8b5cf6;
+      --rose: #f43f5e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      width: 340px;
+      background: var(--bg);
+      color: var(--text-main);
+      padding: 16px;
+      user-select: none;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-icon {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      color: #fff;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .badge-version {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--cyan);
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* Live Connection Status Banner */
+    .status-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .status-dot.connected {
+      background: var(--emerald);
+      color: var(--emerald);
+    }
+
+    .status-dot.offline {
+      background: var(--rose);
+      color: var(--rose);
+    }
+
+    .status-dot.silent {
+      background: var(--purple);
+      color: var(--purple);
+    }
+
+    .status-text {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-sub {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    .btn-refresh {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-dim);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-refresh:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Section Forms */
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 8px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    input[type="password"], input[type="text"] {
+      flex: 1;
+      background: #0d131f;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--text-main);
+      outline: none;
+      font-family: monospace;
+    }
+
+    input:focus {
+      border-color: var(--cyan);
+    }
+
+    button.btn-primary {
+      background: linear-gradient(135deg, #0284c7, #06b6d4);
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button.btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    button.btn-secondary {
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button.btn-secondary:hover {
+      border-color: var(--cyan);
+      color: #fff;
+    }
+
+    /* Toggle Switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-label-wrap {
+      flex: 1;
+      padding-right: 12px;
+    }
+
+    .toggle-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .toggle-desc {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--cyan);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    /* Telemetry Info */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .info-item {
+      background: #0d131f;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-key {
+      color: var(--text-dim);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .info-val {
+      font-weight: 600;
+      margin-top: 2px;
+      color: #fff;
+    }
+
+    .toast {
+      font-size: 10px;
+      text-align: center;
+      margin-top: 6px;
+      color: var(--cyan);
+      min-height: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">N</div>
+      <div class="brand-title">Nexus Bridge</div>
+    </div>
+    <div class="badge-version">v5.0 Sovereign</div>
+  </div>
+
+  <!-- Live Connection Status -->
+  <div class="status-card">
+    <div class="status-left">
+      <div id="statusDot" class="status-dot offline"></div>
+      <div>
+        <div id="statusLabel" class="status-text">Checking...</div>
+        <div id="statusSub" class="status-sub">Binding 127.0.0.1:47630</div>
+      </div>
+    </div>
+    <button id="btnRefresh" class="btn-refresh" title="Ping Local IPC">Ping</button>
+  </div>
+
+  <!-- Auth Configuration -->
+  <div class="section-title">Localhost Auth</div>
+  <div class="card">
+    <div class="form-group">
+      <div class="input-row">
+        <input type="password" id="inputToken" placeholder="Nexus Bearer Token" spellcheck="false" />
+        <button id="btnSaveToken" class="btn-primary">Save</button>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: flex-end;">
+      <button id="btnAutoDetect" class="btn-secondary" style="font-size: 10px; padding: 4px 8px;">Auto-Detect Token</button>
+    </div>
+    <div id="toastMessage" class="toast"></div>
+  </div>
+
+  <!-- TARS Commentary Toggle -->
+  <div class="section-title">Persona Engine</div>
+  <div class="card">
+    <div class="toggle-row">
+      <div class="toggle-label-wrap">
+        <div class="toggle-label">TARS Spoken Commentary</div>
+        <div class="toggle-desc">Synthesize and speak in-character TTS summaries via local neural pipeline.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggleCommentary" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Ingest Stats -->
+  <div class="section-title">Telemetry</div>
+  <div class="card">
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-key">Mode</div>
+        <div id="valMode" class="info-val">DEV</div>
+      </div>
+      <div class="info-item">
+        <div class="info-key">Ingested Q&amp;As</div>
+        <div id="valCount" class="info-val">0</div>
+      </div>
+    </div>
+    <div style="margin-top: 6px; font-size: 10px; color: var(--text-dim);">
+      Target: <span style="color: var(--cyan); font-family: monospace;">https://gemini.google.com/*</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

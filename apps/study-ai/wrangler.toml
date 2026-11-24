@@ -1,0 +1,32 @@
+# ==============================================================================
+# Cloudflare Pages Configuration: EduNexus & Unified Socratic Ecosystem
+# Free-Tier Architecture:
+# - Cloudflare Pages CDN (Unmetered static hosting & PWA)
+# - Cloudflare D1 Serverless SQLite (edunexus-db: 1a94bd51-d272-48c9-a70d-4110a76b086e)
+# - Cloudflare Workers AI (Keyless Free Neurons)
+# - Groq Cloud API & Google AI Studio (Zero-Cost Free Tiers)
+# - Unified Auth Bridge with lead-engineer@nexus.internal
+# ==============================================================================
+
+name = "edunexus"
+pages_build_output_dir = "frontend"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "edunexus-db"
+database_id = "1a94bd51-d272-48c9-a70d-4110a76b086e"
+
+# Cloudflare Workers AI Binding (Zero-Key Fallback Engine)
+[ai]
+binding = "AI"
+
+# Environment Variables
+[vars]
+ENVIRONMENT = "production"
+DEFAULT_PERSONA = "Socratic Tutor"
+SENDER_EMAIL = "lead-engineer@nexus.internal"
+AUTH_BRIDGE_URL = "https://ecosystem-auth.pages.dev"
+APP_NAME = "EduNexus"

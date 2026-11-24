@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "slug": "docker-sandboxed-repl",
+  "name": "Docker Sandboxed REPL & Container Runner",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "developer",
+  "permission_scope": [
+    "FILESYSTEM_READ",
+    "WORKSPACE_WRITE",
+    "DOCKER_EXEC"
+  ],
+  "instructions_md": "# Docker Sandboxed REPL & Container Runner\n\nIsolated microVM and containerized REPL execution environment for running untrusted scripts safely.\n\n## Capabilities\n\n- Sub-100ms container startup\n- Memory, CPU, and network quotas\n- Ephemeral scratch workspaces\n",
+  "references": [],
+  "sha256": "263850edd486ae590ec6711caf9b2271279a06ad48a0a117e156f7063b5b7369"
+}

@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-void: #03050A;
+    --cyan-electric: #00F5D4;
+    --plasma-blue: #38BDF8;
+    --bio-emerald: #10B981;
+    --solar-amber: #F59E0B;
+    --neural-violet: #A855F7;
+  }
+
+  body {
+    background-color: #03050A;
+    color: #f1f5f9;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Typography Utilities */
+.font-space {
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  letter-spacing: -0.04em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.font-editorial {
+  font-family: 'Instrument Serif', Georgia, serif;
+}
+
+/* Spatial Glass System - Editorial Hairline Architecture */
+.spatial-glass {
+  background: rgba(6, 10, 18, 0.58);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+}
+
+.spatial-glass-subtle {
+  background: rgba(6, 10, 18, 0.42);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.spatial-glass-cyan {
+  background: rgba(6, 15, 25, 0.65);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(0, 245, 212, 0.22);
+  box-shadow: 0 0 35px -5px rgba(0, 245, 212, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Polar Rings Background */
+.polar-rings-bg {
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, transparent 200px, rgba(56, 189, 248, 0.03) 201px, transparent 202px),
+    radial-gradient(circle at 50% 50%, transparent 400px, rgba(56, 189, 248, 0.03) 401px, transparent 402px),
+    radial-gradient(circle at 50% 50%, transparent 600px, rgba(56, 189, 248, 0.02) 601px, transparent 602px),
+    radial-gradient(circle at 50% 50%, transparent 800px, rgba(56, 189, 248, 0.02) 801px, transparent 802px);
+}
+
+/* Horizon Radial Glow */
+.cyan-horizon-glow {
+  background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(0, 245, 212, 0.22) 0%, rgba(56, 189, 248, 0.12) 35%, transparent 70%);
+}
+
+/* Text Glows */
+.glow-cyan {
+  text-shadow: 0 0 20px rgba(0, 245, 212, 0.6), 0 0 40px rgba(0, 245, 212, 0.25);
+}
+
+.glow-blue {
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.6), 0 0 40px rgba(56, 189, 248, 0.25);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030711;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 245, 212, 0.4);
+}
+
+/* Hide scrollbar for clean carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

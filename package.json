@@ -1,0 +1,11 @@
+{
+  "name": "nexus-desktop-os",
+  "version": "5.0.0",
+  "private": true,
+  "description": "Nexus OS v5.0 - Autonomous Edge-to-Desktop Sovereign Computing Engine",
+  "scripts": {
+    "test": "pytest tests/",
+    "dev:cc": "bun run --cwd apps/command_center dev",
+    "dev:notch": "python nexus.py --notch"
+  }
+}

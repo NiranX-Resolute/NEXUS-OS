@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "slug": "nextjs-turbopack",
+  "name": "Next.js and Turbopack",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "community",
+  "permission_scope": [
+    "FILESYSTEM_READ"
+  ],
+  "instructions_md": "---\nname: nextjs-turbopack\ndescription: Next.js 16+ and Turbopack \u2014 incremental bundling, FS caching, dev speed, and when to use Turbopack vs webpack.\nlicense: MIT\n---\n\n# Next.js and Turbopack\n\nNext.js 16+ uses Turbopack by default for local development: an incremental bundler written in Rust that significantly speeds up dev startup and hot updates.\n\n## When to Use\n\n- **Turbopack (default dev)**: Use for day-to-day development. Faster cold start and HMR, especially in large apps.\n- **Webpack (legacy dev)**: Use only if you hit a Turbopack bug or rely on a webpack-only plugin in dev. Disable with `--webpack` (or `--no-turbopack` depending on your Next.js version; check the docs for your release).\n- **Production**: Production build behavior (`next build`) may use Turbopack or webpack depending on Next.js version; check the official Next.js docs for your version.\n\nUse when: developing or debugging Next.js 16+ apps, diagnosing slow dev startup or HMR, or optimizing production bundles.\n\n## How It Works\n\n- **Turbopack**: Incremental bundler for Next.js dev. Uses file-system caching so restarts are much faster (e.g. 5\u201314x on large projects).\n- **Default in dev**: From Next.js 16, `next dev` runs with Turbopack unless disabled.\n- **File-system caching**: Restarts reuse previous work; cache is typically under `.next`; no extra config needed for basic use.\n- **Bundle Analyzer (Next.js 16.1+)**: Experimental Bundle Analyzer to inspect output and find heavy dependencies; enable via config or experimental flag (see Next.js docs for your version).\n\n## Examples\n\n### Commands\n\n```bash\nnext dev\nnext build\nnext start\n```\n\n### Usage\n\nRun `next dev` for local development with Turbopack. Use the Bundle Analyzer (see Next.js docs) to optimize code-splitting and trim large dependencies. Prefer App Router and server components where possible.\n\n## Best Practices\n\n- Stay on a recent Next.js 16.x for stable Turbopack and caching behavior.\n- If dev is slow, ensure you're on Turbopack (default) and that the cache isn't being cleared unnecessarily.\n- For production bundle size issues, use the official Next.js bundle analysis tooling for your version.\n",
+  "references": [],
+  "sha256": "0c4edc348856836816cfa70792ac3d1ecc26e3f3e909f9eb248a4a0401e565d9"
+}

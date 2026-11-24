@@ -1,0 +1,739 @@
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Activity,
+  AlertCircle,
+  Archive,
+  ArrowRight,
+  CheckCircle2,
+  Cpu,
+  Database,
+  FileText,
+  KeyRound,
+  Lock,
+  LogIn,
+  Mail,
+  Network,
+  ShieldCheck,
+  TerminalSquare,
+  Upload,
+  User,
+  UserPlus
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../store/auth-store'
+import { configureCloudSupabase } from '../lib/supabase'
+import {
+  normalizeCloudAuthUser,
+  persistPreferredDesktopAuthMode,
+  persistStoredAppAuthToken
+} from '../services/auth-session'
+import {
+  bootstrapCloudAccount,
+  saveCloudData,
+  syncLocalSettingsToCloud
+} from '../services/cloud-data'
+import { importNexusBackup } from '../services/backup-service'
+
+type Mode = 'signin' | 'create'
+
+export default function LoginPage() {
+  const navigate = useNavigate()
+  const setAuthSession = useAuthStore((state) => state.setAuthSession)
+  const [bootLogs, setBootLogs] = useState<string[]>([])
+  const [isReady, setIsReady] = useState(false)
+  const [mode, setMode] = useState<Mode>('signin')
+  const [displayName, setDisplayName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isCloudConfigured] = useState(() => Boolean(configureCloudSupabase()))
+
+  // Backup restore prompt on login
+  const [showBackupModal, setShowBackupModal] = useState(false)
+  const [rememberChoice, setRememberChoice] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(false)
+  const [restoreNotice, setRestoreNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const backupFileInputRef = useRef<HTMLInputElement>(null)
+
+  const authStateLabel = useMemo(() => (isCloudConfigured ? 'CLOUD' : 'SETUP'), [isCloudConfigured])
+
+  useEffect(() => {
+    const sequence = [
+      'SYS_BOOT: INITIATING KERNEL...',
+      'SECURE_ENCLAVE: MOUNTED',
+      'SUPABASE_AUTH: EMAIL + PASSWORD',
+      'IPC_BRIDGE: [OK]',
+      'REMOTE_MEMORY: READY',
+      'AGENTIC_ROUTER: ONLINE',
+      'AWAITING OPERATOR CREDENTIALS...'
+    ]
+
+    let currentStep = 0
+    const interval = setInterval(() => {
+      if (currentStep < sequence.length) {
+        setBootLogs((prev) => [...prev, sequence[currentStep]])
+        currentStep++
+      } else {
+        setIsReady(true)
+        clearInterval(interval)
+      }
+    }, 70)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    setIsSubmitting(true)
+
+    try {
+      const supabase = configureCloudSupabase()
+      const normalizedEmail = email.trim().toLowerCase()
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        throw new Error('Enter a valid email address.')
+      }
+      if (password.length < 8) {
+        throw new Error('Password must be at least 8 characters.')
+      }
+
+      const name = displayName.trim() || normalizedEmail.split('@')[0] || 'Nexus Operator'
+
+      if (!supabase) {
+        if (mode === 'create') {
+          if (password !== confirmPassword) throw new Error('Passwords do not match.')
+          if (name.length < 2) throw new Error('Enter a display name.')
+
+          const res = await (window as any).electron.ipcRenderer.invoke('email-auth:register', {
+            name,
+            email: normalizedEmail,
+            password
+          })
+
+          if (!res?.ok || !res?.token) {
+            throw new Error(res?.error || 'Local account creation failed.')
+          }
+
+          persistPreferredDesktopAuthMode('app')
+          persistStoredAppAuthToken(res.token)
+          localStorage.setItem('nexus_user_name', res.user.name)
+          setAuthSession({ token: res.token, mode: 'app', user: res.user })
+        } else {
+          const res = await (window as any).electron.ipcRenderer.invoke('email-auth:login', {
+            email: normalizedEmail,
+            password
+          })
+
+          if (!res?.ok || !res?.token) {
+            throw new Error(res?.error || 'Local sign in failed. Check email and password.')
+          }
+
+          persistPreferredDesktopAuthMode('app')
+          persistStoredAppAuthToken(res.token)
+          localStorage.setItem('nexus_user_name', res.user.name)
+          setAuthSession({ token: res.token, mode: 'app', user: res.user })
+        }
+
+        handlePostLoginSuccess()
+        return
+      }
+
+      if (mode === 'create') {
+        if (password !== confirmPassword) throw new Error('Passwords do not match.')
+        if (name.length < 2) throw new Error('Enter a display name.')
+
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: normalizedEmail,
+          password,
+          options: {
+            data: {
+              name,
+              full_name: name
+            }
+          }
+        })
+
+        if (signUpError) throw signUpError
+        if (!data.session || !data.user) {
+          setNotice('Account created. Check your email to confirm it, then sign in here.')
+          setMode('signin')
+          return
+        }
+
+        const user = normalizeCloudAuthUser(data.user)
+        persistPreferredDesktopAuthMode('cloud')
+        localStorage.setItem('nexus_user_name', user.name)
+        localStorage.removeItem('nexus_local_account')
+        localStorage.removeItem('nexus_local_session')
+        setAuthSession({ token: data.session.access_token, mode: 'cloud', user })
+        await Promise.allSettled([
+          bootstrapCloudAccount(),
+          syncLocalSettingsToCloud(),
+          saveCloudData('account', 'details', {
+            email: user.email,
+            display_name: user.name,
+            provider: 'email',
+            created_at: data.user.created_at,
+            last_sign_in_at: data.user.last_sign_in_at || null,
+            updated_at: new Date().toISOString()
+          })
+        ])
+      } else {
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password
+        })
+
+        if (signInError || !data.session || !data.user) {
+          throw signInError || new Error('Email or password is incorrect.')
+        }
+
+        const user = normalizeCloudAuthUser(data.user)
+        persistPreferredDesktopAuthMode('cloud')
+        localStorage.setItem('nexus_user_name', user.name)
+        localStorage.removeItem('nexus_local_account')
+        localStorage.removeItem('nexus_local_session')
+        setAuthSession({ token: data.session.access_token, mode: 'cloud', user })
+        await Promise.allSettled([
+          bootstrapCloudAccount(),
+          syncLocalSettingsToCloud(),
+          saveCloudData('account', 'details', {
+            email: user.email,
+            display_name: user.name,
+            provider: 'email',
+            created_at: data.user.created_at,
+            last_sign_in_at: data.user.last_sign_in_at || null,
+            updated_at: new Date().toISOString()
+          })
+        ])
+      }
+
+      handlePostLoginSuccess()
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handlePostLoginSuccess = () => {
+    const skip = localStorage.getItem('nexus_skip_login_backup_prompt') === 'true'
+    if (skip) {
+      navigate('/', { replace: true })
+    } else {
+      setShowBackupModal(true)
+    }
+  }
+
+  const handleModalImport = async (file: File) => {
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      setRestoreNotice({ type: 'error', message: 'Please select a valid .zip backup archive.' })
+      return
+    }
+    setIsRestoring(true)
+    setRestoreNotice(null)
+    try {
+      const res = await importNexusBackup(file)
+      if (!res.success) {
+        throw new Error(res.error || 'Failed to restore backup archive.')
+      }
+      setRestoreNotice({
+        type: 'success',
+        message: `Restored ${res.stats?.notesCount ?? 0} notes, ${res.stats?.memoriesCount ?? 0} memories, and settings! Launching...`
+      })
+      if (rememberChoice) {
+        localStorage.setItem('nexus_skip_login_backup_prompt', 'true')
+      }
+      setTimeout(() => {
+        navigate('/', { replace: true })
+      }, 1200)
+    } catch (err: any) {
+      setRestoreNotice({ type: 'error', message: err.message || 'Restoration failed.' })
+      setIsRestoring(false)
+    }
+  }
+
+  const handleNativeModalBrowse = async () => {
+    setIsRestoring(true)
+    setRestoreNotice(null)
+    try {
+      const res = await importNexusBackup(undefined, { useDialog: true })
+      if (res.canceled) {
+        setIsRestoring(false)
+        return
+      }
+      if (!res.success) {
+        throw new Error(res.error || 'Failed to restore backup archive.')
+      }
+      setRestoreNotice({
+        type: 'success',
+        message: `Restored ${res.stats?.notesCount ?? 0} notes, ${res.stats?.memoriesCount ?? 0} memories, and settings! Launching...`
+      })
+      if (rememberChoice) {
+        localStorage.setItem('nexus_skip_login_backup_prompt', 'true')
+      }
+      setTimeout(() => {
+        navigate('/', { replace: true })
+      }, 1200)
+    } catch (err: any) {
+      setRestoreNotice({ type: 'error', message: err.message || 'Restoration failed.' })
+      setIsRestoring(false)
+    }
+  }
+
+  const handleSkipBackup = () => {
+    if (rememberChoice) {
+      localStorage.setItem('nexus_skip_login_backup_prompt', 'true')
+    }
+    navigate('/', { replace: true })
+  }
+
+  const handleLocalBypass = async () => {
+    setIsSubmitting(true)
+    setError('')
+    try {
+      const localEmail = 'operator@nexus.local'
+      const localName = 'Nexus Operator'
+      const localPass = 'nexusOperator2026!'
+
+      let res = await (window as any).electron.ipcRenderer.invoke('email-auth:login', {
+        email: localEmail,
+        password: localPass
+      })
+
+      if (!res?.ok) {
+        res = await (window as any).electron.ipcRenderer.invoke('email-auth:register', {
+          name: localName,
+          email: localEmail,
+          password: localPass
+        })
+      }
+
+      if (res?.ok && res?.token) {
+        persistPreferredDesktopAuthMode('app')
+        persistStoredAppAuthToken(res.token)
+        localStorage.setItem('nexus_user_name', res.user.name || localName)
+        setAuthSession({ token: res.token, mode: 'app', user: res.user })
+        handlePostLoginSuccess()
+      } else {
+        throw new Error(res?.error || 'Failed to initialize local operator session.')
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Local login error.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+    }
+  }
+
+  const cardVariants: any = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: {
+      opacity: 1,
+      scale: 1,
+      transition: { type: 'spring', stiffness: 300, damping: 25 }
+    }
+  }
+
+  const panelVariants: any = {
+    hidden: { opacity: 0, x: -20 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 200, damping: 20 } }
+  }
+
+  const rightPanelVariants: any = {
+    hidden: { opacity: 0, x: 20 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 200, damping: 20 } }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#050505] text-emerald-50 font-sans flex items-center justify-center p-3 lg:p-5 relative overflow-y-auto scrollbar-small selection:bg-emerald-500/30 selection:text-emerald-100">
+      <div className="absolute top-[-10%] left-[-5%] w-125 h-125 bg-emerald-600/10 blur-[150px] rounded-full pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-125 h-125 bg-cyan-900/10 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-linear(to_right,#10b98105_1px,transparent_1px),linear-linear(to_bottom,#10b98105_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none mix-blend-screen" />
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="w-full max-w-7xl relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center"
+      >
+        <motion.div
+          variants={panelVariants}
+          className="hidden lg:flex col-span-3 flex-col h-[min(31rem,calc(100vh-7rem))] bg-black/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 shadow-2xl relative overflow-hidden"
+        >
+          <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+            <TerminalSquare className="w-5 h-5 text-emerald-500" />
+            <h3 className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">
+              System Log
+            </h3>
+          </div>
+          <div className="flex-1 flex flex-col justify-end font-mono text-[10px] leading-relaxed tracking-wider overflow-hidden">
+            <AnimatePresence>
+              {bootLogs.map((log, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className={`mb-2 ${index === bootLogs.length - 1 ? 'text-emerald-400 font-bold drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 'text-zinc-500'}`}
+                >
+                  <span className="opacity-50 mr-2 text-emerald-700">{`>`}</span> {log}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {isReady && (
+              <motion.div
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ repeat: Infinity, duration: 1 }}
+                className="text-emerald-400 mt-1"
+              >
+                _
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+
+        <motion.div
+          variants={cardVariants}
+          className="col-span-1 lg:col-span-6 flex flex-col items-center justify-center"
+        >
+          <div className="text-center mb-4 flex flex-col items-center">
+            <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-black border border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.15)] mb-4 overflow-hidden">
+              <motion.div
+                className="absolute left-0 w-full h-0.5 bg-emerald-400 shadow-[0_0_15px_#34d399]"
+                animate={{ top: ['-10%', '110%', '-10%'] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+              />
+              <Cpu className="w-8 h-8 text-emerald-400 relative z-10" />
+            </div>
+
+            <h1 className="text-3xl font-black tracking-[0.2em] uppercase text-white mb-1 drop-shadow-md">
+              NEXUS <span className="text-emerald-500">OS</span>
+            </h1>
+            <p className="text-zinc-500 text-xs font-mono tracking-widest uppercase">
+              Supabase Email Access
+            </p>
+          </div>
+
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-md bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-2xl relative"
+          >
+            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-emerald-500 to-transparent opacity-40" />
+
+            <div className="mb-4 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 flex items-start gap-3">
+              <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+                Supabase Auth protects sign-in while Nexus stores profile, settings, and memory rows
+                under your account.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mb-4 rounded-xl bg-white/5 border border-white/10 p-1">
+              <button
+                type="button"
+                onClick={() => setMode('signin')}
+                className={`h-10 rounded-lg text-[10px] font-black tracking-[0.18em] uppercase transition ${mode === 'signin' ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-400/30' : 'text-zinc-500 hover:text-zinc-200'}`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('create')}
+                className={`h-10 rounded-lg text-[10px] font-black tracking-[0.18em] uppercase transition ${mode === 'create' ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-400/30' : 'text-zinc-500 hover:text-zinc-200'}`}
+              >
+                Create
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {mode === 'create' && (
+                <label className="block">
+                  <span className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase text-zinc-400 mb-2">
+                    <User size={14} /> Name
+                  </span>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    autoComplete="name"
+                    className="w-full h-11 bg-black/70 border border-white/15 rounded-xl px-4 text-sm text-white outline-none focus:border-emerald-400/70 focus:bg-emerald-950/10"
+                    placeholder="Operator name"
+                  />
+                </label>
+              )}
+
+              <label className="block">
+                <span className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase text-zinc-400 mb-2">
+                  <Mail size={14} /> Email
+                </span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  className="w-full h-11 bg-black/70 border border-white/15 rounded-xl px-4 text-sm text-white outline-none focus:border-emerald-400/70 focus:bg-emerald-950/10"
+                  placeholder="operator@nexus.local"
+                />
+              </label>
+
+              <label className="block">
+                <span className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase text-zinc-400 mb-2">
+                  <KeyRound size={14} /> Password
+                </span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                  className="w-full h-11 bg-black/70 border border-white/15 rounded-xl px-4 text-sm text-white outline-none focus:border-emerald-400/70 focus:bg-emerald-950/10"
+                  placeholder="Minimum 8 characters"
+                />
+              </label>
+
+              {mode === 'create' && (
+                <label className="block">
+                  <span className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase text-zinc-400 mb-2">
+                    <Lock size={14} /> Confirm
+                  </span>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    autoComplete="new-password"
+                    className="w-full h-11 bg-black/70 border border-white/15 rounded-xl px-4 text-sm text-white outline-none focus:border-emerald-400/70 focus:bg-emerald-950/10"
+                    placeholder="Repeat password"
+                  />
+                </label>
+              )}
+            </div>
+
+            {error && (
+              <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs font-mono text-red-200">
+                {error}
+              </div>
+            )}
+            {notice && (
+              <div className="mt-4 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-3 text-xs font-mono text-cyan-100">
+                {notice}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!isReady || isSubmitting}
+              className={`mt-4 relative flex w-full items-center justify-center gap-3 h-12 px-6 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-50 transition-all duration-200 ease-in-out font-bold text-xs tracking-widest uppercase shadow-lg ${!isReady || isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-emerald-400 hover:text-black hover:border-emerald-300 cursor-pointer'}`}
+            >
+              {mode === 'signin' ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
+              {isSubmitting ? 'Checking' : mode === 'signin' ? 'Sign In' : 'Create Account'}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLocalBypass}
+              disabled={!isReady || isSubmitting}
+              className="mt-2.5 w-full flex items-center justify-center gap-2 h-10 px-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 hover:bg-cyan-900/30 text-cyan-300 font-mono text-xs tracking-wider uppercase transition cursor-pointer disabled:opacity-50"
+            >
+              <Cpu size={14} />
+              Local Operator Direct Access
+            </button>
+
+            <div className="mt-3 flex items-center justify-center gap-2 text-emerald-500/50 text-[10px] font-mono tracking-widest uppercase">
+              <Lock size={14} />
+              {isCloudConfigured ? 'Supabase Ready' : 'Supabase Config Missing'}
+            </div>
+          </form>
+        </motion.div>
+
+        <motion.div
+          variants={rightPanelVariants}
+          className="hidden lg:flex col-span-3 flex-col h-[min(31rem,calc(100vh-7rem))] bg-black/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 shadow-2xl"
+        >
+          <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+            <Activity className="w-5 h-5 text-emerald-500" />
+            <h3 className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase">
+              Telemetry
+            </h3>
+          </div>
+
+          <div className="flex flex-col gap-6 font-mono">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center text-[10px] tracking-widest text-zinc-500">
+                <span className="flex items-center gap-2">
+                  <Network size={12} /> NETWORK
+                </span>
+                <span className="text-emerald-400">CLOUD</span>
+              </div>
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-emerald-500" />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center text-[10px] tracking-widest text-zinc-500">
+                <span className="flex items-center gap-2">
+                  <Database size={12} /> ACCOUNT
+                </span>
+                <span className={isCloudConfigured ? 'text-emerald-400' : 'text-yellow-500'}>
+                  {authStateLabel}
+                </span>
+              </div>
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-emerald-500/50" />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center text-[10px] tracking-widest text-zinc-500">
+                <span className="flex items-center gap-2">
+                  <Lock size={12} /> SESSION
+                </span>
+                <span className={isReady ? 'text-emerald-400' : 'text-zinc-400'}>
+                  {isReady ? 'OPEN' : 'BOOTING'}
+                </span>
+              </div>
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-1000 ${isReady ? 'w-full bg-emerald-500/70' : 'w-1/3 bg-yellow-500 animate-pulse'}`}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-auto p-4 bg-emerald-900/10 border border-emerald-500/20 rounded-xl">
+            <p className="text-[9px] text-emerald-400/80 tracking-widest uppercase leading-relaxed">
+              Nexus AI stores operator state in private Supabase rows guarded by account identity.
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Backup Restoration Prompt Modal on Login */}
+      <AnimatePresence>
+        {showBackupModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 15 }}
+              className="w-full max-w-lg rounded-2xl border border-emerald-400/40 bg-zinc-950 p-6 shadow-[0_0_60px_rgba(16,185,129,0.25)] text-zinc-100"
+            >
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-emerald-400/40 bg-emerald-400/15 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                  <Archive size={22} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold uppercase tracking-wider text-white">
+                    Nexus Backup Archive
+                  </h3>
+                  <p className="text-[11px] font-mono text-emerald-400">
+                    OPERATOR INITIALIZATION // RESTORE CHECK
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-300 mb-5 leading-relaxed">
+                Welcome, Operator. Do you have an existing Nexus system backup archive (<span className="text-emerald-400 font-mono font-bold">.zip</span>) with your notes, memories, AI API keys, and settings to restore into this instance?
+              </p>
+
+              {restoreNotice && (
+                <div
+                  className={`mb-4 flex items-center gap-2 rounded-lg border p-3 text-xs font-mono ${
+                    restoreNotice.type === 'error'
+                      ? 'border-red-500/30 bg-red-500/10 text-red-200'
+                      : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
+                  }`}
+                >
+                  {restoreNotice.type === 'error' ? <AlertCircle size={15} /> : <CheckCircle2 size={15} />}
+                  <span>{restoreNotice.message}</span>
+                </div>
+              )}
+
+              <input
+                ref={backupFileInputRef}
+                type="file"
+                accept=".zip"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) void handleModalImport(file)
+                  e.target.value = ''
+                }}
+              />
+
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const file = e.dataTransfer.files?.[0]
+                  if (file) void handleModalImport(file)
+                }}
+                onClick={() => !isRestoring && backupFileInputRef.current?.click()}
+                className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-emerald-400/30 bg-black/40 p-6 text-center transition hover:border-emerald-400 hover:bg-emerald-950/20 cursor-pointer"
+              >
+                <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-400/30 bg-emerald-400/10 text-emerald-300">
+                  <Upload size={22} className={isRestoring ? 'animate-bounce' : ''} />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-200">
+                  {isRestoring ? 'Restoring Archive...' : 'Import Nexus Backup (.zip)'}
+                </span>
+                <span className="mt-1 text-[11px] text-zinc-500">
+                  Drag & drop your .zip file here or click to browse
+                </span>
+              </div>
+
+              <div className="mt-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleNativeModalBrowse}
+                  disabled={isRestoring}
+                  className="flex-1 inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] text-[11px] font-bold uppercase tracking-wider text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-200 transition"
+                >
+                  <FileText size={13} /> Native File Dialog
+                </button>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+                <label className="flex items-center gap-2 cursor-pointer text-[11px] text-zinc-400 select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberChoice}
+                    onChange={(e) => setRememberChoice(e.target.checked)}
+                    className="rounded border-white/20 bg-black text-emerald-500 focus:ring-0"
+                  />
+                  <span>Don&apos;t ask again on login</span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleSkipBackup}
+                  disabled={isRestoring}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.05] px-4 text-xs font-bold uppercase tracking-wider text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                >
+                  <span>Skip / Start Fresh</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}

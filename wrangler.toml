@@ -1,0 +1,52 @@
+# ==============================================================================
+# Cloudflare Pages / Worker Configuration for Nexus Cross-Device Bridge
+# Free-Tier Stack: 100% Free CDN, D1 SQLite Database, and R2 Object Storage
+# ==============================================================================
+
+name = "nexus-bridge"
+pages_build_output_dir = "web/dashboard"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 Serverless SQLite Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "nexus-db"
+database_id = "05f5359f-83fa-444c-891a-8714bc126adf"
+
+# Environment Variables
+[vars]
+ENVIRONMENT = "production"
+GITHUB_OWNER = "NiranX-Resolute"
+GITHUB_REPO = "NEXUS-OS"
+MODAL_API_URL = "https://nexus-ai-core.modal.run"
+GEMINI_API_KEY = "VAULT_MANAGED_SECRET"
+GEMINI_MODEL = "gemini-3.8-flash"
+GEMINI_FALLBACK_MODEL = "gemini-3.5-flash"
+
+# Cloudflare Workers AI — keyless default provider for Standard Mode (free daily neuron allowance).
+# Optional upgrades (set as secrets, never in this file):
+#   npx wrangler pages secret put GEMINI_API_KEY --project-name nexus-bridge
+#   npx wrangler pages secret put GROQ_API_KEY   --project-name nexus-bridge
+[ai]
+binding = "AI"
+
+# Cloudflare Workers KV Namespace Binding (Key-Value Cache)
+[[kv_namespaces]]
+binding = "NEXUS_KV"
+id = "eb74871aee9548628acca89328685aec"
+
+# Cloudflare Vectorize Index Binding (Vector Database for Embeddings / AI Memory)
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "nexus-vectors"
+
+# Cloudflare R2 Object Storage Binding (Blob DB / Media & Binary Storage)
+# Step to activate: 1. Visit Cloudflare Dashboard -> Storage -> R2 -> Enable R2.
+#                   2. Run: wrangler r2 bucket create nexus-media
+#                   3. Uncomment the block below and re-deploy.
+# [[r2_buckets]]
+# binding = "BUCKET"
+# bucket_name = "nexus-media"
+
+

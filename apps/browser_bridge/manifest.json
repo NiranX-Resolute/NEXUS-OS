@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus OS - Gemini Web Ingest Bridge",
+  "version": "5.0.0",
+  "description": "Passive Shadow-DOM web ingestion bridge streaming Gemini Web conversations to local Nexus Sovereign Store with TARS commentary.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:47630/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://gemini.google.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Nexus Browser Bridge"
+  }
+}

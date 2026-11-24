@@ -1,0 +1,137 @@
+version: "5.0.0"
+repository:
+  owner: "NiranX-Resolute"
+  name: "NEXUS-OS"
+  url: "https://github.com/NiranX-Resolute/NEXUS-OS"
+  releases_url: "https://github.com/NiranX-Resolute/NEXUS-OS/releases"
+  download_hub_url: "https://nexus-landing.pages.dev/download"
+
+agent_identity:
+  name: "Nexdune"
+  author: "NiranX-Resolute"
+  engine: "Antigravity v5.0"
+  description: "Autonomous Edge-to-Desktop Sovereign AI Agent Runtime"
+  data_sovereignty: "LOCAL_FIRST"
+  encryption: "DPAPI"
+
+workspaces:
+  DEV:
+    description: "Full engineering and developer workspace with high compute profile, security audit tools, and file access"
+    allowed_paths:
+      - "C:\\Users\\Public\\Projects"
+      - "C:\\Nexus-OS"
+      - "c:\\Users\\NiranX\\Documents\\antigravity\\Nexus Desktop"
+    mcp_servers:
+      - "sec_sentinel"
+      - "obscura_browser"
+      - "tool_synthesizer"
+      - "filesystem"
+      - "git"
+      - "reticle"
+      - "vision_biometrics"
+    allowed_mcp_tools:
+      - "filesystem"
+      - "git"
+      - "obscura_browser"
+      - "synthesizer"
+      - "sec_sentinel"
+      - "semgrep"
+      - "gitleaks"
+      - "nuclei"
+      - "nmap"
+      - "reticle"
+      - "reticle_session"
+      - "reticle_look"
+      - "reticle_act"
+      - "reticle_act_and_wait"
+      - "reticle_assert"
+      - "vision_biometrics"
+      - "face_lock_verify"
+      - "gesture_control_scan"
+      - "posture_guard_check"
+      - "posture_guard_monitor"
+      - "verify_operator_face"
+    memory_namespace: "dev_context"
+    resource_profile: "HIGH_PERFORMANCE"
+    vector_indexing: true
+    security_level: "STANDARD"
+
+  STUDY:
+    description: "Academic and research environment with balanced resource utilization"
+    allowed_paths:
+      - "C:\\Users\\Public\\Documents\\Scholar"
+    mcp_servers:
+      - "scholar_db"
+      - "fetch"
+      - "sqlite"
+      - "vision_biometrics"
+    allowed_mcp_tools:
+      - "fetch"
+      - "sqlite"
+      - "memory"
+      - "vision_biometrics"
+      - "face_lock_verify"
+      - "gesture_control_scan"
+      - "posture_guard_check"
+      - "posture_guard_monitor"
+    memory_namespace: "study_context"
+    resource_profile: "BALANCED"
+    vector_indexing: true
+    security_level: "STRICT"
+
+  STUDIO:
+    description: "Creative media production environment with specialized canvas and audio capabilities"
+    allowed_paths:
+      - "C:\\Users\\Public\\Music"
+      - "C:\\Users\\Public\\Videos"
+    mcp_servers:
+      - "media_canvas"
+      - "audio_engine"
+      - "vision_biometrics"
+    allowed_mcp_tools:
+      - "audio"
+      - "canvas"
+      - "vision_biometrics"
+      - "face_lock_verify"
+      - "gesture_control_scan"
+      - "posture_guard_check"
+      - "posture_guard_monitor"
+    memory_namespace: "studio_context"
+    resource_profile: "HIGH_PERFORMANCE"
+    vector_indexing: false
+    security_level: "PERMISSIVE"
+
+  SILENT:
+    description: "Zero idle resource consumption sandbox with no external file access and complete zero-idle air-gap isolation"
+    allowed_paths: []
+    mcp_servers: []
+    allowed_mcp_tools: []
+    memory_namespace: "silent_sandbox"
+    resource_profile: "ZERO_IDLE"
+    vector_indexing: false
+    security_level: "AIR_GAPPED"
+
+mcp_server_definitions:
+  reticle:
+    command: "npx"
+    args:
+      - "-y"
+      - "@reticlehq/server"
+      - "mcp"
+    transport: "stdio"
+    host: "127.0.0.1"
+    port: 4400
+    scope:
+      agents:
+        - "DEV-01"
+        - "SEC-01"
+      allowed_hosts:
+        - "127.0.0.1"
+        - "localhost"
+      description: "Local Reticle runtime UI/DOM/IPC and CSP/secret leak verification MCP server"
+
+runtime_defaults:
+  active_mode: "DEV"
+  max_retries: 3
+  reflex_latency_target_ms: 100
+  slice_storage_path: "~/.nexus-agent/db/agent_local.db"

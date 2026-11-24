@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "slug": "ipc-flow",
+  "name": "Ipc Flow",
+  "type": "macro",
+  "orbiter_group": "AUTO-01",
+  "category": "automation",
+  "permission_scope": [
+    "DESKTOP_ACTUATION",
+    "FILESYSTEM_READ",
+    "WORKSPACE_WRITE"
+  ],
+  "instructions_md": "# Macro: Ipc Flow\n\nIPC integration test\n\n- **Slug:** `ipc-flow`\n- **Category:** `automation`\n- **Orbiter Group:** `AUTO-01`\n- **Action Count:** 1\n- **Total Duration:** 0.00 ms\n- **Redacted Credentials:** All credentials masked with `${VAULT:...}`\n\n## Action Execution Steps\n\n| Step | Action Type | Payload Parameters | Delay |\n| :--- | :--- | :--- | :--- |\n| 1 | `type_text` | `{\"text\": \"password=${VAULT:SECRET_PLACEHOLDER}\"}` | 4.06 ms |\n\n## Raw Action Stream\n\n```json\n[\n  {\n    \"id\": \"act-1\",\n    \"action_type\": \"type_text\",\n    \"data\": {\n      \"text\": \"password=${VAULT:SECRET_PLACEHOLDER}\"\n    },\n    \"rel_ms\": 4.06,\n    \"delta_ms\": 4.06,\n    \"timestamp\": 1795503281.7789893\n  }\n]\n```\n",
+  "references": [],
+  "actions": [
+    {
+      "id": "act-1",
+      "action_type": "type_text",
+      "data": {
+        "text": "password=${VAULT:SECRET_PLACEHOLDER}"
+      },
+      "rel_ms": 4.06,
+      "delta_ms": 4.06,
+      "timestamp": 1795503281.7789893
+    }
+  ],
+  "metadata": {
+    "macro_id": "macro-9c7dd62b09",
+    "original_name": "ipc-flow",
+    "action_count": 1,
+    "duration_ms": 0.0,
+    "author": "Nexus Desktop",
+    "compiled_at": "2026-11-24T06:54:41.930806+00:00"
+  },
+  "sha256": "4b6728b48b472b0623d25fec58bd8f9e765e68d5614097133d8099a45c9e6916"
+}

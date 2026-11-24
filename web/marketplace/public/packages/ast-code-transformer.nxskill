@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "slug": "ast-code-transformer",
+  "name": "AST Code Transformer & Refactorer",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "developer",
+  "permission_scope": [
+    "FILESYSTEM_READ",
+    "WORKSPACE_WRITE"
+  ],
+  "instructions_md": "# AST Code Transformer & Refactorer\n\nHigh-precision Python and TypeScript AST code transformations with zero regex hallucinations.\n\n## Architecture\n\nUses Python's `ast` parser and TypeScript compiler API to refactor classes, methods, and types with zero unintended side-effects.\n\n## Execution\n\n```python\nimport ast\n\ndef transform_ast(tree):\n    # AST visitor & transformer\n    return tree\n```\n",
+  "references": [
+    "core/runtime/scope_guard.py"
+  ],
+  "sha256": "a9e3a813bdf03cb305fdbe4c1ba797083b24febb4bfcd2f750f846219c41e1b6"
+}

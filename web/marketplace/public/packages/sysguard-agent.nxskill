@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "slug": "sysguard-agent",
+  "name": "SysGuard",
+  "type": "agent",
+  "orbiter_group": "SYS-01",
+  "category": "system",
+  "permission_scope": [
+    "WIN32_INPUT_SIMULATION",
+    "AUDIO_CAPTURE",
+    "AUDIO_PLAYBACK"
+  ],
+  "instructions_md": "# SysGuard Agent\n\nSub-50ms Win32 native event injector, hardware telemetry reader, and process governor.",
+  "references": [],
+  "sha256": "95dcb0dc36c982efabb3b5a463d44f63026a85ce9379d57d2dd71938963698cc"
+}

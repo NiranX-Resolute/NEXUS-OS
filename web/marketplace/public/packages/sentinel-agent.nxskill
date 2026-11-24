@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "slug": "sentinel-agent",
+  "name": "Sentinel",
+  "type": "agent",
+  "orbiter_group": "SEC-01",
+  "category": "security",
+  "permission_scope": [
+    "FILESYSTEM_READ",
+    "SECURITY_AUDIT"
+  ],
+  "instructions_md": "# Sentinel Agent\n\nSecurity guardian enforcing strict scope boundaries, DPAPI vault locks, and invariant checks.",
+  "references": [],
+  "sha256": "f85aeb7173f7238d31ac028d777d899d04fc54e460acb95c92f4bd8e3ac81151"
+}

@@ -1,0 +1,39 @@
+# ==============================================================================
+# Nexus OS v5.0 - Cursor Context Ignore Specification
+# ==============================================================================
+
+# Reference Research Frameworks (Context Pollution Prevention)
+agents/research/
+
+# Runtimes & Test Caches
+.venv/
+venv/
+.pytest_cache/
+__pycache__/
+
+# Cloudflare & Wrangler Local Artifacts
+.wrangler/
+**/.wrangler/
+.cloudflare/
+**/.cloudflare/
+
+# Dependencies & Build Caches
+node_modules/
+dist/
+out/
+build/
+target/
+.cache/
+**/.cache/
+.turbo/
+*.exe
+docs/binaries/
+release_binaries/
+"New folder"/
+
+# Secrets & Logs
+*.secret
+*.log
+temp_out.txt
+_legacy_archive/
+scratch/

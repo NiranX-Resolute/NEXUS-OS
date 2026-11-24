@@ -1,0 +1,19 @@
+{
+  "name": "Nexus Study AI — Socratic Audio Tutor & NotebookLM",
+  "short_name": "Nexus Study",
+  "description": "Zero-cost open-source student study ecosystem with automated summaries, Leitner spaced repetition, and real-time Socratic voice companion.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080c14",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><path d='M50 15L15 35l35 20 35-20-35-20zM15 65l35 20 35-20M15 50l35 20 35-20' stroke='%23ffffff' stroke-width='6' fill='none'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity", "study"]
+}

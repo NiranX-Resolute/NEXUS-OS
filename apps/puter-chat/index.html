@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Puter AI - Multi-Model Intelligent Chat</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5h-2v-2h2zm0-4h-2V7h2z'/></svg>" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            nexus: {
+              950: '#05070a',
+              900: '#090d14',
+              850: '#0d131d',
+              800: '#141c2b',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              violet: '#8b5cf6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Marked (Markdown) & DOMPurify -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- KaTeX for LaTeX Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Puter.js SDK -->
+  <script src="https://js.puter.com/v2/"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-nexus-950 text-zinc-100 min-h-screen flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
+
+  <!-- TOP APP BAR -->
+  <header class="h-16 border-b border-white/10 bg-nexus-900/80 backdrop-blur-xl px-4 lg:px-6 flex items-center justify-between z-30 sticky top-0">
+    <div class="flex items-center gap-3">
+      <button id="toggle-sidebar-btn" class="p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition lg:hidden" title="Toggle Sidebar">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 p-[1px] shadow-lg shadow-emerald-500/20">
+          <div class="w-full h-full bg-nexus-950 rounded-[11px] flex items-center justify-center text-emerald-400">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold tracking-wider text-sm lg:text-base bg-gradient-to-r from-emerald-400 via-cyan-300 to-white bg-clip-text text-transparent">
+              NEXUS AI
+            </span>
+            <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">
+              PUTER.JS ENGINE
+            </span>
+          </div>
+          <p class="text-[10px] text-zinc-400 font-mono tracking-tight hidden sm:block">
+            Universal Model Orchestration &bull; 500+ LLMs
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODEL & CONTROLS -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Active Model Pill / Dropdown Trigger -->
+      <button id="model-modal-trigger" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-200 transition text-xs font-mono font-medium max-w-[200px] sm:max-w-[320px]">
+        <i data-lucide="cpu" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+        <span id="current-model-label" class="truncate font-semibold">GPT-4o</span>
+        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-emerald-400/70 shrink-0"></i>
+      </button>
+
+      <!-- Settings / Parameters Drawer Trigger -->
+      <button id="settings-drawer-trigger" class="p-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition" title="Model Parameters & Prompt">
+        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Puter Auth Button -->
+      <button id="puter-auth-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-200 transition text-xs font-mono">
+        <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-400"></i>
+        <span id="puter-user-status">Sign In</span>
+      </button>
+
+      <!-- New Chat Button -->
+      <button id="new-chat-top-btn" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-semibold transition text-xs shadow-md shadow-emerald-500/20">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        <span>New Chat</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN BODY LAYOUT -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- SIDEBAR: CHAT SESSIONS & TEMPLATES -->
+    <aside id="chat-sidebar" class="w-72 sm:w-80 border-r border-white/10 bg-nexus-900/95 flex flex-col shrink-0 absolute lg:static inset-y-0 left-0 z-20 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out backdrop-blur-2xl">
+      <div class="p-3 border-b border-white/10 flex items-center justify-between">
+        <button id="sidebar-new-chat-btn" class="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-emerald-500/30 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-semibold text-xs transition">
+          <i data-lucide="message-square-plus" class="w-4 h-4"></i>
+          <span>New Conversation</span>
+        </button>
+        <button id="close-sidebar-btn" class="ml-2 p-2 rounded-lg text-zinc-400 hover:text-white lg:hidden">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Prompt Starters / Modes -->
+      <div class="px-3 pt-3">
+        <div class="text-[10px] font-mono uppercase tracking-wider text-zinc-500 px-1 mb-2">
+          Persona Presets
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button class="preset-btn px-2 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-emerald-500/30 text-[11px] text-zinc-300 hover:text-emerald-200 transition text-left flex items-center gap-1.5" data-preset="coder">
+            <i data-lucide="code" class="w-3 h-3 text-cyan-400 shrink-0"></i>
+            <span class="truncate">Full-Stack Dev</span>
+          </button>
+          <button class="preset-btn px-2 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-emerald-500/30 text-[11px] text-zinc-300 hover:text-emerald-200 transition text-left flex items-center gap-1.5" data-preset="math">
+            <i data-lucide="calculator" class="w-3 h-3 text-emerald-400 shrink-0"></i>
+            <span class="truncate">Math & Physics</span>
+          </button>
+          <button class="preset-btn px-2 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-emerald-500/30 text-[11px] text-zinc-300 hover:text-emerald-200 transition text-left flex items-center gap-1.5" data-preset="reasoning">
+            <i data-lucide="brain" class="w-3 h-3 text-violet-400 shrink-0"></i>
+            <span class="truncate">Deep Thinker</span>
+          </button>
+          <button class="preset-btn px-2 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-emerald-500/30 text-[11px] text-zinc-300 hover:text-emerald-200 transition text-left flex items-center gap-1.5" data-preset="general">
+            <i data-lucide="zap" class="w-3 h-3 text-amber-400 shrink-0"></i>
+            <span class="truncate">Nexus Agent</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- History Sessions -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
+        <div class="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-zinc-500 px-1 py-1">
+          <span>Conversations</span>
+          <span id="sessions-count" class="text-zinc-600">0</span>
+        </div>
+        <div id="sessions-list" class="space-y-1">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Sidebar Footer / Storage status -->
+      <div class="p-3 border-t border-white/10 bg-black/40 text-xs">
+        <div class="flex items-center justify-between text-zinc-400 mb-2">
+          <span class="flex items-center gap-1.5 text-[11px]">
+            <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span id="sync-status">Local & Puter KV</span>
+          </span>
+          <button id="clear-all-sessions-btn" class="text-[11px] text-zinc-500 hover:text-red-400 transition" title="Clear all history">
+            Clear All
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <button id="export-chat-md-btn" class="flex-1 py-1.5 px-2 rounded-lg border border-white/10 hover:bg-white/5 text-[11px] text-zinc-300 hover:text-white transition flex items-center justify-center gap-1">
+            <i data-lucide="download" class="w-3 h-3"></i>
+            <span>Export MD</span>
+          </button>
+          <button id="export-chat-json-btn" class="flex-1 py-1.5 px-2 rounded-lg border border-white/10 hover:bg-white/5 text-[11px] text-zinc-300 hover:text-white transition flex items-center justify-center gap-1">
+            <i data-lucide="file-json" class="w-3 h-3"></i>
+            <span>Export JSON</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CHAT VIEWPORT -->
+    <main class="flex-1 flex flex-col min-w-0 bg-nexus-950 relative overflow-hidden">
+
+      <!-- Model Specs Bar -->
+      <div class="h-9 px-4 border-b border-white/5 bg-nexus-900/50 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+        <div class="flex items-center gap-3 overflow-hidden truncate">
+          <span class="flex items-center gap-1 text-emerald-400 font-semibold truncate">
+            <i data-lucide="check-circle" class="w-3 h-3 text-emerald-400"></i>
+            <span id="active-model-display">gpt-4o</span>
+          </span>
+          <span class="text-zinc-600">&bull;</span>
+          <span id="model-provider-display" class="text-zinc-400">OpenAI</span>
+          <span class="text-zinc-600 hidden sm:inline">&bull;</span>
+          <span id="model-context-display" class="text-zinc-500 hidden sm:inline">128k context</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="streaming-indicator" class="hidden items-center gap-1 text-emerald-400 font-bold animate-pulse text-[10px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> STREAMING
+          </span>
+          <span id="total-tokens-badge" class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] text-zinc-400">
+            0 tokens
+          </span>
+        </div>
+      </div>
+
+      <!-- Messages Stream Area -->
+      <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar">
+        <!-- Welcome Hero (shown when no messages) -->
+        <div id="welcome-hero" class="max-w-2xl mx-auto my-auto text-center py-12 px-4">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/10">
+            <i data-lucide="bot" class="w-8 h-8 text-emerald-400"></i>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
+            What can Nexus AI build with you today?
+          </h2>
+          <p class="text-sm text-zinc-400 mb-8 max-w-lg mx-auto">
+            Powered by <strong class="text-emerald-400">Puter.js</strong> with real-time access to 500+ frontier AI models. Select any model or enter a custom identifier.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-xl mx-auto">
+            <button class="starter-prompt p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 hover:border-emerald-500/40 transition group">
+              <div class="text-xs font-semibold text-emerald-300 group-hover:text-emerald-200 mb-1 flex items-center gap-1.5">
+                <i data-lucide="code-xml" class="w-3.5 h-3.5"></i> Code Automation
+              </div>
+              <div class="text-[11px] text-zinc-400">
+                "Write a fast concurrent crawler in Node.js with error retries."
+              </div>
+            </button>
+
+            <button class="starter-prompt p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 hover:border-cyan-500/40 transition group">
+              <div class="text-xs font-semibold text-cyan-300 group-hover:text-cyan-200 mb-1 flex items-center gap-1.5">
+                <i data-lucide="function-square" class="w-3.5 h-3.5"></i> Advanced Math
+              </div>
+              <div class="text-[11px] text-zinc-400">
+                "Derive the Schrödinger equation in spherical coordinates with LaTeX."
+              </div>
+            </button>
+
+            <button class="starter-prompt p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 hover:border-violet-500/40 transition group">
+              <div class="text-xs font-semibold text-violet-300 group-hover:text-violet-200 mb-1 flex items-center gap-1.5">
+                <i data-lucide="workflow" class="w-3.5 h-3.5"></i> System Architecture
+              </div>
+              <div class="text-[11px] text-zinc-400">
+                "Design a fault-tolerant multi-agent fallback system with Puter.js."
+              </div>
+            </button>
+
+            <button class="starter-prompt p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 hover:border-amber-500/40 transition group">
+              <div class="text-xs font-semibold text-amber-300 group-hover:text-amber-200 mb-1 flex items-center gap-1.5">
+                <i data-lucide="microchip" class="w-3.5 h-3.5"></i> Model Comparison
+              </div>
+              <div class="text-[11px] text-zinc-400">
+                "Compare Claude 3.7 Sonnet reasoning vs DeepSeek R1."
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Message List -->
+        <div id="messages-list" class="max-w-4xl mx-auto space-y-6"></div>
+      </div>
+
+      <!-- Attachment Preview Tray -->
+      <div id="attachment-tray" class="hidden px-4 py-2 border-t border-white/10 bg-nexus-900/90 max-w-4xl mx-auto w-full">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1" id="attachment-previews">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="p-3 sm:p-4 border-t border-white/10 bg-nexus-900/90 backdrop-blur-xl">
+        <div class="max-w-4xl mx-auto">
+          <form id="chat-form" class="relative rounded-2xl border border-white/15 bg-black/60 focus-within:border-emerald-500/60 shadow-2xl transition">
+            <!-- Hidden File Input -->
+            <input type="file" id="file-input" multiple class="hidden" accept="image/*,.pdf,.txt,.md,.json,.js,.py,.csv" />
+
+            <div class="flex items-end p-2 gap-2">
+              <!-- Attach File Button -->
+              <button type="button" id="attach-btn" class="p-2.5 rounded-xl text-zinc-400 hover:text-emerald-300 hover:bg-white/5 transition" title="Attach image or file for multimodal models">
+                <i data-lucide="paperclip" class="w-5 h-5"></i>
+              </button>
+
+              <!-- Textarea -->
+              <textarea
+                id="user-input"
+                rows="1"
+                placeholder="Ask anything, write code, or solve problems with Puter.js..."
+                class="flex-1 bg-transparent border-0 outline-none resize-none text-sm text-zinc-100 placeholder-zinc-500 py-2.5 max-h-48 custom-scrollbar leading-relaxed"
+              ></textarea>
+
+              <!-- Speech-to-Text Button -->
+              <button type="button" id="voice-input-btn" class="p-2.5 rounded-xl text-zinc-400 hover:text-cyan-300 hover:bg-white/5 transition" title="Voice Input">
+                <i data-lucide="mic" class="w-5 h-5"></i>
+              </button>
+
+              <!-- Stop Stream Button (shown during streaming) -->
+              <button type="button" id="stop-stream-btn" class="hidden p-2.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 transition" title="Stop Generation">
+                <i data-lucide="square" class="w-5 h-5 fill-current"></i>
+              </button>
+
+              <!-- Send Button -->
+              <button type="submit" id="send-btn" class="p-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-bold transition shadow-lg shadow-emerald-500/25 disabled:opacity-40 disabled:cursor-not-allowed">
+                <i data-lucide="send" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </form>
+
+          <!-- Status / Shortcuts Bar & Mandatory Puter Attribution -->
+          <div class="flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-500 font-mono mt-2 px-1 gap-1">
+            <div class="flex items-center gap-3">
+              <span>Shift+Enter for newline</span>
+              <span class="hidden sm:inline">&bull;</span>
+              <span id="model-status-indicator" class="text-emerald-500/80">Puter.js ready</span>
+            </div>
+
+            <!-- MANDATORY PUTER.JS ATTRIBUTION -->
+            <div class="flex items-center gap-1.5">
+              <span>Powered by</span>
+              <a href="https://developer.puter.com" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 underline font-semibold flex items-center gap-1">
+                Puter.js
+                <i data-lucide="external-link" class="w-3 h-3 inline"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: MODEL SELECTOR (500+ Models + Custom Input)                         -->
+  <!-- ========================================================================= -->
+  <div id="model-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="w-full max-w-2xl bg-nexus-900 border border-white/15 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">Select or Enter Any AI Model</h3>
+            <p class="text-xs text-zinc-400 font-mono">500+ Models accessible through Puter.js</p>
+          </div>
+        </div>
+        <button id="close-model-modal-btn" class="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Custom Model Input Section -->
+      <div class="p-4 border-b border-white/10 bg-black/40">
+        <label class="block text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold mb-1.5">
+          Custom Model Identifier (Use Any Model)
+        </label>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            id="custom-model-input"
+            placeholder="e.g. claude-3-7-sonnet, deepseek/deepseek-r1, gpt-4o, etc."
+            class="flex-1 bg-nexus-950 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 outline-none"
+          />
+          <button id="apply-custom-model-btn" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-xl transition">
+            Use Model
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Categories & Search Bar -->
+      <div class="p-4 border-b border-white/10 space-y-3">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-zinc-500 absolute left-3 top-3"></i>
+          <input
+            type="text"
+            id="model-search-input"
+            placeholder="Search through 500+ live models (by name, vendor, id)..."
+            class="w-full bg-nexus-950 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:border-cyan-500 outline-none"
+          />
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="flex flex-wrap gap-1.5 text-xs font-mono">
+          <button class="model-cat-tab active px-2.5 py-1 rounded-lg border border-emerald-500/40 bg-emerald-500/20 text-emerald-300" data-category="popular">
+            🔥 Popular
+          </button>
+          <button class="model-cat-tab px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:text-white" data-category="free">
+            ⚡ Free & Fast
+          </button>
+          <button class="model-cat-tab px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:text-white" data-category="reasoning">
+            🧠 Reasoning
+          </button>
+          <button class="model-cat-tab px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:text-white" data-category="vision">
+            👁️ Multimodal
+          </button>
+          <button class="model-cat-tab px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:text-white" data-category="all">
+            🌐 All (<span id="total-models-count">990+</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Models List (Scrollable) -->
+      <div id="model-grid" class="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- DRAWER: PARAMETERS & SYSTEM PROMPT                                         -->
+  <!-- ========================================================================= -->
+  <div id="settings-drawer" class="fixed inset-y-0 right-0 w-80 sm:w-96 bg-nexus-900 border-l border-white/15 z-50 transform translate-x-full transition-transform duration-200 ease-in-out flex flex-col shadow-2xl backdrop-blur-2xl">
+    <div class="p-4 border-b border-white/10 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="sliders" class="w-5 h-5 text-emerald-400"></i>
+        <h3 class="font-bold text-white text-base">Model Parameters</h3>
+      </div>
+      <button id="close-settings-drawer-btn" class="p-2 rounded-lg text-zinc-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar text-xs">
+      <!-- System Prompt -->
+      <div>
+        <label class="block font-mono uppercase tracking-wider text-zinc-400 mb-1.5 font-semibold">
+          System Instructions
+        </label>
+        <textarea
+          id="system-prompt-input"
+          rows="4"
+          placeholder="You are Nexus AI, a brilliant and precise AI assistant..."
+          class="w-full bg-nexus-950 border border-white/15 rounded-xl p-3 text-zinc-200 text-xs outline-none focus:border-emerald-500 custom-scrollbar leading-relaxed"
+        ></textarea>
+      </div>
+
+      <!-- Temperature Slider -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5 font-mono">
+          <label class="uppercase tracking-wider text-zinc-400 font-semibold">Temperature</label>
+          <span id="temp-val" class="text-emerald-400 font-bold">0.7</span>
+        </div>
+        <input
+          type="range"
+          id="temperature-slider"
+          min="0"
+          max="2"
+          step="0.05"
+          value="0.7"
+          class="w-full accent-emerald-500"
+        />
+        <div class="flex justify-between text-[10px] text-zinc-500 font-mono mt-1">
+          <span>0.0 (Deterministic)</span>
+          <span>1.0 (Balanced)</span>
+          <span>2.0 (Creative)</span>
+        </div>
+      </div>
+
+      <!-- Max Tokens Slider -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5 font-mono">
+          <label class="uppercase tracking-wider text-zinc-400 font-semibold">Max Tokens</label>
+          <span id="max-tokens-val" class="text-cyan-400 font-bold">4096</span>
+        </div>
+        <input
+          type="range"
+          id="max-tokens-slider"
+          min="256"
+          max="32768"
+          step="256"
+          value="4096"
+          class="w-full accent-cyan-500"
+        />
+      </div>
+
+      <!-- Reasoning Effort (for thinking models) -->
+      <div>
+        <label class="block font-mono uppercase tracking-wider text-zinc-400 mb-1.5 font-semibold">
+          Reasoning Effort (Thinking Models)
+        </label>
+        <select id="reasoning-effort-select" class="w-full bg-nexus-950 border border-white/15 rounded-xl p-2.5 text-zinc-200 outline-none">
+          <option value="">Default (Auto)</option>
+          <option value="minimal">Minimal</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="xhigh">Extra High</option>
+        </select>
+      </div>
+
+      <!-- Test Mode Toggle -->
+      <div class="p-3 rounded-xl border border-white/10 bg-white/[0.02] flex items-center justify-between">
+        <div>
+          <div class="font-semibold text-zinc-200">Test Mode</div>
+          <div class="text-[10px] text-zinc-500">Test code without consuming Puter credits</div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="test-mode-toggle" class="sr-only peer" />
+          <div class="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+        </label>
+      </div>
+
+      <!-- Backup Mode / Nexus Handshake status -->
+      <div class="p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-1.5">
+        <div class="flex items-center gap-2 text-emerald-400 font-semibold font-mono text-[11px]">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>Nexus AI Resilient Backup</span>
+        </div>
+        <p class="text-[11px] text-zinc-400 leading-relaxed">
+          Puter.js acts as the primary or secondary high-availability bridge for Nexus Desktop & Web. If primary API keys are absent or rate-limited, Puter transparently executes your chat requests.
+        </p>
+      </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 border-t border-white/10 flex gap-2">
+      <button id="reset-params-btn" class="flex-1 py-2 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-300 transition text-xs font-medium">
+        Reset
+      </button>
+      <button id="save-params-btn" class="flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold transition text-xs">
+        Save
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

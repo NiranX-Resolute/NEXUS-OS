@@ -1,0 +1,24 @@
+name = "nexus-edge-worker"
+main = "worker.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Serverless SQLite Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "nexus-db"
+database_id = "nexus-d1-production"
+
+# Cloudflare KV Key-Value Cache Binding
+[[kv_namespaces]]
+binding = "KV"
+id = "nexus-kv-cache"
+preview_id = "nexus-kv-cache-preview"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+ENVIRONMENT = "production"
+DEFAULT_TARGET_DEVICE = "DESKTOP"

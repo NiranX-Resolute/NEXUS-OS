@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "slug": "arxiv-deep-scholar",
+  "name": "arXiv Deep Scholar & RAG Synthesizer",
+  "type": "skill",
+  "orbiter_group": "SCOUT-01",
+  "category": "research",
+  "permission_scope": [
+    "NETWORK_OUTBOUND",
+    "LOCAL_MEMORY_WRITE"
+  ],
+  "instructions_md": "# arXiv Deep Scholar & RAG Synthesizer\n\nDiscovers, summarizes, and extracts KaTeX equations from arXiv and Europe PMC research papers.\n\n## Features\n\n- Real-time arXiv API querying\n- PDF math formula and KaTeX block extraction\n- Direct integration with SovereignMemoryStore\n",
+  "references": [],
+  "sha256": "86a8ebd5805726eafd90516df5e50bcdbe452e78bfaaac1437965a7a464f323d"
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "slug": "orch-refine-code",
+  "name": "orch-refine-code",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "community",
+  "permission_scope": [
+    "FILESYSTEM_READ"
+  ],
+  "instructions_md": "---\nname: orch-refine-code\ndescription: Orchestrate a behavior-preserving refactor \u2014 confirm tests are green, restructure without changing behavior, keep tests green, review, and gated commit. Use when the structure should improve but behavior must not change.\nmetadata:\n  origin: ECC\n---\n\n# orch-refine-code\n\nActor \u00b7 action \u00b7 target: **orch \u00b7 refine \u00b7 code**. Thin wrapper over the shared\nengine in [`orch-pipeline`](../orch-pipeline/SKILL.md).\n\n## When to Use\n\n- Same behavior, **better structure**: extract modules, remove duplication, kill\n  dead code, reduce nesting, rename for clarity.\n- Distinguish from siblings: if behavior is meant to change at all, this is the\n  wrong skill (`orch-change-feature` / `orch-fix-defect`).\n\n## Operation settings\n\n- **Default size floor:** standard \u2014 restructures touch multiple files.\n- **Phase mask:** 0 \u2192 2 (plan the restructure) \u2192 4 (keep green) \u2192 5 \u2192 6. No new\n  behavior tests are written \u2014 the existing suite is the safety net.\n- **First move (phase 4):** confirm the relevant tests exist and are **green\n  before** touching code; if coverage is thin, add characterization tests first.\n  Then restructure in small steps, re-running tests after each.\n\n## How It Works\n\n1. Run the `orch-pipeline` engine with the settings above.\n2. For dead-code / duplication sweeps, delegate to the `refactor-cleaner` agent\n   (it runs knip / depcheck / ts-prune and removes safely).\n3. Stop at **Gate 1** (restructure plan) and **Gate 2** (pre-commit).\n4. Commit as `refactor:` \u2014 the diff must be behavior-neutral.\n\n## Example\n\n```\norch-refine-code: extract the NWS HTTP client out of poller.py\n\u2192 confirm tests green \u2192 plan extraction  [GATE 1: approve]\n\u2192 move in small steps, tests green throughout \u2192 code-review\n\u2192 commit refactor:  [GATE 2: confirm]\n```\n",
+  "references": [],
+  "sha256": "2409b1cff0151e883441f7696862d94100b103c0cbdabbf98627e41fbcb37a49"
+}

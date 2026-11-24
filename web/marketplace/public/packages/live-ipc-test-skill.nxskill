@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "slug": "live-ipc-test-skill",
+  "name": "Live IPC Test Skill",
+  "type": "skill",
+  "orbiter_group": "DEV-01",
+  "category": "developer",
+  "permission_scope": [
+    "FILESYSTEM_READ"
+  ],
+  "instructions_md": "# Live IPC Test Skill\n\nTested via live loopback server.",
+  "references": [],
+  "sha256": "49f90899c9b8cc11828eb768bf170c22f4dfd955718f643c1db1a40b81295773"
+}

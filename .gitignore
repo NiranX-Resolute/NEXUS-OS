@@ -1,0 +1,51 @@
+# ==============================================================================
+# Nexus OS v5.0 - Git Ignore Specification
+# ==============================================================================
+
+# Dependencies & Python Runtime
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+supporting_files/
+bin/
+.reticle/
+.agents/
+
+# Cloudflare & Wrangler Local Artifacts
+.wrangler/
+**/.wrangler/
+.cloudflare/
+**/.cloudflare/
+
+# Build, Dist & Cache Artifacts
+dist/
+out/
+build/
+target/
+.cache/
+**/.cache/
+.turbo/
+*.exe
+.eslintcache
+docs/binaries/
+release_binaries/
+"New folder"/
+
+# Reference Research Frameworks (Context Pollution Prevention)
+agents/research/
+
+# Logs & Secrets
+*.secret
+*.log
+temp_out.txt
+py_where.txt
+electron_boot_log.txt
+*.egg-info/
+uv.lock
+scratch/
+_legacy_archive/
+core/bridge/_cache/

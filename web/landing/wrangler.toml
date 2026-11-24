@@ -1,0 +1,15 @@
+﻿# ==============================================================================
+# Cloudflare Pages Configuration: NEXUS OS v5.0 Flagship Showcase
+# Project Name: nexus-os
+# ==============================================================================
+
+name = "nexus-os"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"
+
+[vars]
+SITE_ROLE = "LANDING_PORTAL"
+ENVIRONMENT = "production"
+AUTH_GATEWAY_URL = "https://ecosystem-auth.pages.dev"
+STATUS_RADAR_URL = "https://ecosystem-status.pages.dev"
+ADMIN_HQ_URL = "https://ecosystem-admin.pages.dev"

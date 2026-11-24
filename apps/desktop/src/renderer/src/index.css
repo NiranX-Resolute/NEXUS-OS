@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap');
+
+:root {
+  /* Typography Families */
+  --font-space-grotesk: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-instrument-serif: 'Instrument Serif', Georgia, serif;
+  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+
+  --font-sans: var(--font-space-grotesk);
+  --font-serif: var(--font-instrument-serif);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Cyberpunk Void & Surface Foundation */
+  --bg-void: #030711;
+  --void-bg: #030711;
+  --accent-primary: #00f5d4;
+  --accent-secondary: #38bdf8;
+  --accent-danger: #ef4444;
+  --surface-tint: #061325;
+  --text-primary: #f8fafc;
+  --text-muted: #64748b;
+
+  /* HUD Optics, Glass & Scanlines */
+  --glass-opacity: 0.85;
+  --glass-blur-px: 20px;
+  --glass-blur: 20px;
+  --border-glow-intensity: 0.65;
+  --corner-brackets: 1;
+  --scanline-opacity: 0.08;
+  --film-grain-opacity: 0.04;
+  --kinetic-cipher-speed: normal;
+  --typography-pair: 'Space Grotesk + JetBrains Mono';
+  --core-morphology: dyson;
+
+  /* Orbiter Colors */
+  --orbiter-dev-01: #00f5d4;
+  --orbiter-sys-01: #38bdf8;
+  --orbiter-scout-01: #f59e0b;
+  --orbiter-sec-01: #10b981;
+  --orbiter-ops-01: #8b5cf6;
+
+  /* Wallpaper Binding Defaults */
+  --wallpaper-id: nebula_vortex_shader;
+  --wallpaper-name: 'Nebula Vortex WebGL';
+  --wallpaper-kind: shader;
+  --wallpaper-source: 'shader://nebula_vortex';
+  --wallpaper-opacity: 0.9;
+  --wallpaper-blur: 0px;
+  --wallpaper-blend-mode: screen;
+}
+
+body {
+  font-family: var(--font-space-grotesk);
+  color: var(--text-primary);
+  background-color: var(--bg-void);
+}
+
+.font-sans,
+.font-space {
+  font-family: var(--font-space-grotesk);
+}
+
+.font-serif,
+.font-instrument {
+  font-family: var(--font-instrument-serif);
+}
+
+.font-mono,
+.font-jetbrains {
+  font-family: var(--font-jetbrains-mono);
+}

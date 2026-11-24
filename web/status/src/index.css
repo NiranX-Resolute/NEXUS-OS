@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --bg-main: #030712;
+  --bg-card: rgba(15, 23, 42, 0.7);
+  --border-cyan: rgba(56, 189, 248, 0.25);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --cyan-neon: #38bdf8;
+  --emerald-neon: #10b981;
+  --amber-neon: #f59e0b;
+  --rose-neon: #f43f5e;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-main);
+  color: #f8fafc;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glassmorphism card styles */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+}
+
+.glass-panel:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.glass-kpi {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.4) 100%);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 12px;
+}
+
+/* Uptime tick bar */
+.uptime-tick {
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background-color: #10b981;
+  display: inline-block;
+  margin-right: 2px;
+  transition: opacity 0.2s;
+}
+
+.uptime-tick:hover {
+  opacity: 0.8;
+}
+
+.uptime-tick.tick-degraded {
+  background-color: #f59e0b;
+}
+
+.uptime-tick.tick-offline {
+  background-color: #f43f5e;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="dark" />
+    <title>Nexus AI</title>
+    <link rel="icon" type="image/png" href="./assets/icon-Bk8fBjo-.png" />
+
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+    default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
+    script-src * 'unsafe-inline' 'unsafe-eval' data: blob: https://cdn.jsdelivr.net https://js.puter.com;
+    worker-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
+    connect-src * data: blob: 'unsafe-inline';
+    img-src * data: blob: file: 'unsafe-inline';
+    media-src * data: blob: file: 'unsafe-inline';
+    style-src * 'unsafe-inline';
+  "
+    />
+    <style>
+      /* Suppress Puter.js unsupported origin notice modal from ever blocking UI */
+      puter-dialog,
+      .puter-modal,
+      [class*="puter-dialog"] {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+    </style>
+    <script>
+      // Global Puter flags to silence console spam and block unauthorized modal overlays
+      window.PUTER_QUIET = true;
+      if (typeof window !== 'undefined') {
+        const removePuterOverlays = () => {
+          try {
+            document.querySelectorAll('puter-dialog').forEach((el) => el.remove());
+          } catch {}
+        };
+        const observer = new MutationObserver(() => removePuterOverlays());
+        if (document.body) {
+          observer.observe(document.body, { childList: true, subtree: true });
+        } else {
+          document.addEventListener('DOMContentLoaded', () => {
+            if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+          });
+        }
+      }
+    </script>
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="./bun-bridge.js"></script>
+    <script type="module" crossorigin src="./assets/index-CYaMQ3cR.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CyzNU-hI.css">
+  </head>
+
+  <body class="text-white overflow-hidden bg-transparent">
+    <div id="root"></div>
+  </body>
+</html>

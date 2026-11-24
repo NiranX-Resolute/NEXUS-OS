@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "slug": "win32-reflex-actuator",
+  "name": "Win32 Reflex Actuator & Hardware Sentry",
+  "type": "skill",
+  "orbiter_group": "SYS-01",
+  "category": "system",
+  "permission_scope": [
+    "WIN32_INPUT_SIMULATION",
+    "AUDIO_DEVICE_READ"
+  ],
+  "instructions_md": "# Win32 Reflex Actuator & Hardware Sentry\n\nSub-50ms Win32 cursor text injection, volume modulation, and process affinity controller.\n\n## Native OS Integration\n\nInteracts with `user32.dll` and `endpointvolume` interfaces to deliver instant UI feedback.\n",
+  "references": [],
+  "sha256": "a7afecd8f79bb9d7842e54f0c7c986b6dca78ab7beb5dd5c0a4e65f032b70bc0"
+}

@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduNexus — Socratic Audio Tutor & NotebookLM</title>
+  <meta name="description" content="Open-source AI study companion with Leitner spaced repetition, automated concept summaries, practice quizzes, and an interactive Socratic voice tutor.">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#090d16">
+
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- External CDN Libraries (100% Free / Unmetered) -->
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- PDF.js for 100% Client-Side PDF Text Extraction (0 Server GPU/RAM) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg-dark: #080c14;
+      --bg-surface: #0f172a;
+      --bg-card: #131c33;
+      --bg-card-hover: #182442;
+      --border-color: #1e293b;
+      --border-focus: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-primary: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Top Navigation Header */
+    header.nexus-header {
+      height: 64px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-logo svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-edu {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #818cf8;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-center-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.85rem;
+    }
+
+    .stat-pill {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .stat-pill strong {
+      color: var(--text-main);
+    }
+
+    .stat-pill.mastery strong {
+      color: var(--accent-emerald);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-header {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-primary);
+    }
+
+    /* Main Container Grid */
+    .app-workspace {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 64px - 84px); /* Subtract header and audio HUD */
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: Document Library */
+    aside.doc-sidebar {
+      width: 320px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sidebar-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    /* Drag & Drop Upload Card */
+    .upload-zone {
+      border: 2px dashed rgba(99, 102, 241, 0.4);
+      background: rgba(99, 102, 241, 0.05);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.12);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      margin-bottom: 4px;
+      color: var(--accent-primary);
+    }
+
+    .upload-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .upload-hint {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* Subject Filter Pill Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border-color);
+      scrollbar-width: none;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+
+    .filter-pill {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .filter-pill.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Document List */
+    .doc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .doc-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .doc-item:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .doc-item.active {
+      border-color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.1);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .doc-item-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .doc-item-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .doc-item-badges {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .mini-badge {
+      font-size: 0.65rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text-muted);
+    }
+
+    .mini-badge.has-material {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* Main View: Study Deck & Workspace */
+    main.study-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+      overflow: hidden;
+    }
+
+    /* Workspace Header Bar */
+    .workspace-topbar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    .active-doc-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .active-doc-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .active-doc-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Tabs Bar */
+    .tab-navigation {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(30, 41, 59, 0.4);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: var(--accent-primary);
+      box-shadow: 0 0 14px rgba(99, 102, 241, 0.35);
+    }
+
+    /* Workspace Content Panels */
+    .tab-panel-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Generator Action Trigger Header */
+    .curation-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .curation-banner-info h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .curation-banner-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .btn-curate {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: none;
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-curate:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45);
+    }
+
+    .btn-curate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 1. Summary Markdown Container */
+    .summary-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 28px;
+      line-height: 1.7;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    .summary-content h1, .summary-content h2, .summary-content h3 {
+      color: var(--text-main);
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .summary-content h1 { font-size: 1.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+    .summary-content h2 { font-size: 1.2rem; color: #818cf8; }
+    .summary-content h3 { font-size: 1.05rem; color: #38bdf8; }
+    .summary-content p { margin-bottom: 14px; }
+    .summary-content ul, .summary-content ol { margin-left: 24px; margin-bottom: 14px; }
+    .summary-content li { margin-bottom: 6px; }
+    .summary-content code {
+      background: rgba(15, 23, 42, 0.8);
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #38bdf8;
+    }
+    .summary-content blockquote {
+      border-left: 4px solid var(--accent-primary);
+      padding-left: 16px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin: 16px 0;
+    }
+
+    /* 2. Spaced Repetition Flashcards */
+    .flashcards-container {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Leitner Box Progress Tracker */
+    .leitner-progress-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .leitner-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .leitner-step-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .leitner-step-count {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .leitner-step.box-5 .leitner-step-count {
+      color: var(--accent-emerald);
+    }
+
+    /* 3D Flip Card */
+    .flashcard-3d-scene {
+      perspective: 1000px;
+      height: 320px;
+      cursor: pointer;
+    }
+
+    .flashcard-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .flashcard-inner.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--border-color);
+    }
+
+    .card-face.front {
+      background: linear-gradient(145deg, #131c33, #0f172a);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .card-face.back {
+      background: linear-gradient(145deg, #0e1e38, #0a1426);
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: rotateY(180deg);
+    }
+
+    .card-face-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-box-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+    }
+
+    .card-face-hint {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .card-content-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: center;
+      color: var(--text-main);
+      padding: 0 10px;
+    }
+
+    .card-mnemonic-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      color: #fcd34d;
+      margin-top: 10px;
+    }
+
+    /* Leitner Rating Controls */
+    .leitner-controls {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-rating {
+      padding: 12px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-rating.again {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+    .btn-rating.again:hover { background: #f43f5e; color: #fff; }
+
+    .btn-rating.hard {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+    .btn-rating.hard:hover { background: #f59e0b; color: #fff; }
+
+    .btn-rating.good {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+    }
+    .btn-rating.good:hover { background: #3b82f6; color: #fff; }
+
+    .btn-rating.easy {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+    .btn-rating.easy:hover { background: #10b981; color: #fff; }
+
+    .rating-sub {
+      font-size: 0.68rem;
+      font-weight: 400;
+      opacity: 0.85;
+    }
+
+    /* Flashcard Navigation row */
+    .flashcard-nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* 3. Practice Exam Questions */
+    .quiz-container {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .quiz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .quiz-question-number {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-cyan);
+    }
+
+    .quiz-question-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .quiz-options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quiz-option-btn {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+
+    .quiz-option-btn:hover:not(:disabled) {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-primary);
+    }
+
+    .quiz-option-prefix {
+      font-weight: 700;
+      color: var(--text-dim);
+      min-width: 20px;
+    }
+
+    .quiz-option-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #34d399 !important;
+    }
+
+    .quiz-option-btn.incorrect {
+      background: rgba(244, 63, 94, 0.2) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fb7185 !important;
+    }
+
+    .quiz-explanation-box {
+      display: none;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #93c5fd;
+    }
+
+    /* Floating Voice Tutor Companion HUD */
+    footer.voice-tutor-hud {
+      height: 84px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+    }
+
+    .hud-voice-companion {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Glowing Voice Orb */
+    .voice-orb {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #818cf8 0%, #4f46e5 60%, #312e81 100%);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .voice-orb svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .voice-orb.listening {
+      background: radial-gradient(circle, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.8);
+      animation: pulseListening 1.4s infinite ease-in-out;
+    }
+
+    .voice-orb.thinking {
+      background: radial-gradient(circle, #f59e0b 0%, #d97706 60%, #78350f 100%);
+      box-shadow: 0 0 24px rgba(245, 158, 11, 0.7);
+      animation: spinThinking 2s infinite linear;
+    }
+
+    .voice-orb.speaking {
+      background: radial-gradient(circle, #34d399 0%, #059669 60%, #064e3b 100%);
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.8);
+      animation: waveSpeaking 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseListening {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+      50% { transform: scale(1.12); box-shadow: 0 0 35px rgba(56, 189, 248, 0.95); }
+    }
+
+    @keyframes spinThinking {
+      0% { transform: rotate(0deg) scale(1.05); }
+      100% { transform: rotate(360deg) scale(1.05); }
+    }
+
+    @keyframes waveSpeaking {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Audio Waveform Canvas */
+    #audioWaveformCanvas {
+      width: 140px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Live Dialogue Subtitle Bar */
+    .hud-transcript-stream {
+      flex: 1;
+      max-width: 650px;
+      margin: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden;
+    }
+
+    .hud-transcript-speaker {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hud-transcript-text {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hud-controls-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-mic-action {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: none;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-mic-action.active {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.5);
+    }
+
+    /* Settings & Developer Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 540px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-input, .form-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .security-callout {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: #6ee7b7;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Paste Notes Modal */
+    .textarea-notes {
+      height: 180px;
+      font-family: var(--font-sans);
+      resize: vertical;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      stroke: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="nexus-header">
+    <div class="brand-group">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="brand-title">
+        EduNexus
+        <span class="badge-edu">AI Study Ecosystem</span>
+      </div>
+    </div>
+
+    <div class="header-center-stats">
+      <div class="stat-pill mastery">
+        <span>Retention Mastery:</span>
+        <strong id="headerMasteryRate">0%</strong>
+      </div>
+      <div class="stat-pill">
+        <span>Due For Review:</span>
+        <strong id="headerDueCount">0 Cards</strong>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btnUserAuth" style="border-color: rgba(99, 102, 241, 0.4);">
+        <span id="userAuthDot" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+        <span id="userAuthName">Guest Student</span>
+      </button>
+      <button class="btn-header" id="btnPasteNotes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Paste Note
+      </button>
+      <button class="btn-header" id="btnOpenSettings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Dev Settings
+      </button>
+    </div>
+  </header>
+
+  <!-- App Workspace -->
+  <div class="app-workspace">
+
+    <!-- Left Sidebar: Document Library -->
+    <aside class="doc-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title-row">
+          <span class="sidebar-title">Study Library</span>
+          <span id="docCountBadge" class="mini-badge">0 Docs</span>
+        </div>
+
+        <!-- Drag & Drop Upload -->
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept=".pdf,.txt,.md" />
+          <div class="upload-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="upload-label">Upload PDF or Notes</div>
+          <div class="upload-hint">100% Client PDF Parsing (0 Cost)</div>
+        </div>
+      </div>
+
+      <!-- Subject Filter Tabs -->
+      <div class="filter-tabs" id="subjectFilterTabs">
+        <button class="filter-pill active" data-subject="All">All Subjects</button>
+      </div>
+
+      <!-- Document List Container -->
+      <div class="doc-list" id="docListContainer">
+        <!-- Injected via JavaScript -->
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          <h3>Library Empty</h3>
+          <p>Drop a textbook or lecture note to begin.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="study-workspace">
+      <!-- Active Document Header -->
+      <div class="workspace-topbar">
+        <div class="active-doc-info">
+          <h2 class="active-doc-title" id="activeDocTitle">Select a Document</h2>
+          <div class="active-doc-sub">
+            <span id="activeDocSubject">No Subject</span>
+            <span>•</span>
+            <span id="activeDocStats">0 words</span>
+          </div>
+        </div>
+
+        <!-- Workspace Tabs -->
+        <div class="tab-navigation">
+          <button class="tab-btn active" data-tab="summary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Concept Summary
+          </button>
+          <button class="tab-btn" data-tab="flashcards">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Leitner Flashcards
+          </button>
+          <button class="tab-btn" data-tab="quiz">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Practice Exam
+          </button>
+          <button class="tab-btn" data-tab="agentic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <span style="color: #10b981; font-weight: 700;">Agentic Nexus</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content Panels -->
+      <div class="tab-panel-container">
+
+        <!-- 1. Concept Summary Panel -->
+        <div class="tab-panel active" id="panel-summary">
+          <div class="curation-banner">
+            <div class="curation-banner-info">
+              <h3>High-Yield NotebookLM Summary</h3>
+              <p>AI extracts core formulas, principles, and high-frequency exam traps.</p>
+            </div>
+            <button class="btn-curate" id="btnCurateSummary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Generate Summary</span>
+            </button>
+          </div>
+          <div class="summary-content" id="summaryMarkdownView">
+            <div class="empty-state">
+              <h3>No Summary Generated Yet</h3>
+              <p>Click "Generate Summary" above to curate an executive breakdown.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Spaced Repetition Flashcards Panel -->
+        <div class="tab-panel" id="panel-flashcards">
+          <div class="curation-banner">
+            <div class="curation-banner-info">
+              <h3>Leitner Spaced Repetition Deck</h3>
+              <p>Cognitive active recall system automatically schedules review intervals (Boxes 1 to 5).</p>
+            </div>
+            <button class="btn-curate" id="btnCurateFlashcards">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Build Flashcards</span>
+            </button>
+          </div>
+
+          <div class="flashcards-container">
+            <!-- Leitner Box Progress Tracker -->
+            <div class="leitner-progress-bar">
+              <div class="leitner-step">
+                <span class="leitner-step-label">Box 1 (1d)</span>
+                <span class="leitner-step-count" id="statBox1">0</span>
+              </div>
+              <div class="leitner-step">
+                <span class="leitner-step-label">Box 2 (3d)</span>
+                <span class="leitner-step-count" id="statBox2">0</span>
+              </div>
+              <div class="leitner-step">
+                <span class="leitner-step-label">Box 3 (7d)</span>
+                <span class="leitner-step-count" id="statBox3">0</span>
+              </div>
+              <div class="leitner-step">
+                <span class="leitner-step-label">Box 4 (14d)</span>
+                <span class="leitner-step-count" id="statBox4">0</span>
+              </div>
+              <div class="leitner-step box-5">
+                <span class="leitner-step-label">Box 5 (30d)</span>
+                <span class="leitner-step-count" id="statBox5">0</span>
+              </div>
+            </div>
+
+            <!-- 3D Flip Card Scene -->
+            <div class="flashcard-3d-scene" id="flashcardScene">
+              <div class="flashcard-inner" id="flashcardInner">
+                <!-- Front -->
+                <div class="card-face front">
+                  <div class="card-face-header">
+                    <span class="card-box-badge" id="cardBoxBadge">Box 1</span>
+                    <span class="card-face-hint">Click card to reveal answer</span>
+                  </div>
+                  <div class="card-content-text" id="cardFrontText">
+                    Select a document to begin flashcard study session
+                  </div>
+                  <div class="card-face-hint" style="text-align: right;">Front: Concept</div>
+                </div>
+
+                <!-- Back -->
+                <div class="card-face back">
+                  <div class="card-face-header">
+                    <span class="card-box-badge" style="color: #38bdf8; border-color: #38bdf8;">Explanation</span>
+                    <span class="card-face-hint">Click card to flip back</span>
+                  </div>
+                  <div class="card-content-text" id="cardBackText" style="font-size: 1.05rem;">
+                    Explanation will appear here.
+                  </div>
+                  <div class="card-mnemonic-box" id="cardMnemonicBox" style="display: none;">
+                    💡 <strong>Mnemonic:</strong> <span id="cardMnemonicText"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Leitner Rating Controls -->
+            <div class="leitner-controls">
+              <button class="btn-rating again" data-rating="again">
+                <span>Again (Box 1)</span>
+                <span class="rating-sub">Review in 10m</span>
+              </button>
+              <button class="btn-rating hard" data-rating="hard">
+                <span>Hard</span>
+                <span class="rating-sub">+1 day</span>
+              </button>
+              <button class="btn-rating good" data-rating="good">
+                <span>Good</span>
+                <span class="rating-sub">+3 days</span>
+              </button>
+              <button class="btn-rating easy" data-rating="easy">
+                <span>Easy</span>
+                <span class="rating-sub">+7 days</span>
+              </button>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="flashcard-nav-row">
+              <button class="btn-header" id="btnPrevCard">Previous</button>
+              <span id="cardCounterIndicator">Card 0 of 0</span>
+              <button class="btn-header" id="btnNextCard">Next</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Practice Exam Panel -->
+        <div class="tab-panel" id="panel-quiz">
+          <div class="curation-banner">
+            <div class="curation-banner-info">
+              <h3>Diagnostic Practice Exam</h3>
+              <p>Multiple-choice test with immediate pedagogical rationale and distractors breakdown.</p>
+            </div>
+            <button class="btn-curate" id="btnCurateQuiz">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Generate Quiz</span>
+            </button>
+          </div>
+
+          <div class="quiz-container" id="quizContainer">
+            <div class="empty-state">
+              <h3>No Practice Exam Generated</h3>
+              <p>Click "Generate Quiz" to test your mastery of this material.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Agentic Nexus Autonomous Engine Panel -->
+        <div class="tab-panel" id="panel-agentic">
+          <div class="curation-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.08)); border: 1px solid rgba(16, 185, 129, 0.3);">
+            <div class="curation-banner-info">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
+                <h3 style="color: #ffffff; margin: 0;">Autonomous Agent Execution Engine</h3>
+              </div>
+              <p style="margin-top: 4px; color: #94a3b8;">Execute shell tasks, git worktree diffs, self-repair loops, and browser verification in isolated environments.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="stat-pill" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">
+                <strong>PC: ONLINE</strong>
+              </span>
+            </div>
+          </div>
+
+          <!-- Command Dispatch Surface -->
+          <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px; margin-top: 16px;">
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="agenticCommandInput" placeholder="Give an instruction to the autonomous agent (e.g. 'Run pytest and auto-fix lints', 'Verify local web surface')..." style="flex: 1; background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 12px 16px; color: #ffffff; font-size: 0.9rem; outline: none;" />
+              <button id="btnDispatchAgentic" style="background: #10b981; color: #020617; font-weight: 700; border: none; border-radius: 10px; padding: 0 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; transition: background 0.2s;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Execute Task</span>
+              </button>
+            </div>
+
+            <!-- Quick Preset Actions -->
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+              <button class="preset-agent-btn" data-cmd="Run unit tests and self-repair any failing assertions" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; cursor: pointer;">
+                🧪 Run Test Suite & Self-Heal
+              </button>
+              <button class="preset-agent-btn" data-cmd="Verify local development surface http://localhost:3000 and capture console audit" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; cursor: pointer;">
+                🌐 Browser Verifier Audit
+              </button>
+              <button class="preset-agent-btn" data-cmd="Create isolated git worktree and apply atomic patch" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; cursor: pointer;">
+                🌿 Isolated Git Worktree Patch
+              </button>
+              <button class="preset-agent-btn" data-cmd="Synthesize audio status feedback via edge-tts" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; cursor: pointer;">
+                🔊 Spoken Status Feedback
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Agent Execution Trace Feed -->
+          <div style="margin-top: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin: 0; display: flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
+                Inspectable Agent Activity Feed
+              </h4>
+              <span id="agenticTraceCounter" style="font-family: monospace; font-size: 0.75rem; color: #64748b;">Ready for tasks</span>
+            </div>
+
+            <div id="agenticTraceFeedContainer" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Default Initial State -->
+              <div style="background: rgba(15, 23, 42, 0.5); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 30px; text-align: center; color: #64748b;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 10px auto; opacity: 0.6;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <p style="margin: 0; font-size: 0.85rem;">Autonomous engine standing by. Type an instruction or choose a preset to watch the live thought stream, terminal PTY, and self-correction cycles.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Floating Audio Tutor Companion HUD -->
+  <footer class="voice-tutor-hud">
+    <div class="hud-voice-companion">
+      <!-- Glowing Animated Orb -->
+      <div class="voice-orb" id="voiceOrb" title="Tap to talk with Socratic Audio Tutor">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </div>
+      <!-- Audio Waveform Canvas -->
+      <canvas id="audioWaveformCanvas" width="140" height="38"></canvas>
+    </div>
+
+    <!-- Live Subtitle Stream -->
+    <div class="hud-transcript-stream">
+      <div class="hud-transcript-speaker" id="hudSpeakerLabel">Nexus Audio Tutor (Idle)</div>
+      <div class="hud-transcript-text" id="hudTranscriptText">
+        "Ask me anything about your uploaded notes or tap the mic to practice Socratically."
+      </div>
+    </div>
+
+    <!-- Voice Actions -->
+    <div class="hud-controls-group">
+      <button class="btn-mic-action" id="btnMicToggle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <span id="btnMicText">Tap to Talk</span>
+      </button>
+      <button class="btn-header" id="btnMuteSpeaker" title="Toggle audio responses">
+        <svg id="speakerIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Developer Settings Modal -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Developer & Pro Settings</h3>
+        <button class="btn-close-modal" id="btnCloseSettings">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label>Developer Mode</label>
+        <select class="form-select" id="devModeSelect">
+          <option value="enabled">Enabled (Custom Keys & Pro Presets)</option>
+          <option value="disabled">Standard Free Tier (Cloudflare + Default Groq)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Default AI Provider</label>
+        <select class="form-select" id="aiProviderSelect">
+          <option value="groq">Groq Cloud (Llama-3.3-70b & Whisper-turbo — 0 Cost)</option>
+          <option value="gemini">Google Gemini (Gemini 1.5 Pro / Flash — Free Tier)</option>
+          <option value="cloudflare">Cloudflare Workers AI (Keyless Free Neurons)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Groq Cloud API Key (Optional)</label>
+        <input type="password" class="form-input" id="inputGroqKey" placeholder="gsk_..." />
+      </div>
+
+      <div class="form-group">
+        <label>Google Gemini API Key (Optional)</label>
+        <input type="password" class="form-input" id="inputGeminiKey" placeholder="AIza..." />
+      </div>
+
+      <div class="form-group">
+        <label>Socratic Tutor Persona Preset</label>
+        <select class="form-select" id="personaSelect">
+          <option value="Socratic Tutor">Socratic Tutor (Concise 2-3 Sentences + Probe)</option>
+          <option value="Explain Like I'm 5 (ELI5)">Explain Like I'm 5 (Everyday Metaphors)</option>
+          <option value="Rigorous Exam Prep">Rigorous Exam Prep (High Stakes MCAT/USMLE/GRE)</option>
+          <option value="Medical & Clinical">Medical & Clinical (Physiology & Vignettes)</option>
+          <option value="Code & Engineering">Code & Engineering (Distributed Systems)</option>
+        </select>
+      </div>
+
+      <div class="security-callout">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Keys are stored strictly in your browser's <code>localStorage</code>. Zero external logging.</span>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-header" id="btnLoadSampleDoc">Load Sample: Neural Networks</button>
+        <button class="btn-curate" id="btnSaveSettings">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paste Note Modal -->
+  <div class="modal-backdrop" id="pasteModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Paste Study Notes</h3>
+        <button class="btn-close-modal" id="btnClosePaste">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label>Document Title</label>
+        <input type="text" class="form-input" id="pasteDocTitle" placeholder="e.g., Chapter 4: Photosynthesis & Calvin Cycle" />
+      </div>
+
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" class="form-input" id="pasteDocSubject" placeholder="e.g., Biology, Computer Science, Economics" />
+      </div>
+
+      <div class="form-group">
+        <label>Notes / Transcript Text</label>
+        <textarea class="form-input textarea-notes" id="pasteDocContent" placeholder="Paste your textbook excerpts, lecture transcript, or study notes here..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-header" id="btnCancelPaste">Cancel</button>
+        <button class="btn-curate" id="btnSubmitPaste">Ingest Notes</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Auth Bridge Modal (Magic Link & Unified Identity) -->
+  <div class="modal-backdrop" id="authBridgeModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🔐 EduNexus Identity & Auth Bridge</h3>
+        <button class="btn-close-modal" id="btnCloseAuthBridge">&times;</button>
+      </div>
+
+      <!-- Auth Modal Tabs -->
+      <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <button class="tab-btn active" id="modalTabMagic" style="padding: 6px 14px; font-size: 0.8rem;">Magic Link</button>
+        <button class="tab-btn" id="modalTabPass" style="padding: 6px 14px; font-size: 0.8rem;">Passphrase</button>
+        <button class="tab-btn" id="modalTabRegister" style="padding: 6px 14px; font-size: 0.8rem;">Register</button>
+      </div>
+
+      <!-- 1. Magic Link Form -->
+      <div id="modalMagicSection">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+          Instant passwordless sign-in link dispatched from <strong>lead-engineer@nexus.internal</strong>.
+        </p>
+        <form id="inAppMagicForm">
+          <div class="form-group">
+            <label>Student Email Address</label>
+            <input type="email" class="form-input" id="inAppMagicEmail" required placeholder="student@domain.com" />
+          </div>
+          <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="submit" class="btn-curate" id="btnSendInAppMagic">Send Magic Link</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 2. Passphrase Form -->
+      <div id="modalPassSection" style="display: none;">
+        <form id="inAppPassForm">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" class="form-input" id="inAppPassEmail" required placeholder="admin-owner@nexus.internal" />
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Passphrase</label>
+            <input type="password" class="form-input" id="inAppPassPassword" required placeholder="••••••••••••" />
+          </div>
+          <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="submit" class="btn-curate" id="btnSignInPass">Sign In</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 3. Register Form -->
+      <div id="modalRegSection" style="display: none;">
+        <form id="inAppRegForm">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" class="form-input" id="inAppRegName" required placeholder="NiranX" />
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Email Address</label>
+            <input type="email" class="form-input" id="inAppRegEmail" required placeholder="student@pages.dev" />
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Passphrase (Min. 8 characters)</label>
+            <input type="password" class="form-input" id="inAppRegPass" required placeholder="••••••••••••" />
+          </div>
+          <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="submit" class="btn-curate" id="btnRegisterPass">Create Account</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Cross-App Portal SSO Link -->
+      <div style="border-top: 1px solid var(--border-color); padding-top: 14px; text-align: center; font-size: 0.8rem; color: var(--text-dim);">
+        <span>Or authenticate via Central Gateway:</span>
+        <br />
+        <a href="https://ecosystem-auth.pages.dev" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; display: inline-block; margin-top: 6px;">
+          Open Nexus Identity Gateway (ecosystem-auth) ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Controller -->
+  <script src="app.js"></script>
+</body>
+</html>

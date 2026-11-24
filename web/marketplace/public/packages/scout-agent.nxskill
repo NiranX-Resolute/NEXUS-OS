@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "slug": "scout-agent",
+  "name": "Scout",
+  "type": "agent",
+  "orbiter_group": "SCOUT-01",
+  "category": "research",
+  "permission_scope": [
+    "NETWORK_OUTBOUND",
+    "LOCAL_MEMORY_WRITE"
+  ],
+  "instructions_md": "# Scout Agent\n\nWeb research specialist querying technical literature, developer docs, and arXiv papers.",
+  "references": [],
+  "sha256": "236336d89b39934a2707c0df65abbb6bd81b794e32b26c8ba90c65815f3bf28f"
+}

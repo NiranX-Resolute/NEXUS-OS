@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "slug": "nexkoder-agent",
+  "name": "NexKoder",
+  "type": "agent",
+  "orbiter_group": "DEV-01",
+  "category": "developer",
+  "permission_scope": [
+    "FILESYSTEM_READ",
+    "WORKSPACE_WRITE",
+    "GIT_COMMIT"
+  ],
+  "instructions_md": "# NexKoder Agent\n\nDeep codebase architect specializing in AST modification, git worktrees, and test verification.",
+  "references": [],
+  "sha256": "4e68086701e4ef726dc2182e726b48067c2847a94fddbfd715c83dcf08d0ac56"
+}
