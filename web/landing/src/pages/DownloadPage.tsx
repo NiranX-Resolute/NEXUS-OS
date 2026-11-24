@@ -46,38 +46,38 @@ export const DownloadPage: React.FC = () => {
   // Live checksums & sizes dictionary (updated from release-manifest.json or fallback)
   const [assetsInfo, setAssetsInfo] = useState<Record<string, { size: string; sha256: string; url: string }>>({
     'NEXUS-OS-v5.0-Setup.exe': {
-      size: '185 MB',
-      sha256: '9f83b2a14e8c75d31f0b48e234c891a27e65f3d4c1b9a80e32f5d71c6e4a29b0',
+      size: '181.9 MB',
+      sha256: 'c164f46c95d87e78040c3e90439ab47b3db7cd5b92832f47110eab34d21df244',
       url: `${CANONICAL_DOWNLOAD_BASE}/NEXUS-OS-v5.0-Setup.exe`,
     },
     'NEXUS-OS-v5.0-Windows-Portable.exe': {
-      size: '142 MB',
-      sha256: 'a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0',
+      size: '181.3 MB',
+      sha256: '284243ce92dd1c0301dc2d184359b95bb9f1dbe0f814d671d94f748ea45f2d69',
       url: `${CANONICAL_DOWNLOAD_BASE}/NEXUS-OS-v5.0-Windows-Portable.exe`,
     },
     'NEXUS-OS-v5.0-Linux-x86_64.img': {
-      size: '512 MB',
-      sha256: 'b2c3d4e5f6a17890123456789abcdef0123456789abcdef0123456789abcdef1',
+      size: '552.0 MB',
+      sha256: '9bd6a54a7a91b3fb9488c6e58a88c3b556a57875b92666d6ffe4fc2290a20783',
       url: `${CANONICAL_DOWNLOAD_BASE}/NEXUS-OS-v5.0-Linux-x86_64.img`,
     },
     'NEXUS-OS-v5.0-Linux-x86_64.iso': {
-      size: '380 MB',
-      sha256: 'c3d4e5f6a1b27890123456789abcdef0123456789abcdef0123456789abcdef2',
+      size: '299.7 MB',
+      sha256: 'c4545c1624e6a236eb08cce39943baae4759f64355369001800d5a8112be3516',
       url: `${CANONICAL_DOWNLOAD_BASE}/NEXUS-OS-v5.0-Linux-x86_64.iso`,
     },
     'NEXUS-OS-v5.0-x86_64.AppImage': {
-      size: '160 MB',
-      sha256: 'd4e5f6a1b2c37890123456789abcdef0123456789abcdef0123456789abcdef3',
+      size: '299.8 MB',
+      sha256: 'db079a993b8c317e06799ca30c877d352fcaadd208a8d94f0d5420ab86b9f20b',
       url: `${CANONICAL_DOWNLOAD_BASE}/NEXUS-OS-v5.0-x86_64.AppImage`,
     },
     'NEXUS-OS-v5.0-macOS-Universal.dmg': {
-      size: '195 MB',
-      sha256: 'e5f6a1b2c3d47890123456789abcdef0123456789abcdef0123456789abcdef4',
+      size: '49.9 MB',
+      sha256: 'fca763ca0dce577a2217638346f648bb108a4cb55f221616b1a615b2f75a8d18',
       url: `${CANONICAL_DOWNLOAD_BASE}/NEXUS-OS-v5.0-macOS-Universal.dmg`,
     },
     'NEXUS-OS-v5.0-macOS.app.zip': {
-      size: '190 MB',
-      sha256: 'f6a1b2c3d4e57890123456789abcdef0123456789abcdef0123456789abcdef5',
+      size: '49.8 MB',
+      sha256: '19f6fe00ae50ff705687f45739143f8ade3582e6d814a4a03b0c0738f8f2f313',
       url: `${CANONICAL_DOWNLOAD_BASE}/NEXUS-OS-v5.0-macOS.app.zip`,
     },
   });
