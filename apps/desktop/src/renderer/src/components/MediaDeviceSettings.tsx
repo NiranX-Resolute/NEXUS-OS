@@ -70,7 +70,8 @@ export const MediaDeviceSettings: React.FC<MediaDeviceSettingsProps> = ({
   const fetchQrPairing = async () => {
     setQrPairing((prev) => ({ ...prev, loading: true, error: null }))
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/remote/qr-pairing?format=json')
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/remote/qr-pairing?format=json')
       if (resp.ok) {
         const data = await resp.json()
         setQrPairing({

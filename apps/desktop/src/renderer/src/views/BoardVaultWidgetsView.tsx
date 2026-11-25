@@ -964,21 +964,19 @@ export const BoardVaultWidgetsView: React.FC = () => {
       if (res?.success) {
         setStockData(res)
       } else {
-        // Fallback mock representation of real stock
-        setStockData({
-          ticker: ticker.toUpperCase(),
-          price: 138.45,
-          previousClose: 135.2,
-          change: 3.25,
-          changePercent: 2.4,
-          currency: 'USD',
-          exchangeName: 'NASDAQ',
-          timestamps: [1, 2, 3, 4, 5, 6, 7],
-          closes: [135.2, 136.1, 135.8, 137.4, 136.9, 138.1, 138.45]
-        })
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        const gwRes = await ipcFetch(`/api/widgets/stock?symbol=${encodeURIComponent(ticker)}`).catch(() => null)
+        if (gwRes && gwRes.ok) {
+          const data = await gwRes.json()
+          if (data?.success) {
+            setStockData(data)
+            return
+          }
+        }
+        setStockData(null)
       }
     } catch {
-      // ignore
+      setStockData(null)
     } finally {
       setIsStockLoading(false)
     }
@@ -1100,11 +1098,7 @@ export const BoardVaultWidgetsView: React.FC = () => {
           setIsWormholeActive(true)
           showToast(`Wormhole open: ${res.url}`)
         } else {
-          // Local fallback representation
-          const fallbackUrl = `https://nexus-${Math.random().toString(36).slice(2, 8)}.trycloudflare.com`
-          setWormholeUrl(fallbackUrl)
-          setIsWormholeActive(true)
-          showToast(`Wormhole open: ${fallbackUrl}`)
+          showToast(res?.error || 'Wormhole tunnel requires Electron cloudflared daemon')
         }
       } catch (err: any) {
         showToast(`Tunnel error: ${err?.message || 'failed'}`)
@@ -1128,19 +1122,25 @@ export const BoardVaultWidgetsView: React.FC = () => {
       const keys = await window.electron?.ipcRenderer?.invoke('secure-get-keys')
       const res = await window.electron?.ipcRenderer?.invoke('execute-deep-research', {
         query: targetQuery,
-        tavilyKey: keys?.fireworksKey || process.env.TAVILY_API_KEY || 'tvly-demo',
-        groqKey: keys?.groqKey || process.env.GROQ_API_KEY || 'groq-demo'
+        tavilyKey: keys?.tavilyKey || keys?.fireworksKey || '',
+        groqKey: keys?.groqKey || ''
       })
 
       if (res?.success && res.summary) {
         setResearchSummary(res.summary)
       } else {
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        const synthRes = await ipcFetch('/api/scholar/synthesize', {
+          method: 'POST',
+          body: JSON.stringify({ topic: targetQuery, notes: '' })
+        }).catch(() => null)
+        const sData = synthRes && synthRes.ok ? await synthRes.json() : null
         setResearchSummary(
-          `### Deep Research Synthesis: ${targetQuery}\n\n- **Autonomous Mesh Performance**: Local-first vector storage yields 1.2ms latency on sqlite-vec.\n- **Zero-Subscription Architecture**: Eliminates SaaS reliance via DPAPI credentials and local runtime.\n- **Conclusion**: Architecture satisfies all 6 GRAVITAS invariants with deterministic WAL rollback.`
+          sData?.synthesis || `Unable to reach research synthesis backend for "${targetQuery}".`
         )
       }
     } catch {
-      setResearchSummary(`Research synthesis completed for "${targetQuery}".`)
+      setResearchSummary(`Research synthesis error for "${targetQuery}".`)
     } finally {
       setIsResearching(false)
     }

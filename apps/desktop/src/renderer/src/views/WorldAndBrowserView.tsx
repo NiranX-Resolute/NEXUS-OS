@@ -268,11 +268,12 @@ export const WorldAndBrowserView: React.FC = () => {
     }
 
     // Dispatch voice command to local persona/voice engine
-    fetch('http://127.0.0.1:47630/api/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'VOICE_RADAR_NAV', payload: { command: cmd } })
-    }).catch(() => null)
+    import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+      void ipcFetch('/api/action', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'VOICE_RADAR_NAV', payload: { command: cmd } })
+      }).catch(() => null)
+    })
   }, [])
 
   // ---------------------------------------------------------------------------
@@ -294,11 +295,12 @@ export const WorldAndBrowserView: React.FC = () => {
     setUserBroadcastText('')
 
     // Send to agent local mesh
-    fetch('http://127.0.0.1:47630/api/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'SWARM_BROADCAST', payload: { message: newMsg.text } })
-    }).catch(() => null)
+    import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+      void ipcFetch('/api/action', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'SWARM_BROADCAST', payload: { message: newMsg.text } })
+      }).catch(() => null)
+    })
   }, [userBroadcastText])
 
   // ---------------------------------------------------------------------------
@@ -313,9 +315,9 @@ export const WorldAndBrowserView: React.FC = () => {
     }
 
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/bridge/browser-engine', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/bridge/browser-engine', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ engine: engineMap[mode], action: 'switch' })
       })
       if (resp.ok) {
@@ -345,9 +347,9 @@ export const WorldAndBrowserView: React.FC = () => {
         CHROMIUM: 'chromium_persistent'
       }
 
-      const resp = await fetch('http://127.0.0.1:47630/api/bridge/browser-engine', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/bridge/browser-engine', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           engine: engineMap[browserMode],
           action: 'navigate',
@@ -405,14 +407,15 @@ export const WorldAndBrowserView: React.FC = () => {
     setBrowserStatus(`Reticle locked on Tag #${el.id} <${el.tag}> at (${el.rect[0]}, ${el.rect[1]})`)
 
     // Dispatch click telemetry to IPC
-    fetch('http://127.0.0.1:47630/api/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'WEB_CLICK',
-        payload: { element_id: el.id, selector: el.selector, url: targetUrl }
-      })
-    }).catch(() => null)
+    import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+      void ipcFetch('/api/action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'WEB_CLICK',
+          payload: { element_id: el.id, selector: el.selector, url: targetUrl }
+        })
+      }).catch(() => null)
+    })
   }, [targetUrl])
 
   // Nudge Reticle Coordinates
@@ -558,9 +561,9 @@ export const WorldAndBrowserView: React.FC = () => {
   // Pin Distillation to Sovereign SQLite Memory
   const handlePinToMemory = useCallback(async () => {
     try {
-      await fetch('http://127.0.0.1:47630/api/memory', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/memory', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: `Obscura Distillation: ${targetUrl}`,
           content: `Distilled ${distilledElements.length} DOM tags via engine [${browserMode}].\nReticle Locked: Tag #${reticle.targetId} <${reticle.tag}> at (${reticle.x}, ${reticle.y}).\nVerdict: ${reticle.verified}.`,
@@ -865,11 +868,12 @@ export const WorldAndBrowserView: React.FC = () => {
                 <button
                   onClick={() => {
                     setOccupiedSeats(5)
-                    fetch('http://127.0.0.1:47630/api/action', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: 'DISPATCH_RESET_DESKS' })
-                    }).catch(() => null)
+                    import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+                      void ipcFetch('/api/action', {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'DISPATCH_RESET_DESKS' })
+                      }).catch(() => null)
+                    })
                   }}
                   className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] transition cursor-pointer"
                 >
@@ -878,11 +882,12 @@ export const WorldAndBrowserView: React.FC = () => {
                 <button
                   onClick={() => {
                     setOccupiedSeats(8)
-                    fetch('http://127.0.0.1:47630/api/action', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: 'DISPATCH_HUDDLE_HUB' })
-                    }).catch(() => null)
+                    import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+                      void ipcFetch('/api/action', {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'DISPATCH_HUDDLE_HUB' })
+                      }).catch(() => null)
+                    })
                   }}
                   className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] transition cursor-pointer"
                 >
@@ -891,11 +896,12 @@ export const WorldAndBrowserView: React.FC = () => {
                 <button
                   onClick={() => {
                     setOccupiedSeats(2)
-                    fetch('http://127.0.0.1:47630/api/action', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: 'DISPATCH_BREAKROOM' })
-                    }).catch(() => null)
+                    import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+                      void ipcFetch('/api/action', {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'DISPATCH_BREAKROOM' })
+                      }).catch(() => null)
+                    })
                   }}
                   className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] transition cursor-pointer"
                 >

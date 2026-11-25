@@ -1501,9 +1501,9 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
         setActiveSwarm((prev) =>
           prev.map((a) => (a.agent_id === agentId ? { ...a, status: 'DISSOLVED' } : a))
         );
-        await fetch('http://127.0.0.1:47630/api/swarm/dissolve', {
+        const { ipcFetch } = await import('@renderer/services/ipc-client');
+        await ipcFetch('/api/swarm/dissolve', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ agent_id: agentId, synthesis_summary: 'Killed via HUD controls' })
         }).catch(() => null);
         if (onKillAgent) {
@@ -1572,11 +1572,12 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
       setSelectedMorphology(morph);
       onMorphologyChange?.(morph);
       setUiPrefs((prev) => ({ ...prev, reactor_shape: morph.toLowerCase() as ReactorShape }));
-      fetch('http://127.0.0.1:47630/api/ui/state', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ui_state: { reactor_shape: morph.toLowerCase() } }),
-      }).catch(() => null);
+      import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+        void ipcFetch('/api/ui/state', {
+          method: 'POST',
+          body: JSON.stringify({ ui_state: { reactor_shape: morph.toLowerCase() } }),
+        }).catch(() => null);
+      });
     },
     [onMorphologyChange]
   );
@@ -1599,6 +1600,7 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
     let mounted = true;
     const fetchUiState = async () => {
       try {
+        const { ipcFetch } = await import('@renderer/services/ipc-client');
         const win = typeof window !== 'undefined' ? (window as any) : null;
         let lat = 0;
         if (win && win.nexusTelemetry?.getAgents) {
@@ -1607,14 +1609,14 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
           lat = performance.now() - start;
         } else {
           const start = performance.now();
-          await fetch('http://127.0.0.1:47630/api/ui/state').catch(() => null);
+          await ipcFetch('/api/ui/state').catch(() => null);
           lat = performance.now() - start;
         }
         if (mounted && lat > 0) {
           setActualLatencyMs(Math.round(lat * 10) / 10);
         }
 
-        const resp = await fetch('http://127.0.0.1:47630/api/ui/state').catch(() => null);
+        const resp = await ipcFetch('/api/ui/state').catch(() => null);
         if (resp && resp.ok) {
           const data = await resp.json();
           if (mounted && data.ui_state) {
@@ -1641,7 +1643,8 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
     // Poll active swarm agents
     const fetchSwarmState = async () => {
       try {
-        const resp = await fetch('http://127.0.0.1:47630/api/swarm/active').catch(() => null);
+        const { ipcFetch } = await import('@renderer/services/ipc-client');
+        const resp = await ipcFetch('/api/swarm/active').catch(() => null);
         if (resp && resp.ok) {
           const data = await resp.json();
           if (mounted && Array.isArray(data.agents)) {
@@ -1687,7 +1690,8 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
   const fetchInstincts = useCallback(async () => {
     setInstinctsLoading(true);
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/instincts').catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const resp = await ipcFetch('/api/instincts').catch(() => null);
       if (resp && resp.ok) {
         const data = await resp.json();
         setInstinctsList(data.instincts || []);
@@ -1702,7 +1706,8 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
     if (!exportSlug.trim()) return;
     setExportLoading(true);
     try {
-      const resp = await fetch(`http://127.0.0.1:47630/api/skills/export/${encodeURIComponent(exportSlug.trim())}`).catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const resp = await ipcFetch(`/api/skills/export/${encodeURIComponent(exportSlug.trim())}`).catch(() => null);
       if (resp && resp.ok) {
         const data = await resp.json();
         setExportResult(data);
@@ -1721,9 +1726,9 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
     if (!importInput.trim()) return;
     setImportLoading(true);
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/skills/import', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const resp = await ipcFetch('/api/skills/import', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug: importInput.trim(), bundle_path: importInput.trim(), auto_elevate: true }),
       }).catch(() => null);
       if (resp && resp.ok) {
@@ -1742,9 +1747,9 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
   // Promote Instinct Handler
   const handlePromoteInstinct = useCallback(async (instId: string, slug?: string) => {
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/instincts/promote', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const resp = await ipcFetch('/api/instincts/promote', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ instinct_id: instId, skill_slug: slug }),
       }).catch(() => null);
       if (resp && resp.ok) {
@@ -1771,7 +1776,8 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
     setSearchQuery(q);
     if (!q.trim()) return;
     try {
-      const resp = await fetch(`http://127.0.0.1:47630/api/memory/search?q=${encodeURIComponent(q)}&limit=5`).catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const resp = await ipcFetch(`/api/memory/search?q=${encodeURIComponent(q)}&limit=5`).catch(() => null);
       if (resp && resp.ok) {
         const data = await resp.json();
         if (Array.isArray(data.results) && data.results.length > 0) {
@@ -1793,9 +1799,9 @@ export const NexusCoreOrb: React.FC<NexusCoreOrbProps> = ({
     setAuditRunning(true);
     setAuditSuccess(false);
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/security/shield-scan', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/security/shield-scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       }).catch(() => null);
       if (res && res.ok) {

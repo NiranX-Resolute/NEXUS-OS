@@ -101,12 +101,13 @@ export const ProvidersComputeHub: React.FC<ProvidersComputeHubProps> = ({
   // Auth helper
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
     try {
-      // @ts-ignore
-      const token = await window.nexusAuth?.getAuthToken?.()
+      const { getIpcToken } = await import('@renderer/services/ipc-client')
+      const token = await getIpcToken()
       if (token) {
         return {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          'X-Nexus-Token': token
         }
       }
     } catch (err) {

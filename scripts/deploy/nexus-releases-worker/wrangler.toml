@@ -1,0 +1,15 @@
+name = "nexus-releases"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+workers_dev = true
+
+[vars]
+GITHUB_OWNER = "NiranX-Resolute"
+GITHUB_REPO = "NEXUS-OS"
+DEFAULT_RELEASE_TAG = "v5.1.0-editions"
+R2_STATUS = "pending-dashboard-enablement"
+
+# Once R2 is enabled via Cloudflare Dashboard -> R2 -> Create bucket `nexus-media`:
+# [[r2_buckets]]
+# binding = "BUCKET"
+# bucket_name = "nexus-media"

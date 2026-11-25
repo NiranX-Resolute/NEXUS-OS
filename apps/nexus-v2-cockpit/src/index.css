@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --bg: #050a14;
+  --bg-deep: #030710;
+  --panel: #091322;
+  --panel-glass: rgba(9, 19, 34, 0.78);
+  --panel-elevated: rgba(12, 26, 46, 0.86);
+  --border: rgba(6, 182, 212, 0.22);
+  --border-subtle: rgba(148, 163, 184, 0.12);
+  --accent: #06b6d4;
+  --accent-bright: #22d3ee;
+  --accent-emerald: #34d399;
+  --accent-glow: rgba(6, 182, 212, 0.34);
+  --emerald-glow: rgba(52, 211, 153, 0.28);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Aerospace Glass & Telemetry HUD Surfaces */
+.aether-glass {
+  background: var(--panel-glass);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 rgba(34, 211, 238, 0.1),
+    0 12px 36px rgba(2, 6, 16, 0.55);
+}
+
+.aether-panel {
+  background: linear-gradient(160deg, rgba(9, 19, 34, 0.9) 0%, rgba(5, 10, 20, 0.92) 100%);
+  border: 1px solid var(--border-subtle);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.aether-hud-grid {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(6, 182, 212, 0.12), transparent 38%),
+    radial-gradient(circle at 82% 88%, rgba(52, 211, 153, 0.08), transparent 36%),
+    linear-gradient(rgba(6, 182, 212, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.045) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+}
+
+.aether-glow-cyan {
+  box-shadow:
+    0 0 22px -4px var(--accent-glow),
+    inset 0 0 14px rgba(6, 182, 212, 0.08);
+}
+
+.aether-glow-emerald {
+  box-shadow:
+    0 0 22px -4px var(--emerald-glow),
+    inset 0 0 14px rgba(52, 211, 153, 0.08);
+}
+
+.aether-text-glow {
+  text-shadow: 0 0 14px rgba(6, 182, 212, 0.52);
+}
+
+.aether-bracket-card {
+  position: relative;
+  background: var(--panel-glass);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.aether-bracket-card::before,
+.aether-bracket-card::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-color: var(--accent-bright);
+  opacity: 0.72;
+}
+
+.aether-bracket-card::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--accent-bright);
+  border-left: 2px solid var(--accent-bright);
+}
+
+.aether-bracket-card::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--accent-emerald);
+  border-right: 2px solid var(--accent-emerald);
+}
+
+@keyframes aether-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.35;
+  }
+  80% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.aether-scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.aether-scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0.07) 50%,
+    transparent 100%
+  );
+  animation: aether-scan 6.5s linear infinite;
+}
+
+@keyframes aether-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.45);
+  }
+  50% {
+    opacity: 0.65;
+    box-shadow: 0 0 12px 2px rgba(52, 211, 153, 0.35);
+  }
+}
+
+.aether-pulse {
+  animation: aether-pulse 2.2s ease-in-out infinite;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Custom Aerospace Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(5, 10, 20, 0.65);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.28);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.55);
+}

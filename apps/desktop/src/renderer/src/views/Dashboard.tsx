@@ -16,17 +16,12 @@ import {
   RiEarthLine,
   RiSendPlane2Line,
   RiGitBranchLine,
-  RiListCheck2,
   RiAttachment2,
   RiMusic2Line,
   RiPauseCircleLine,
   RiPlayCircleLine,
   RiSkipBackLine,
   RiSkipForwardLine,
-  RiPaintBrushLine,
-  RiWhatsappLine,
-  RiFilePpt2Line,
-  RiShieldCheckLine,
   RiVolumeUpLine,
   RiFullscreenLine,
   RiFullscreenExitLine
@@ -72,7 +67,7 @@ interface DashboardViewProps {
 }
 
 const glassPanel =
-  'rounded-xl border border-white/10 bg-zinc-950/55 shadow-[0_18px_60px_rgba(0,0,0,0.42)] backdrop-blur-2xl'
+  'rounded-2xl border border-white/10 bg-zinc-950/55 backdrop-blur-xl'
 const liveGeminiModelOptions = GEMINI_MODEL_OPTIONS.filter((model) => model.live)
 
 const formatMediaTime = (milliseconds = 0) => {
@@ -461,8 +456,8 @@ export default function DashboardView({
     return `\n\nUse these shared files as context for the answer:${fileBlocks.join('')}`
   }
 
-  const submitTextCommand = async (intent: 'queue' | 'steer') => {
-    const text = commandText.trim()
+  const submitTextCommand = async (intent: 'queue' | 'steer', overrideText?: string) => {
+    const text = (overrideText !== undefined ? overrideText : commandText).trim()
     if (!text && sharedFiles.length === 0) return
 
     const sharedContext = await readSharedFiles()
@@ -480,7 +475,7 @@ export default function DashboardView({
     if (intent === 'steer' && isSystemActive && nexusService.isConnected) {
       try {
         await nexusService.sendTextPrompt(finalText, 'steer')
-        setCommandText('')
+        if (overrideText === undefined) setCommandText('')
         setSharedFiles([])
         setCommandStatus('Steer command sent into the live AI response.')
         return
@@ -496,7 +491,7 @@ export default function DashboardView({
         createdAt: new Date().toLocaleTimeString()
       }
     ])
-    setCommandText('')
+    if (overrideText === undefined) setCommandText('')
     setSharedFiles([])
     setCommandStatus(
       intent === 'steer'
@@ -508,64 +503,41 @@ export default function DashboardView({
   const systemMetrics = [
     {
       icon: <RiCpuLine />,
-      bgIcon: <RiCpuLine size={140} />,
       label: 'CPU LOAD',
       val: isSystemActive && stats ? `${stats.cpu}%` : '--',
       raw: isSystemActive && stats ? stats.cpu : 0,
       colorClass: 'text-emerald-400',
-      bgClass: 'bg-emerald-500',
-      glowClass: 'via-emerald-500/50',
-      shadowClass: 'shadow-[0_0_8px_#10b981]',
-      bgGradient: 'from-emerald-950/30 to-black/60',
-      pattern:
-        'bg-[linear-gradient(to_right,#10b98108_1px,transparent_1px),linear-gradient(to_bottom,#10b98108_1px,transparent_1px)] bg-[size:12px_12px]'
+      bgClass: 'bg-emerald-500/85'
     },
     {
       icon: <FaMemory />,
-      bgIcon: <FaMemory size={140} />,
       label: 'RAM USAGE',
       val: isSystemActive && stats ? `${stats.memory.usedPercentage}%` : '--',
       raw: isSystemActive && stats ? stats.memory.usedPercentage : 0,
       colorClass: 'text-cyan-400',
-      bgClass: 'bg-cyan-500',
-      glowClass: 'via-cyan-500/50',
-      shadowClass: 'shadow-[0_0_8px_#06b6d4]',
-      bgGradient: 'from-cyan-950/30 to-black/60',
-      pattern: 'bg-[radial-gradient(#06b6d415_1px,transparent_1px)] bg-[size:10px_10px]'
+      bgClass: 'bg-cyan-500/85'
     },
     {
       icon: <GiTinker />,
-      bgIcon: <GiTinker size={140} />,
       label: 'TEMP',
       val: isSystemActive && stats ? `${stats.temperature}°C` : '--',
       raw: isSystemActive && stats ? Math.min((stats.temperature / 90) * 100, 100) : 0,
       colorClass: 'text-orange-400',
-      bgClass: 'bg-orange-500',
-      glowClass: 'via-orange-500/50',
-      shadowClass: 'shadow-[0_0_8px_#f97316]',
-      bgGradient: 'from-orange-950/30 to-black/60',
-      pattern:
-        'bg-[radial-gradient(ellipse_at_top_right,#f9731626,transparent_64%)]'
+      bgClass: 'bg-orange-500/85'
     },
     {
       icon: <HiComputerDesktop />,
-      bgIcon: <HiComputerDesktop size={140} />,
       label: 'OS',
       val: isSystemActive && stats ? `${stats.os.type}` : '--',
       raw: 0,
       colorClass: 'text-purple-400',
-      bgClass: 'bg-purple-500',
-      glowClass: 'via-purple-500/50',
-      shadowClass: '',
-      bgGradient: 'from-purple-950/30 to-black/60',
-      pattern:
-        'bg-[linear-gradient(45deg,#a855f708_25%,transparent_25%,transparent_50%,#a855f708_50%,#a855f708_75%,transparent_75%,transparent)] bg-[size:24px_24px]',
+      bgClass: 'bg-purple-500/85',
       hideBar: true
     }
   ]
 
   return (
-    <div className="flex-1 min-h-0 p-4 bg-white/[0.02] grid grid-cols-12 gap-4 h-full overflow-hidden relative animate-in fade-in zoom-in duration-300 w-full">
+    <div className="flex-1 min-h-0 p-4 lg:p-5 bg-white/[0.015] grid grid-cols-12 gap-4 lg:gap-5 h-full overflow-hidden relative animate-in fade-in zoom-in duration-300 w-full">
       <input
         ref={fileInputRef}
         type="file"
@@ -576,18 +548,18 @@ export default function DashboardView({
       <div
         className={`hidden lg:flex ${
           isFullScreen ? 'col-span-12 lg:col-span-4 xl:col-span-3' : 'col-span-3'
-        } min-h-0 flex-col gap-3 overflow-y-auto pr-1.5 pb-20 z-40 scrollbar-small transition-all duration-300`}
+        } min-h-0 flex-col gap-4 overflow-y-auto pr-1 pb-6 z-40 scrollbar-small transition-all duration-300`}
       >
         <div
-          className={`${glassPanel} h-[224px] shrink-0 flex flex-col p-1 overflow-hidden relative group`}
+          className={`${glassPanel} h-[208px] shrink-0 flex flex-col p-1.5 overflow-hidden relative group`}
         >
-          <div className="absolute top-3 left-3 z-30 flex items-center gap-2">
+          <div className="absolute top-3 left-3 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-zinc-950/75 px-2.5 py-1 backdrop-blur-md">
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 isVideoOn
                   ? visionMode === 'dual'
-                    ? 'bg-cyan-400 animate-pulse shadow-[0_0_8px_cyan]'
-                    : 'bg-red-500 animate-pulse shadow-[0_0_8px_red]'
+                    ? 'bg-cyan-400 animate-pulse'
+                    : 'bg-red-500 animate-pulse'
                   : 'bg-zinc-600'
               }`}
             />
@@ -596,8 +568,8 @@ export default function DashboardView({
                 isVideoOn
                   ? visionMode === 'dual'
                     ? 'text-cyan-300'
-                    : 'text-red-400/80'
-                  : 'text-zinc-600'
+                    : 'text-red-300'
+                  : 'text-zinc-500'
               }`}
             >
               {isVideoOn
@@ -609,7 +581,7 @@ export default function DashboardView({
                 : 'OPTICS OFFLINE'}
             </span>
             {isVideoOn && isScreenAudioActive && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[8px] font-mono font-bold animate-pulse">
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[8px] font-mono font-bold">
                 <RiVolumeUpLine size={10} /> AUDIO
               </span>
             )}
@@ -618,7 +590,7 @@ export default function DashboardView({
           {isVideoOn && (
             <button
               onClick={onVisionClick}
-              className="absolute top-2 right-2 z-30 p-1.5 rounded-md bg-black/60 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-black transition-all cursor-pointer"
+              className="absolute top-2.5 right-2.5 z-30 p-1.5 rounded-lg bg-zinc-950/75 text-emerald-300 border border-white/10 hover:border-emerald-400/40 hover:bg-emerald-500 hover:text-black transition-all cursor-pointer backdrop-blur-md"
               title="Change capture source or mode"
             >
               <RiSwapBoxLine size={14} />
@@ -626,7 +598,7 @@ export default function DashboardView({
           )}
 
           <div
-            className={`w-full h-full rounded-xl overflow-hidden bg-black/20 relative border border-white/5 transition-all ${isVideoOn ? 'opacity-100' : 'opacity-30'}`}
+            className={`w-full h-full rounded-xl overflow-hidden bg-black/30 relative border border-white/5 transition-opacity ${isVideoOn ? 'opacity-100' : 'opacity-40'}`}
           >
             <video
               key={visionMode}
@@ -639,7 +611,7 @@ export default function DashboardView({
 
             {/* Picture-In-Picture Webcam overlay for Dual Vision Mode */}
             {visionMode === 'dual' && activeCameraStream && (
-              <div className="absolute bottom-2 right-2 w-28 h-20 rounded-lg overflow-hidden border border-cyan-400/60 shadow-[0_0_16px_rgba(6,182,212,0.45)] bg-black/85 z-25 group">
+              <div className="absolute bottom-2 right-2 w-28 h-20 rounded-lg overflow-hidden border border-cyan-400/50 shadow-lg shadow-black/50 bg-black/85 z-25 group">
                 <video
                   ref={setPipVideoRef}
                   className="w-full h-full object-cover -scale-x-100"
@@ -647,7 +619,7 @@ export default function DashboardView({
                   playsInline
                   muted
                 />
-                <div className="absolute top-1 left-1 px-1 py-0.2 rounded bg-black/75 text-[7px] font-mono font-bold text-cyan-300 border border-cyan-400/30">
+                <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/75 text-[7px] font-mono font-bold text-cyan-300 border border-cyan-400/30">
                   WEBCAM PIP
                 </div>
               </div>
@@ -659,56 +631,46 @@ export default function DashboardView({
             />
 
             {!isVideoOn && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-50">
-                <RiCameraLine size={24} />
-                <span className="text-[9px] font-mono">NO SIGNAL</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-500">
+                <RiCameraLine size={22} />
+                <span className="text-[9px] font-mono tracking-widest">NO SIGNAL</span>
               </div>
             )}
           </div>
         </div>
 
-        <div
-          className={`${glassPanel} h-[120px] shrink-0 p-3 flex flex-col justify-between relative overflow-hidden`}
-        >
-          <div
-            className={`absolute inset-0 bg-linear-to-r from-emerald-500/5 to-transparent transition-opacity duration-1000 ${isSystemActive ? 'opacity-100' : 'opacity-0'}`}
-          />
-
-          <div className="flex items-center justify-between border-b border-white/10 pb-2 relative z-10">
-            <span className="text-[10px] font-bold tracking-widest text-zinc-400 flex items-center gap-1">
-              <RiPulseLine className={isSystemActive ? 'text-emerald-500 animate-pulse' : ''} />{' '}
+        <div className={`${glassPanel} shrink-0 p-4 flex flex-col gap-3`}>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <span className="text-[10px] font-bold tracking-widest text-zinc-400 flex items-center gap-1.5">
+              <RiPulseLine className={isSystemActive ? 'text-emerald-400' : 'text-zinc-500'} />
               NETWORK TELEMETRY
             </span>
             <span
-              className={`text-[8px] px-2 py-0.5 rounded-full font-mono font-bold border ${isSystemActive ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-zinc-600 border-zinc-800 bg-zinc-900'}`}
+              className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-semibold border ${isSystemActive ? 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10' : 'text-zinc-500 border-white/10 bg-white/[0.03]'}`}
             >
               {isSystemActive ? 'SECURE UPLINK' : 'STANDBY'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between mt-2 relative z-10">
-            <div className="flex flex-col">
-              <span className="text-[8px] text-zinc-600 font-mono tracking-widest flex items-center gap-1">
-                WSS LATENCY
-              </span>
-              <span className="text-xs font-bold text-emerald-50 font-mono flex items-center gap-1.5 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] text-zinc-500 font-mono tracking-wider">WSS LATENCY</span>
+              <span className="text-xs font-semibold text-zinc-100 font-mono flex items-center gap-1.5">
                 <RiWifiLine className={isSystemActive ? 'text-emerald-400' : 'text-zinc-600'} />
                 {isSystemActive ? `${networkStats.ping}ms` : '--'}
               </span>
             </div>
 
-            <div className="flex flex-col items-center">
-              <span className="text-[8px] text-zinc-600 font-mono tracking-widest">
-                PACKET RATE
-              </span>
-              <span className="text-xs font-bold text-emerald-50 font-mono transition-all">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-zinc-500 font-mono tracking-wider">PACKET RATE</span>
+              <span className="text-xs font-semibold text-zinc-100 font-mono">
                 {isSystemActive ? `${networkStats.rate} MB/s` : '--'}
               </span>
             </div>
 
-            <div className="flex flex-col items-end">
-              <span className="text-[8px] text-zinc-600 font-mono tracking-widest">ROUTING</span>
-              <span className="text-xs font-bold text-emerald-50 font-mono flex items-center gap-1.5">
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="text-[9px] text-zinc-500 font-mono tracking-wider">ROUTING</span>
+              <span className="text-xs font-semibold text-zinc-100 font-mono flex items-center gap-1.5">
                 {isSystemActive ? 'GLOBAL' : 'LOCAL'}
                 {isSystemActive ? (
                   <RiEarthLine className="text-cyan-400" />
@@ -719,21 +681,21 @@ export default function DashboardView({
             </div>
           </div>
 
-          <div className="w-full flex flex-col gap-1 mt-3 relative z-10">
+          <div className="w-full flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-[7px] font-mono text-zinc-500 w-3">TX</span>
-              <div className="flex-1 h-1 bg-black/60 rounded-full overflow-hidden">
+              <span className="text-[9px] font-mono text-zinc-500 w-4">TX</span>
+              <div className="flex-1 h-1 bg-black/50 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-emerald-500 shadow-[0_0_8px_#10b981] transition-all duration-300 ease-out"
+                  className="h-full bg-emerald-500/90 transition-all duration-300 ease-out"
                   style={{ width: `${isSystemActive ? networkStats.tx : 0}%` }}
                 />
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[7px] font-mono text-zinc-500 w-3">RX</span>
-              <div className="flex-1 h-1 bg-black/60 rounded-full overflow-hidden">
+              <span className="text-[9px] font-mono text-zinc-500 w-4">RX</span>
+              <div className="flex-1 h-1 bg-black/50 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-cyan-500 shadow-[0_0_8px_#06b6d4] transition-all duration-300 ease-out delay-75"
+                  className="h-full bg-cyan-500/90 transition-all duration-300 ease-out delay-75"
                   style={{ width: `${isSystemActive ? networkStats.rx : 0}%` }}
                 />
               </div>
@@ -741,29 +703,26 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div
-          className={`${glassPanel} h-36 shrink-0 p-3 flex flex-col gap-2 relative overflow-hidden`}
-        >
-          <div className="absolute inset-0 bg-linear-to-r from-cyan-500/5 via-transparent to-emerald-500/5 pointer-events-none" />
-          <div className="relative z-10 flex items-center justify-between gap-2">
+        <div className={`${glassPanel} shrink-0 p-4 flex flex-col gap-3`}>
+          <div className="flex items-center justify-between gap-2">
             <span className="flex min-w-0 items-center gap-1.5 text-[10px] font-bold tracking-widest text-zinc-400">
               <RiMusic2Line
-                className={activeMedia?.status === 'Playing' ? 'text-cyan-300 animate-pulse' : ''}
+                className={activeMedia?.status === 'Playing' ? 'text-cyan-300' : 'text-zinc-500'}
               />
               NOW PLAYING
             </span>
             <span
-              className={`shrink-0 rounded-full border px-2 py-0.5 text-[8px] font-mono font-bold uppercase ${activeMedia?.status === 'Playing' ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200' : 'border-white/10 bg-white/5 text-zinc-500'}`}
+              className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-mono font-semibold uppercase ${activeMedia?.status === 'Playing' ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200' : 'border-white/10 bg-white/[0.03] text-zinc-500'}`}
             >
               {activeMedia?.status || 'IDLE'}
             </span>
           </div>
 
-          <div className="relative z-10 min-w-0">
-            <div className="truncate text-xs font-black text-zinc-100">
+          <div className="min-w-0">
+            <div className="truncate text-xs font-semibold text-zinc-100">
               {activeMedia?.title || 'No media detected'}
             </div>
-            <div className="mt-1 flex items-center justify-between gap-2 text-[9px] font-mono uppercase tracking-widest text-zinc-500">
+            <div className="mt-1 flex items-center justify-between gap-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
               <span className="truncate">
                 {activeMedia
                   ? activeMedia.artist ||
@@ -771,30 +730,30 @@ export default function DashboardView({
                     getMediaAppLabel(activeMedia.source)
                   : mediaStatus}
               </span>
-              <span className="shrink-0 text-cyan-300/70">
+              <span className="shrink-0 text-cyan-300/80">
                 {activeMedia ? getMediaAppLabel(activeMedia.source) : '--'}
               </span>
             </div>
           </div>
 
-          <div className="relative z-10 min-w-0">
-            <div className="h-1 overflow-hidden rounded-full border border-white/5 bg-black/60">
+          <div className="min-w-0">
+            <div className="h-1 overflow-hidden rounded-full bg-black/50">
               <div
-                className="h-full bg-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.7)] transition-all duration-500"
+                className="h-full bg-cyan-300/90 transition-all duration-500"
                 style={{ width: `${activeMedia ? mediaProgress : 0}%` }}
               />
             </div>
-            <div className="mt-1 flex justify-between text-[8px] font-mono text-zinc-600">
+            <div className="mt-1 flex justify-between text-[9px] font-mono text-zinc-500">
               <span>{formatMediaTime(activeMedia?.positionMs || 0)}</span>
               <span>{formatMediaTime(activeMedia?.durationMs || 0)}</span>
             </div>
           </div>
 
-          <div className="relative z-10 grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => handleMediaAction('previous')}
               disabled={!activeMedia?.canPrevious}
-              className="flex h-8 min-w-0 items-center justify-center rounded-md border border-white/10 bg-white/5 text-zinc-400 transition hover:border-cyan-400/30 hover:text-cyan-200 disabled:opacity-35"
+              className="flex h-8 min-w-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:border-cyan-400/30 hover:text-cyan-200 disabled:opacity-35 cursor-pointer"
               title="Previous media"
               aria-label="Previous media"
             >
@@ -803,7 +762,7 @@ export default function DashboardView({
             <button
               onClick={() => handleMediaAction('toggle')}
               disabled={!activeMedia}
-              className="flex h-8 min-w-0 items-center justify-center rounded-md border border-cyan-400/20 bg-cyan-400/10 text-cyan-200 transition hover:bg-cyan-300 hover:text-black disabled:opacity-35"
+              className="flex h-8 min-w-0 items-center justify-center rounded-lg border border-cyan-400/25 bg-cyan-400/10 text-cyan-200 transition hover:bg-cyan-300 hover:text-black disabled:opacity-35 cursor-pointer"
               title="Play or pause media"
               aria-label="Play or pause media"
             >
@@ -812,7 +771,7 @@ export default function DashboardView({
             <button
               onClick={() => handleMediaAction('next')}
               disabled={!activeMedia?.canNext}
-              className="flex h-8 min-w-0 items-center justify-center rounded-md border border-white/10 bg-white/5 text-zinc-400 transition hover:border-cyan-400/30 hover:text-cyan-200 disabled:opacity-35"
+              className="flex h-8 min-w-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:border-cyan-400/30 hover:text-cyan-200 disabled:opacity-35 cursor-pointer"
               title="Next media"
               aria-label="Next media"
             >
@@ -821,52 +780,34 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div className={`${glassPanel} min-h-[172px] shrink-0 p-3 flex flex-col gap-3`}>
+        <div className={`${glassPanel} shrink-0 p-4 flex flex-col gap-3`}>
           <div className="flex items-center justify-between border-b border-white/10 pb-2">
-            <span className="text-[10px] font-bold tracking-widest text-zinc-400">
-              <RiLayoutGridLine className="inline mr-1" /> CORE METRICS
+            <span className="text-[10px] font-bold tracking-widest text-zinc-400 flex items-center gap-1.5">
+              <RiLayoutGridLine /> CORE METRICS
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 pb-1">
+          <div className="grid grid-cols-2 gap-2.5">
             {systemMetrics.map((m, i) => (
               <div
                 key={i}
-                className={`cursor-pointer relative rounded-xl p-2.5 flex flex-col justify-between border border-white/5 overflow-hidden group hover:border-white/10 transition-all duration-300 bg-linear-to-br ${m.bgGradient}`}
+                className="rounded-xl p-3 flex flex-col justify-between gap-2 border border-white/10 bg-white/[0.03] hover:border-white/20 transition-colors"
               >
-                <div
-                  className={`absolute inset-0 ${m.pattern} opacity-30 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none`}
-                />
-
-                <div
-                  className={`absolute -bottom-8 -right-8 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-500 transform group-hover:scale-110 pointer-events-none ${m.colorClass}`}
-                >
-                  {m.bgIcon}
-                </div>
-
-                <div
-                  className={`absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent ${m.glowClass} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-                />
-
-                <div className="relative z-10 flex justify-between items-start text-zinc-500">
-                  <span
-                    className={`text-base ${m.colorClass} opacity-70 group-hover:opacity-100 transition-opacity`}
-                  >
-                    {m.icon}
-                  </span>
-                  <span className="text-[8px] font-mono tracking-widest uppercase opacity-70 group-hover:opacity-100 transition-opacity text-zinc-300">
+                <div className="flex justify-between items-center text-zinc-400">
+                  <span className={`text-base ${m.colorClass}`}>{m.icon}</span>
+                  <span className="text-[9px] font-mono tracking-wider uppercase text-zinc-400">
                     {m.label}
                   </span>
                 </div>
 
-                <div className="relative z-10 flex flex-col gap-1.5 mt-2">
-                  <span className="text-sm font-bold text-white text-right font-mono tracking-wider drop-shadow-md">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm font-bold text-zinc-100 text-right font-mono tracking-wide">
                     {m.val}
                   </span>
 
                   {!m.hideBar && (
-                    <div className="w-full h-1 bg-black/40 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+                    <div className="w-full h-1 bg-black/50 rounded-full overflow-hidden">
                       <div
-                        className={`h-full ${m.bgClass} ${m.shadowClass} transition-all duration-700 ease-out`}
+                        className={`h-full ${m.bgClass} transition-all duration-700 ease-out`}
                         style={{ width: isSystemActive ? `${m.raw}%` : '0%' }}
                       />
                     </div>
@@ -881,29 +822,29 @@ export default function DashboardView({
       <div
         className={`col-span-12 ${
           isFullScreen ? 'lg:col-span-8 xl:col-span-9' : 'lg:col-span-6'
-        } relative isolate flex min-h-0 flex-col items-center justify-between overflow-y-auto overflow-x-hidden pb-8 scrollbar-small transition-all duration-300`}
+        } relative isolate flex min-h-0 flex-col items-center justify-between overflow-y-auto overflow-x-hidden pb-2 scrollbar-small transition-all duration-300`}
       >
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           <div
             className={`absolute left-1/2 top-[42%] ${
-              isFullScreen ? 'h-[min(68vh,660px)] w-[min(68vh,660px)]' : 'h-[min(58vh,540px)] w-[min(58vh,540px)]'
-            } -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#10b98126_0%,#06b6d41a_36%,transparent_70%)] blur-3xl transition-all duration-700`}
+              isFullScreen ? 'h-[min(68vh,660px)] w-[min(68vh,660px)]' : 'h-[min(56vh,520px)] w-[min(56vh,520px)]'
+            } -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#10b98118_0%,#06b6d410_38%,transparent_70%)] blur-3xl transition-all duration-700`}
           />
           <div
             className={`nexus-core-grid absolute left-1/2 top-[42%] ${
-              isFullScreen ? 'h-[min(72vh,700px)] w-[min(72vh,700px)]' : 'h-[min(62vh,580px)] w-[min(62vh,580px)]'
-            } -translate-x-1/2 -translate-y-1/2 opacity-60 transition-all duration-700`}
+              isFullScreen ? 'h-[min(72vh,700px)] w-[min(72vh,700px)]' : 'h-[min(60vh,560px)] w-[min(60vh,560px)]'
+            } -translate-x-1/2 -translate-y-1/2 opacity-25 transition-all duration-700`}
           />
         </div>
 
         {/* Voice Agent Fullscreen Mode Toggle Button */}
-        <div className="absolute top-3 right-4 z-40 flex items-center gap-2">
+        <div className="absolute top-3 right-3 z-40 flex items-center gap-2">
           <button
             onClick={() => setIsFullScreen((prev) => !prev)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border backdrop-blur-xl text-[9px] font-mono uppercase tracking-wider transition-all cursor-pointer group ${
               isFullScreen
-                ? 'border-emerald-400/50 bg-emerald-500/20 text-emerald-200 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:bg-emerald-500/30'
-                : 'border-white/10 bg-black/60 text-zinc-400 hover:border-emerald-400/40 hover:text-emerald-300 hover:bg-black/80'
+                ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25'
+                : 'border-white/10 bg-zinc-950/70 text-zinc-400 hover:border-emerald-400/40 hover:text-emerald-300'
             }`}
             title={isFullScreen ? 'Exit Full Screen Mode (Esc or F)' : 'Enter Full Screen Voice Mode (F)'}
           >
@@ -938,42 +879,41 @@ export default function DashboardView({
             className={`group/core relative flex aspect-square ${
               isFullScreen
                 ? 'h-[min(65vh,640px)] min-h-[340px] max-h-[640px] w-full max-w-[640px]'
-                : 'h-[min(56vh,540px)] min-h-[300px] max-h-[540px] w-full max-w-[540px]'
+                : 'h-[min(54vh,500px)] min-h-[280px] max-h-[500px] w-full max-w-[500px]'
             } items-center justify-center transition-all duration-700 ${
-              isSystemActive || isSystemStarting ? 'opacity-100 scale-100' : 'opacity-80 scale-95 grayscale'
+              isSystemActive || isSystemStarting ? 'opacity-100 scale-100' : 'opacity-85 scale-95 grayscale'
             }`}
           >
-            <div className="absolute inset-0 rounded-full border border-emerald-300/10 bg-[radial-gradient(circle,#031915_0%,#020807_48%,transparent_68%)] shadow-[0_0_90px_rgba(16,185,129,0.12)]" />
+            <div className="absolute inset-0 rounded-full border border-emerald-300/10 bg-[radial-gradient(circle,#031915_0%,#020807_48%,transparent_68%)]" />
             {isUserSpeaking && !isMicMuted && (
               <>
-                <div className="pointer-events-none absolute inset-[-7%] animate-ping rounded-full border border-cyan-400/40 opacity-40 duration-1000" />
-                <div className="pointer-events-none absolute inset-[-15%] animate-pulse rounded-full border border-cyan-300/30 shadow-[0_0_55px_rgba(6,182,212,0.4)]" />
+                <div className="pointer-events-none absolute inset-[-6%] animate-ping rounded-full border border-cyan-400/30 opacity-35 duration-1000" />
+                <div className="pointer-events-none absolute inset-[-12%] animate-pulse rounded-full border border-cyan-300/20" />
               </>
             )}
-            <div className="absolute inset-[5%] rounded-full border border-emerald-300/15 animate-[nexus-orbit_18s_linear_infinite]" />
-            <div className="absolute inset-[13%] rounded-full border border-cyan-300/10 animate-[nexus-orbit-reverse_26s_linear_infinite]" />
-            <div className="absolute inset-[22%] rounded-full border border-white/5" />
+            <div className="absolute inset-[5%] rounded-full border border-emerald-300/10 animate-[nexus-orbit_18s_linear_infinite]" />
+            <div className="absolute inset-[13%] rounded-full border border-cyan-300/8 animate-[nexus-orbit-reverse_26s_linear_infinite]" />
 
-            <div className="absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border border-emerald-300/20 bg-black/60 px-4 py-1.5 text-center shadow-[0_0_28px_rgba(16,185,129,0.16)] backdrop-blur-md">
-              <div className="text-[9px] font-black uppercase tracking-[0.28em] text-emerald-200">
+            <div className="absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-zinc-950/70 px-4 py-1.5 text-center backdrop-blur-md">
+              <div className="text-[9px] font-black uppercase tracking-[0.26em] text-emerald-200">
                 Nexus Core
               </div>
-              <div className="mt-0.5 text-[8px] font-mono uppercase tracking-widest text-zinc-500">
+              <div className="mt-0.5 text-[8px] font-mono uppercase tracking-widest text-zinc-400">
                 {isSystemStarting ? 'BOOTING' : isSystemActive ? 'ONLINE' : 'STANDBY'}
               </div>
             </div>
 
             <div className="absolute left-3 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-start gap-1 sm:flex">
-              <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-600">
+              <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-500">
                 Vision
               </span>
               <span
-                className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest ${
+                className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest ${
                   isVideoOn
                     ? visionMode === 'dual'
-                      ? 'border-cyan-400/50 bg-cyan-400/15 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                      : 'border-cyan-300/30 bg-cyan-300/10 text-cyan-200'
-                    : 'border-white/10 bg-white/5 text-zinc-500'
+                      ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-200'
+                      : 'border-cyan-300/25 bg-cyan-300/10 text-cyan-200'
+                    : 'border-white/10 bg-white/[0.04] text-zinc-500'
                 }`}
               >
                 {isVideoOn ? (visionMode === 'dual' ? 'Dual' : visionMode) : 'Off'}
@@ -981,16 +921,16 @@ export default function DashboardView({
             </div>
 
             <div className="absolute right-3 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-end gap-1 sm:flex">
-              <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-600">
+              <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-500">
                 Voice
               </span>
               <span
-                className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-widest transition-all ${
+                className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest transition-all ${
                   isMicMuted
-                    ? 'border-red-300/30 bg-red-500/10 text-red-300'
+                    ? 'border-red-300/25 bg-red-500/10 text-red-300'
                     : isUserSpeaking
-                      ? 'border-cyan-400/60 bg-cyan-400/20 text-cyan-200 shadow-[0_0_16px_rgba(6,182,212,0.6)] flex items-center gap-1.5'
-                      : 'border-emerald-300/30 bg-emerald-300/10 text-emerald-200'
+                      ? 'border-cyan-400/50 bg-cyan-400/20 text-cyan-200 flex items-center gap-1.5'
+                      : 'border-emerald-300/25 bg-emerald-300/10 text-emerald-200'
                 }`}
               >
                 {isMicMuted ? (
@@ -1011,17 +951,17 @@ export default function DashboardView({
             </div>
 
             <div
-              className={`absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border px-3 py-1.5 text-[8px] font-mono uppercase tracking-widest backdrop-blur-md transition-all ${
+              className={`absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border px-3 py-1.5 text-[9px] font-mono uppercase tracking-wider backdrop-blur-md transition-all ${
                 isUserSpeaking && !isMicMuted
-                  ? 'border-cyan-400/50 bg-black/80 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] animate-pulse'
-                  : 'border-white/10 bg-black/50 text-zinc-500'
+                  ? 'border-cyan-400/40 bg-zinc-950/80 text-cyan-200'
+                  : 'border-white/10 bg-zinc-950/65 text-zinc-400'
               }`}
             >
               <span
                 className={`h-1.5 w-1.5 rounded-full transition-all ${
                   isUserSpeaking && !isMicMuted
-                    ? 'bg-cyan-300 shadow-[0_0_12px_rgba(6,182,212,1)] animate-ping'
-                    : 'bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.8)]'
+                    ? 'bg-cyan-300 animate-ping'
+                    : 'bg-emerald-400'
                 }`}
               />
               {isUserSpeaking && !isMicMuted ? 'User Voice Uplink Active' : 'Neural lattice synced'}
@@ -1034,23 +974,23 @@ export default function DashboardView({
         </div>
 
         {isFullScreen ? (
-          /* FULLSCREEN MODE: Glassmorphic translucent buttons with text box with them */
+          /* FULLSCREEN MODE: Translucent command bar with voice/vision controls */
           <div className="relative z-50 w-full max-w-2xl xl:max-w-3xl shrink-0 px-2 sm:px-4 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <div className="rounded-2xl border border-white/12 bg-zinc-950/45 p-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.65),0_0_35px_rgba(16,185,129,0.12)] backdrop-blur-2xl flex flex-col gap-2.5">
+            <div className={`${glassPanel} p-3 flex flex-col gap-2.5`}>
               {/* Translucent Buttons Row */}
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={onVisionClick}
-                  className={`flex h-12 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-black uppercase tracking-widest backdrop-blur-xl transition-all duration-300 ${
+                  className={`flex h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
                     isVideoOn
                       ? visionMode === 'dual'
-                        ? 'border-cyan-400/60 bg-cyan-500/20 text-cyan-200 shadow-[0_0_24px_rgba(6,182,212,0.35)]'
-                        : 'border-red-400/40 bg-red-500/20 text-red-300 shadow-[0_0_20px_rgba(248,113,113,0.25)]'
+                        ? 'border-cyan-400/50 bg-cyan-500/15 text-cyan-200'
+                        : 'border-red-400/35 bg-red-500/15 text-red-300'
                       : 'border-white/10 bg-white/[0.04] text-zinc-300 hover:border-white/25 hover:bg-white/[0.08] hover:text-white'
                   }`}
                   title="Vision source"
                 >
-                  {isVideoOn ? <RiSwapBoxLine size={20} /> : <RiCameraLine size={20} />}
+                  {isVideoOn ? <RiSwapBoxLine size={18} /> : <RiCameraLine size={18} />}
                   <span>
                     {isVideoOn ? (visionMode === 'dual' ? 'Dual' : 'Vision') : 'Vision'}
                   </span>
@@ -1058,41 +998,41 @@ export default function DashboardView({
 
                 <button
                   onClick={toggleSystem}
-                  className={`relative flex h-12 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-black uppercase tracking-widest backdrop-blur-xl transition-all duration-300 ${
+                  className={`relative flex h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
                     isSystemStarting
-                      ? 'border-amber-400/50 bg-amber-400/20 text-amber-200 shadow-[0_0_24px_rgba(251,191,36,0.3)]'
+                      ? 'border-amber-400/45 bg-amber-400/15 text-amber-200'
                       : isSystemActive
-                        ? 'border-emerald-400/60 bg-emerald-500/25 text-emerald-200 shadow-[0_0_30px_rgba(52,211,153,0.35)] hover:bg-emerald-500/35'
-                        : 'border-red-400/35 bg-red-500/15 text-red-300 hover:bg-red-500/25'
+                        ? 'border-emerald-400/50 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30'
+                        : 'border-red-400/30 bg-red-500/10 text-red-300 hover:bg-red-500/20'
                   }`}
                   title="Core status"
                 >
                   <RiPhoneFill
-                    size={20}
-                    className={`${isSystemActive || isSystemStarting ? 'animate-pulse drop-shadow-[0_0_8px_rgba(52,211,153,0.9)]' : ''}`}
+                    size={18}
+                    className={isSystemActive || isSystemStarting ? 'animate-pulse' : ''}
                   />
                   <span>{isSystemStarting ? 'Booting' : isSystemActive ? 'Online' : 'Core'}</span>
                   {isSystemActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981] animate-ping" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                   )}
                 </button>
 
                 <button
                   onClick={toggleMic}
-                  className={`flex h-12 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-black uppercase tracking-widest backdrop-blur-xl transition-all duration-300 ${
+                  className={`flex h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
                     isMicMuted
-                      ? 'border-red-400/35 bg-red-500/15 text-red-300 hover:bg-red-500/25'
+                      ? 'border-red-400/30 bg-red-500/10 text-red-300 hover:bg-red-500/20'
                       : isUserSpeaking
-                        ? 'border-cyan-400/70 bg-cyan-500/30 text-cyan-100 shadow-[0_0_30px_rgba(6,182,212,0.6)] animate-pulse'
-                        : 'border-emerald-400/40 bg-emerald-500/20 text-emerald-200 shadow-[0_0_22px_rgba(52,211,153,0.25)] hover:bg-emerald-500/30'
+                        ? 'border-cyan-400/60 bg-cyan-500/25 text-cyan-100'
+                        : 'border-emerald-400/35 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25'
                   }`}
                   title="Voice status"
                 >
                   {isMicMuted ? (
-                    <RiMicOffLine size={20} />
+                    <RiMicOffLine size={18} />
                   ) : (
                     <RiMicLine
-                      size={20}
+                      size={18}
                       className={isUserSpeaking ? 'text-cyan-300 animate-bounce' : ''}
                     />
                   )}
@@ -1113,9 +1053,9 @@ export default function DashboardView({
               <div className="flex items-center gap-2 w-full">
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className={`h-11 w-11 shrink-0 rounded-xl border backdrop-blur-xl flex items-center justify-center transition-all ${
+                  className={`h-11 w-11 shrink-0 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
                     sharedFiles.length > 0
-                      ? 'border-emerald-400/50 bg-emerald-500/25 text-emerald-200 shadow-[0_0_15px_rgba(52,211,153,0.3)]'
+                      ? 'border-emerald-400/50 bg-emerald-500/20 text-emerald-200'
                       : 'border-white/10 bg-white/[0.04] text-zinc-400 hover:border-emerald-400/40 hover:text-emerald-300 hover:bg-white/[0.08]'
                   }`}
                   title="Share files with AI"
@@ -1130,7 +1070,7 @@ export default function DashboardView({
                     setSelectedModel(nextModel)
                     nexusService.setModel(nextModel)
                   }}
-                  className="h-11 max-w-36 sm:max-w-44 shrink-0 rounded-xl border border-white/10 bg-zinc-950/70 px-2.5 text-[9px] font-mono text-zinc-300 outline-none backdrop-blur-xl focus:border-emerald-400/50"
+                  className="h-11 max-w-36 sm:max-w-44 shrink-0 rounded-xl border border-white/10 bg-zinc-950/70 px-2.5 text-[10px] font-mono text-zinc-300 outline-none focus:border-emerald-400/50"
                   title="AI model"
                 >
                   {liveGeminiModelOptions.map((model) => (
@@ -1149,13 +1089,13 @@ export default function DashboardView({
                       submitTextCommand('queue')
                     }
                   }}
-                  className="h-11 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-xs font-mono text-emerald-50 placeholder:text-zinc-500 backdrop-blur-xl outline-none focus:border-emerald-400/60 focus:bg-white/[0.07] shadow-inner transition-all"
+                  className="h-11 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-xs font-mono text-emerald-50 placeholder:text-zinc-500 outline-none focus:border-emerald-400/50 focus:bg-white/[0.07] transition-all"
                   placeholder="Enter AI command or steer..."
                 />
 
                 <button
                   onClick={() => submitTextCommand('steer')}
-                  className="h-11 w-11 shrink-0 rounded-xl border border-cyan-400/30 bg-cyan-500/15 text-cyan-200 hover:bg-cyan-500/30 hover:border-cyan-400/60 backdrop-blur-xl flex items-center justify-center transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                  className="h-11 w-11 shrink-0 rounded-xl border border-cyan-400/30 bg-cyan-500/15 text-cyan-200 hover:bg-cyan-500/25 hover:border-cyan-400/50 flex items-center justify-center transition-all cursor-pointer"
                   title="Steer live response immediately"
                 >
                   <RiGitBranchLine size={18} />
@@ -1163,7 +1103,7 @@ export default function DashboardView({
 
                 <button
                   onClick={() => submitTextCommand('queue')}
-                  className="h-11 px-4 shrink-0 rounded-xl border border-emerald-400/40 bg-emerald-500/25 hover:bg-emerald-400 hover:text-black text-emerald-200 font-mono text-xs font-bold transition-all backdrop-blur-xl shadow-[0_0_20px_rgba(52,211,153,0.25)] flex items-center gap-1.5 cursor-pointer"
+                  className="h-11 px-4 shrink-0 rounded-xl border border-emerald-400/40 bg-emerald-500/20 hover:bg-emerald-400 hover:text-black text-emerald-200 font-mono text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                   title="Send command"
                 >
                   <RiSendPlane2Line size={16} />
@@ -1172,9 +1112,9 @@ export default function DashboardView({
               </div>
 
               {/* Minimalist Status Bar */}
-              <div className="flex items-center justify-between px-1 text-[8px] font-mono uppercase tracking-widest text-zinc-500">
+              <div className="flex items-center justify-between px-1 text-[9px] font-mono uppercase tracking-wider text-zinc-500">
                 <span className="truncate flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   {sharedFiles.length > 0
                     ? `${sharedFiles.length} file(s) ready for AI read`
                     : commandStatus}
@@ -1196,105 +1136,69 @@ export default function DashboardView({
             </div>
           </div>
         ) : (
-          /* NORMAL MODE: Original layout with Quick-Launch bar and Standard Command box */
-          <div className="relative z-50 w-[min(94vw,620px)] shrink-0">
+          /* NORMAL MODE: Clean Voice/Vision status strip + CommandDeck */
+          <div className="relative z-50 w-full max-w-[700px] mx-auto shrink-0">
             <div className="flex flex-col gap-2">
-              <div
-                className={`${glassPanel} grid grid-cols-3 gap-2 border border-emerald-400/15 p-2 shadow-[0_0_38px_rgba(0,0,0,0.52)]`}
-              >
-                <button
-                  onClick={onVisionClick}
-                  className={`flex h-12 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 text-[10px] font-black uppercase tracking-widest transition-all ${
-                    isVideoOn
-                      ? visionMode === 'dual'
-                        ? 'border-cyan-400/60 bg-cyan-500/20 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.35)]'
-                        : 'border-red-400/30 bg-red-500/15 text-red-300 shadow-[0_0_18px_rgba(248,113,113,0.12)]'
-                      : 'border-white/10 bg-white/[0.04] text-zinc-400 hover:border-cyan-300/30 hover:text-cyan-200'
-                  }`}
-                  title="Vision source"
-                >
-                  {isVideoOn ? <RiSwapBoxLine size={20} /> : <RiCameraLine size={20} />}
-                  <span className="hidden sm:inline">
-                    {isVideoOn ? (visionMode === 'dual' ? 'Dual' : 'Vision') : 'Vision'}
-                  </span>
-                </button>
-                <button
-                  onClick={toggleSystem}
-                  className={`relative flex h-12 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${isSystemStarting ? 'border-amber-300/50 bg-amber-400/15 text-amber-100 shadow-[0_0_22px_rgba(251,191,36,0.2)]' : isSystemActive ? 'border-emerald-300/40 bg-emerald-400 text-black shadow-[0_0_26px_rgba(52,211,153,0.42)]' : 'border-red-400/40 bg-red-500/10 text-red-300'}`}
-                  title="Core"
-                >
-                  <RiPhoneFill
-                    size={21}
-                    className={isSystemActive || isSystemStarting ? 'animate-pulse' : ''}
-                  />
-                  <span>{isSystemStarting ? 'Booting' : isSystemActive ? 'Online' : 'Core'}</span>
-                </button>
-                <button
-                  onClick={toggleMic}
-                  className={`flex h-12 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 text-[10px] font-black uppercase tracking-widest transition-all ${
-                    isMicMuted
-                      ? 'border-red-400/30 bg-red-500/15 text-red-300'
-                      : isUserSpeaking
-                        ? 'border-cyan-400 bg-cyan-400/25 text-cyan-200 shadow-[0_0_24px_rgba(6,182,212,0.6)] animate-pulse'
-                        : 'border-emerald-300/25 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/45'
-                  }`}
-                  title="Voice"
-                >
-                  {isMicMuted ? (
-                    <RiMicOffLine size={20} />
-                  ) : (
-                    <RiMicLine
-                      size={20}
-                      className={isUserSpeaking ? 'text-cyan-300 animate-bounce' : ''}
-                    />
-                  )}
-                  <span className="hidden sm:inline">
-                    {isMicMuted ? 'Muted' : isUserSpeaking ? 'Speaking' : 'Voice'}
-                  </span>
-                  {isUserSpeaking && !isMicMuted && (
-                    <span className="hidden sm:flex items-center gap-0.5 ml-0.5">
-                      <span className="h-2 w-0.5 rounded-full bg-cyan-300 animate-pulse" />
-                      <span className="h-3.5 w-0.5 rounded-full bg-cyan-100 animate-pulse delay-75" />
-                      <span className="h-2 w-0.5 rounded-full bg-cyan-300 animate-pulse delay-150" />
+              <div className="px-6">
+                <div className={`${glassPanel} grid grid-cols-3 gap-2 p-2`}>
+                  <button
+                    onClick={onVisionClick}
+                    className={`flex h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                      isVideoOn
+                        ? visionMode === 'dual'
+                          ? 'border-cyan-400/50 bg-cyan-500/15 text-cyan-200'
+                          : 'border-red-400/35 bg-red-500/15 text-red-300'
+                        : 'border-white/10 bg-white/[0.04] text-zinc-400 hover:border-cyan-300/30 hover:text-cyan-200'
+                    }`}
+                    title="Vision source"
+                  >
+                    {isVideoOn ? <RiSwapBoxLine size={18} /> : <RiCameraLine size={18} />}
+                    <span className="hidden sm:inline">
+                      {isVideoOn ? (visionMode === 'dual' ? 'Dual' : 'Vision') : 'Vision'}
                     </span>
-                  )}
-                </button>
-              </div>
-
-              {/* Neural Systems Quick-Launch HUD Bar */}
-              <div className="flex items-center justify-between gap-2 px-1">
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('show-wallpaper-forge'))}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:border-emerald-500/40 hover:bg-emerald-500/10 text-[9px] font-mono text-zinc-400 hover:text-emerald-300 transition uppercase tracking-wider"
-                  title="AI Wallpaper Engine"
-                >
-                  <RiPaintBrushLine size={13} className="text-emerald-400" />
-                  <span>Wallpaper</span>
-                </button>
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('show-whatsapp'))}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:border-cyan-500/40 hover:bg-cyan-500/10 text-[9px] font-mono text-zinc-400 hover:text-cyan-300 transition uppercase tracking-wider"
-                  title="WhatsApp Automation"
-                >
-                  <RiWhatsappLine size={13} className="text-cyan-400" />
-                  <span>WhatsApp</span>
-                </button>
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('show-doc-forge'))}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:border-purple-500/40 hover:bg-purple-500/10 text-[9px] font-mono text-zinc-400 hover:text-purple-300 transition uppercase tracking-wider"
-                  title="Document & Slide Forge"
-                >
-                  <RiFilePpt2Line size={13} className="text-purple-400" />
-                  <span>Doc Forge</span>
-                </button>
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('show-focus'))}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] hover:border-amber-500/40 hover:bg-amber-500/10 text-[9px] font-mono text-zinc-400 hover:text-amber-300 transition uppercase tracking-wider"
-                  title="Deep Work Focus Protocol"
-                >
-                  <RiShieldCheckLine size={13} className="text-amber-400" />
-                  <span>Focus</span>
-                </button>
+                  </button>
+                  <button
+                    onClick={toggleSystem}
+                    className={`relative flex h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-bold uppercase tracking-widest transition-all ${isSystemStarting ? 'border-amber-300/45 bg-amber-400/15 text-amber-100' : isSystemActive ? 'border-emerald-300/40 bg-emerald-400 text-black' : 'border-red-400/35 bg-red-500/10 text-red-300 hover:bg-red-500/20'}`}
+                    title="Core"
+                  >
+                    <RiPhoneFill
+                      size={19}
+                      className={isSystemActive || isSystemStarting ? 'animate-pulse' : ''}
+                    />
+                    <span>{isSystemStarting ? 'Booting' : isSystemActive ? 'Online' : 'Core'}</span>
+                  </button>
+                  <button
+                    onClick={toggleMic}
+                    className={`flex h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                      isMicMuted
+                        ? 'border-red-400/30 bg-red-500/10 text-red-300 hover:bg-red-500/20'
+                        : isUserSpeaking
+                          ? 'border-cyan-400/60 bg-cyan-400/20 text-cyan-200'
+                          : 'border-emerald-300/25 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/45'
+                    }`}
+                    title="Voice"
+                  >
+                    {isMicMuted ? (
+                      <RiMicOffLine size={18} />
+                    ) : (
+                      <RiMicLine
+                        size={18}
+                        className={isUserSpeaking ? 'text-cyan-300 animate-bounce' : ''}
+                      />
+                    )}
+                    <span className="hidden sm:inline">
+                      {isMicMuted ? 'Muted' : isUserSpeaking ? 'Speaking' : 'Voice'}
+                    </span>
+                    {isUserSpeaking && !isMicMuted && (
+                      <span className="hidden sm:flex items-center gap-0.5 ml-0.5">
+                        <span className="h-2 w-0.5 rounded-full bg-cyan-300 animate-pulse" />
+                        <span className="h-3.5 w-0.5 rounded-full bg-cyan-100 animate-pulse delay-75" />
+                        <span className="h-2 w-0.5 rounded-full bg-cyan-300 animate-pulse delay-150" />
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <CommandDeck
@@ -1310,10 +1214,9 @@ export default function DashboardView({
                 }}
                 onSubmitPrompt={async (prompt, routeAgent) => {
                   if (routeAgent) {
-                    await submitTextCommand('steer')
+                    await submitTextCommand('steer', prompt)
                   } else {
-                    setCommandText(prompt)
-                    await submitTextCommand('queue')
+                    await submitTextCommand('queue', prompt)
                   }
                 }}
               />
@@ -1324,21 +1227,21 @@ export default function DashboardView({
 
       {!isFullScreen && (
         <div className="hidden lg:flex col-span-3 min-h-0 flex-col overflow-hidden h-full z-40">
-          <div className={`${glassPanel} h-full p-4 flex flex-col`}>
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-2">
-              <span className="text-[10px] font-bold tracking-widest text-zinc-400">
-                <RiTerminalBoxLine className="inline mr-1" /> TRANSCRIPT
+          <div className={`${glassPanel} h-full p-4 lg:p-5 flex flex-col`}>
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
+              <span className="text-[10px] font-bold tracking-widest text-zinc-400 flex items-center gap-1.5">
+                <RiTerminalBoxLine /> TRANSCRIPT
               </span>
-              <span className="text-[8px] font-mono text-emerald-500/50">LIVE-LOG</span>
+              <span className="text-[9px] font-mono text-emerald-400/70">LIVE-LOG</span>
             </div>
-            <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3 pr-2 pb-10 scrollbar-small">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3 pr-1.5 pb-6 scrollbar-small">
               {chatHistory.filter((msg) => {
                 const text = msg.parts && msg.parts[0] ? msg.parts[0].text : msg.content || ''
                 return text && !/<(?:no[- ]speech|silence|applause|music|laughter|\|nospeech\|)>/i.test(text) && text.trim().length > 0
               }).length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-700 gap-2 opacity-50">
+                <div className="h-full flex flex-col items-center justify-center text-zinc-600 gap-2 opacity-60">
                   <RiHistoryLine size={24} />
-                  <span className="text-[9px] tracking-widest uppercase font-mono">
+                  <span className="text-[10px] tracking-widest uppercase font-mono">
                     No Data Stream
                   </span>
                 </div>
@@ -1354,7 +1257,7 @@ export default function DashboardView({
                       className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
                     >
                       <div
-                        className={`max-w-[95%] py-2 px-3 rounded-lg text-[11px] leading-relaxed border font-mono font-semibold ${msg.role === 'user' ? 'bg-emerald-900/20 border-emerald-500/20 text-emerald-100/90 rounded-br-none' : 'bg-zinc-900/50 border-white/5 text-zinc-400 rounded-bl-none'}`}
+                        className={`max-w-[95%] py-2.5 px-3 rounded-xl text-xs leading-relaxed border font-mono ${msg.role === 'user' ? 'bg-emerald-950/35 border-emerald-500/20 text-emerald-100 rounded-br-none' : 'bg-white/[0.03] border-white/10 text-zinc-300 rounded-bl-none'}`}
                       >
                         {msg.parts && msg.parts[0] ? msg.parts[0].text : msg.content}
                       </div>

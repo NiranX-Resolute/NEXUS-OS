@@ -1,0 +1,41 @@
+{
+  "name": "nexus-v3-spatial",
+  "private": true,
+  "version": "5.0.0",
+  "description": "Nexus V3 — Spatial Floating Dock Edition (Frosted Graphite & Mint Emerald)",
+  "author": {
+    "name": "NiranX-Resolute"
+  },
+  "homepage": "https://github.com/NiranX-Resolute/NEXUS-OS",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --port 5183",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview --port 5183",
+    "electron": "electron .",
+    "build:win": "npm run build && electron-builder --win",
+    "build:web": "npm run build && electron-builder --win nsis-web",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux"
+  },
+  "dependencies": {
+    "lucide-react": "^1.8.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^41.2.1",
+    "electron-builder": "^26.8.1",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^6.0.3",
+    "vite": "^7.3.0"
+  }
+}

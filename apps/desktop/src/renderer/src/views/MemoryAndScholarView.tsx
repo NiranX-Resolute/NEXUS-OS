@@ -160,7 +160,8 @@ export function MemoryAndScholarView() {
     setIsLoadingPapers(true)
     try {
       const q = queryStr.trim() || 'artificial intelligence autonomous systems'
-      const res = await fetch(`${IPC_ORIGIN}/api/scholar/search?q=${encodeURIComponent(q)}&limit=15`)
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch(`/api/scholar/search?q=${encodeURIComponent(q)}&limit=15`)
       if (res.ok) {
         const data = await res.json()
         if (data && Array.isArray(data.results)) {
@@ -369,7 +370,8 @@ export function MemoryAndScholarView() {
       for (let i = 0; i < subQueries.length; i++) {
         const sq = subQueries[i]
         try {
-          const res = await fetch(`${IPC_ORIGIN}/api/scholar/search?q=${encodeURIComponent(sq)}&limit=4`)
+          const { ipcFetch } = await import('@renderer/services/ipc-client')
+          const res = await ipcFetch(`/api/scholar/search?q=${encodeURIComponent(sq)}&limit=4`)
           if (res.ok) {
             const data = await res.json()
             if (data && Array.isArray(data.results)) {
@@ -447,14 +449,14 @@ export function MemoryAndScholarView() {
 
       let synthesisOutput = ''
       try {
-        const synthRes = await fetch(`${IPC_ORIGIN}/api/scholar/synthesize`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            topic: topic,
-            notes: aggregatedAbstracts.slice(0, 3500)
-          })
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const synthRes = await ipcFetch('/api/scholar/synthesize', {
+        method: 'POST',
+        body: JSON.stringify({
+          topic: topic,
+          notes: aggregatedAbstracts.slice(0, 3500)
         })
+      })
         if (synthRes.ok) {
           const synthData = await synthRes.json()
           if (synthData && synthData.synthesis) {
@@ -509,9 +511,9 @@ ${rankedPapers.map((p, i) => `${i + 1}. **${p.title}** (${p.year}) — *${p.auth
       appendResearchLog('Persisting synthesized research dossier to SQLite WAL (scholar_context namespace)...', 'PHASE-5')
 
       try {
-        await fetch(`${IPC_ORIGIN}/api/memory`, {
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        await ipcFetch('/api/memory', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: `Deep Research: ${topic}`,
             content: synthesisOutput,
@@ -573,7 +575,8 @@ Notes synced persistently with SQLite WAL.`)
 
   const loadStoredNotesFromSqlite = async () => {
     try {
-      const res = await fetch(`${IPC_ORIGIN}/api/memory?namespace=scholar_context&limit=1`)
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/memory?namespace=scholar_context&limit=1')
       if (res.ok) {
         const data = await res.json()
         if (data && Array.isArray(data.memories) && data.memories.length > 0) {
@@ -600,9 +603,9 @@ Notes synced persistently with SQLite WAL.`)
 
     notesSaveTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`${IPC_ORIGIN}/api/memory`, {
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        const res = await ipcFetch('/api/memory', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: 'Nexus Scholar Research Notes',
             content: text,
@@ -743,58 +746,62 @@ Notes synced persistently with SQLite WAL.`)
 
     setIsProcessingVideo(true)
     try {
-      // Simulate/Trigger video analysis via MCP or backend endpoint
-      await new Promise((r) => setTimeout(r, 600))
-      const baseName = pathStr.split('/').pop()?.replace(/\.[^/.]+$/, '') || 'Screen Recording'
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const baseName = pathStr.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, '') || 'Media Session'
+      const isYoutube = /youtube\.com|youtu\.be/i.test(pathStr)
+      let analysisText = ''
+
+      if (isYoutube) {
+        const vidMatch = pathStr.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{6,})/)
+        const ytRes = await ipcFetch('/api/creator/youtube', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'sentiment', video_id: vidMatch?.[1] || pathStr, max_comments: 25 })
+        }).catch(() => null)
+        if (ytRes && ytRes.ok) {
+          const ytData = await ytRes.json()
+          analysisText = ytData.summary || JSON.stringify(ytData).slice(0, 600)
+        }
+      }
+
+      if (!analysisText) {
+        const synthRes = await ipcFetch('/api/scholar/synthesize', {
+          method: 'POST',
+          body: JSON.stringify({
+            topic: `Video & Recording Brief: ${baseName}`,
+            notes: `Source URI/Path: ${pathStr}`
+          })
+        }).catch(() => null)
+        if (synthRes && synthRes.ok) {
+          const sData = await synthRes.json()
+          analysisText = sData.synthesis || ''
+        }
+      }
 
       const summary: VideoSummaryItem = {
         id: `vid_${Date.now()}`,
         videoPath: pathStr,
-        durationSec: 185,
-        fileSizeMb: 36.4,
-        summary: `Executive Intelligence Summary for '${baseName}'. Captured active desktop engineering workflows. Discovered key operational milestones with zero critical modal blockades. Verified ScopeGuard execution boundary check.`,
-        topics: [
-          'Desktop UFO Automation',
-          'Win32 Input Validation',
-          'Sovereign Memory Persistence',
-          'Air-Gap Confinement'
-        ],
-        keyEvents: [
-          { timecode: '00:10', event: `Presentation initial setup and target view focus: ${baseName}.` },
-          { timecode: '00:48', event: 'Interactive control actuation executed with auto-approval.' },
-          { timecode: '01:35', event: 'Reflex state update committed to SQLite WAL.' },
-          { timecode: '02:40', event: 'Session concluded with verified state metrics.' }
-        ],
+        durationSec: 0,
+        fileSizeMb: 0,
+        summary: analysisText || `Indexed media reference '${baseName}' into sovereign memory.`,
+        topics: ['Sovereign Synthesis', baseName],
+        keyEvents: [{ timecode: '00:00', event: `Source indexed: ${baseName}` }],
         createdAt: Date.now()
       }
 
+      await ipcFetch('/api/memory', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: `Media Dossier: ${baseName}`,
+          content: summary.summary,
+          namespace: 'scholar_context',
+          metadata: { source: pathStr, type: 'video_summary' }
+        })
+      }).catch(() => null)
+
       setVideoSummaryData(summary)
-
-      // Generate dynamic quiz
-      const generatedQuiz: QuizQuestion[] = [
-        {
-          id: `gen_q1_${Date.now()}`,
-          question: `What primary engineering action was demonstrated during the ${baseName} session?`,
-          options: [
-            `A) Autonomous Desktop Execution & Sovereignty Validation`,
-            `B) Remote Cloud Egress Deployment`,
-            `C) Unverified Binary Compilation`,
-            `D) Plaintext Key Storage`
-          ],
-          correctOptionIndex: 0,
-          explanation: `The screen presentation focused strictly on verified autonomous desktop actuation.`
-        },
-        {
-          id: `gen_q2_${Date.now()}`,
-          question: `At what timecode was the interactive control actuation milestone detected?`,
-          options: ['A) 00:10', 'B) 00:48', 'C) 01:35', 'D) 02:40'],
-          correctOptionIndex: 1,
-          explanation: `Keyframe telemetry identified the control milestone at timestamp 00:48.`
-        }
-      ]
-
-      setQuizQuestions(generatedQuiz)
       resetQuizState()
+    } catch {
+      // Keep UI responsive
     } finally {
       setIsProcessingVideo(false)
     }
@@ -837,13 +844,27 @@ Notes synced persistently with SQLite WAL.`)
     if (!target) return
 
     setIsIngestingRag(true)
-    setRagIngestStatus(`Ingesting codebase from '${target}' into namespace [${ragNamespace}]...`)
+    setRagIngestStatus(`Indexing codebase from '${target}' into SQLite WAL [${ragNamespace}]...`)
 
     try {
-      // Simulate chunking and embedding generation via Sovereign DocumentRAG
-      await new Promise((r) => setTimeout(r, 700))
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const treeRes = await ipcFetch(`/api/fs/tree?dir=${encodeURIComponent(target)}`)
+      const treeData = treeRes.ok ? await treeRes.json() : null
+      const items: any[] = Array.isArray(treeData?.items) ? treeData.items : []
+      const fileList = items.filter((i) => !i.is_dir).slice(0, 25)
+
+      await ipcFetch('/api/memory', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: `DocumentRAG Index: ${target}`,
+          content: `Indexed ${fileList.length} files under '${target}': ${fileList.map((f) => f.path).join(', ')}`,
+          namespace: ragNamespace || 'scholar_context',
+          metadata: { source: 'document_rag', file_count: fileList.length, path: target }
+        })
+      })
+
       setRagIngestStatus(
-        `Successfully ingested '${target}'. Indexed 34 files, 142 semantic chunks (384-dim) into SQLite WAL.`
+        `Indexed ${fileList.length} files from '${target}' into SQLite WAL (${ragNamespace}).`
       )
     } catch {
       setRagIngestStatus(`Ingestion failed on path: ${target}`)
@@ -858,16 +879,17 @@ Notes synced persistently with SQLite WAL.`)
 
     setIsSearchingRag(true)
     try {
-      const res = await fetch(`${IPC_ORIGIN}/api/memory/search?q=${encodeURIComponent(q)}&limit=6`)
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch(`/api/memory/search?q=${encodeURIComponent(q)}&limit=6`)
       if (res.ok) {
         const data = await res.json()
-        if (data && Array.isArray(data.results) && data.results.length > 0) {
+        if (data && Array.isArray(data.results)) {
           const mapped: RagChunkResult[] = data.results.map((r: any, idx: number) => ({
             id: r.id || `chunk-${idx}`,
             title: r.title || `Memory Node ${idx}`,
             content: r.content || '',
             score: r.score ?? 0.85,
-            filePath: r.metadata?.file_path || 'core/engine/runtime.py',
+            filePath: r.metadata?.file_path || r.metadata?.path || 'sqlite://agent_local.db',
             lineStart: 1,
             lineEnd: 24,
             matchType: 'hybrid'
@@ -877,7 +899,7 @@ Notes synced persistently with SQLite WAL.`)
         }
       }
     } catch {
-      // Keep existing sample chunks if offline
+      setRagResults([])
     } finally {
       setIsSearchingRag(false)
     }
@@ -1350,9 +1372,9 @@ Notes synced persistently with SQLite WAL.`)
                             onClick={async () => {
                               setIsSynthesizingPaper(true)
                               try {
-                                const res = await fetch(`${IPC_ORIGIN}/api/scholar/synthesize`, {
+                                const { ipcFetch } = await import('@renderer/services/ipc-client')
+                                const res = await ipcFetch('/api/scholar/synthesize', {
                                   method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({
                                     topic: selectedPaper.title,
                                     notes: selectedPaper.abstract

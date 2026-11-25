@@ -45,13 +45,19 @@ export function ScholarWorkbench() {
   const fetchPapers = async (query: string = '') => {
     setIsLoadingPapers(true);
     try {
-      const res = await fetch(
-        `http://127.0.0.1:47630/api/scholar/search?q=${encodeURIComponent(query)}&limit=12`
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch(
+        `/api/scholar/search?query=${encodeURIComponent(query || 'autonomous AI systems')}&limit=12`
       );
       if (res.ok) {
         const data = await res.json();
-        if (data && Array.isArray(data.results)) {
-          const mapped: Paper[] = data.results.map((r: any, idx: number) => {
+        const rawResults = Array.isArray(data?.results)
+          ? data.results
+          : Array.isArray(data?.papers)
+          ? data.papers
+          : [];
+        if (rawResults.length > 0) {
+          const mapped: Paper[] = rawResults.map((r: any, idx: number) => {
             const authorsList = Array.isArray(r.authors)
               ? r.authors
               : typeof r.authors === 'string'
@@ -60,18 +66,18 @@ export function ScholarWorkbench() {
 
             const paperId = r.id || `paper-${idx}`;
             const cleanTitle = r.title || 'Untitled Research Finding';
-            const pdfUrl = r.id && r.id.startsWith('http')
-              ? r.id.replace('abs', 'pdf')
-              : `https://arxiv.org/abs/${paperId}`;
+            const pdfUrl = r.id && String(r.id).startsWith('http')
+              ? String(r.id).replace('abs', 'pdf')
+              : r.link || `https://arxiv.org/abs/${paperId}`;
 
             return {
               id: paperId,
               title: cleanTitle,
               authors: authorsList,
               year: r.year || new Date().getFullYear(),
-              source: r.venue || (r.is_local ? 'Sovereign Knowledge' : 'arXiv preprint'),
+              source: r.venue || r.category || (r.is_local ? 'Sovereign Knowledge' : 'arXiv preprint'),
               citations: r.citations ?? (15 + (idx * 7) % 40),
-              abstract: r.abstract || 'No abstract content recorded in node.',
+              abstract: r.abstract || r.summary || 'No abstract content recorded in node.',
               topics: r.is_local
                 ? ['Local Knowledge', 'Sovereign WAL', 'Nexus Engine']
                 : ['Autonomous Agents', 'Edge Computing', 'Deep Learning'],
@@ -97,9 +103,8 @@ export function ScholarWorkbench() {
   // 2. Fetch existing research notes from SQLite WAL
   const loadStoredNotes = async () => {
     try {
-      const res = await fetch(
-        'http://127.0.0.1:47630/api/memory?namespace=scholar_context&limit=1'
-      );
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/memory?namespace=scholar_context&limit=1');
       if (res.ok) {
         const data = await res.json();
         if (data && Array.isArray(data.memories) && data.memories.length > 0) {
@@ -148,9 +153,9 @@ export function ScholarWorkbench() {
 
     notesSaveTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await fetch('http://127.0.0.1:47630/api/memory', {
+        const { ipcFetch } = await import('@renderer/services/ipc-client');
+        const res = await ipcFetch('/api/memory', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: 'Nexus Scholar Research Notes',
             content: text,
@@ -193,9 +198,9 @@ export function ScholarWorkbench() {
     if (!selectedPaper.title || selectedPaper.id === 'empty-selection') return;
     setIsSynthesizing(true);
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/scholar/synthesize', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/scholar/synthesize', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic: selectedPaper.title,
           notes: selectedPaper.abstract,

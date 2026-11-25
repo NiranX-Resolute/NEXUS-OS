@@ -255,38 +255,25 @@ export const CircuitDrawers: React.FC<CircuitDrawersProps> = ({
   const [currentGovMode, setCurrentGovMode] = useState<string>(workspaceMode)
 
   // ---------------------------------------------------------------------------
-  // Bearer Token Discovery & Fetch Helper
+  // Bearer Token Discovery & Authenticated IPC Fetch Helper
   // ---------------------------------------------------------------------------
   useEffect(() => {
     const discoverToken = async () => {
       try {
-        const resp = await fetch('http://127.0.0.1:47630/api/auth/token')
-        if (resp.ok) {
-          const data = await resp.json()
-          if (data.token) {
-            setAuthToken(data.token)
-          }
-        }
+        const { getIpcToken } = await import('@renderer/services/ipc-client')
+        const tok = await getIpcToken()
+        if (tok) setAuthToken(tok)
       } catch {}
     }
-    discoverToken()
+    void discoverToken()
   }, [])
 
   const apiFetch = useCallback(
     async (path: string, options: RequestInit = {}) => {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        ...((options.headers as Record<string, string>) || {})
-      }
-      if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`
-      }
-      return fetch(`http://127.0.0.1:47630${path}`, {
-        ...options,
-        headers
-      })
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      return ipcFetch(path, options)
     },
-    [authToken]
+    []
   )
 
   // ---------------------------------------------------------------------------

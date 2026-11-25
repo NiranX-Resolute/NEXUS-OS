@@ -1,0 +1,650 @@
+{
+  "version": "5.0.0",
+  "release_tag": "v5.1.0-editions",
+  "generated_at": "2026-11-25T19:53:32.708723+00:00",
+  "cloudflare_worker_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions",
+  "github_release_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions",
+  "total_artifacts": 70,
+  "editions": {
+    "v1-obsidian": {
+      "NEXUS-V1-Obsidian-v5.0.0-Portable.exe": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-Portable.exe",
+        "edition": "v1-obsidian",
+        "size_bytes": 91976542,
+        "size_formatted": "87.7 MB",
+        "sha256": "699b6b8efcade352aa5055a79fbd92b660c91b71e0517ab30a837978402c4854",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Portable.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Portable.exe"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-Setup.exe": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-Setup.exe",
+        "edition": "v1-obsidian",
+        "size_bytes": 92605185,
+        "size_formatted": "88.3 MB",
+        "sha256": "2c2be3767bc46e0e1335218061600007fe8e7537efb7fcb5acab72f349abbf0a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Setup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Setup.exe"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-WebSetup.exe": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-WebSetup.exe",
+        "edition": "v1-obsidian",
+        "size_bytes": 1304801,
+        "size_formatted": "1.2 MB",
+        "sha256": "d87eea19991f87387c9bc0de3afb3035cad25919be485da714e8417543ee63dd",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-WebSetup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-WebSetup.exe"
+      },
+      "nexus-v1-obsidian-5.0.0-x64.nsis.7z": {
+        "filename": "nexus-v1-obsidian-5.0.0-x64.nsis.7z",
+        "edition": "v1-obsidian",
+        "size_bytes": 91426564,
+        "size_formatted": "87.2 MB",
+        "sha256": "6e676743192fb35ccc94cbab54591bf03f8767e6ce70c9f9bddc71bd9667c4d1",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/nexus-v1-obsidian-5.0.0-x64.nsis.7z",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/nexus-v1-obsidian-5.0.0-x64.nsis.7z"
+      },
+      "NEXUS-V1-Obsidian-latest.yml": {
+        "filename": "NEXUS-V1-Obsidian-latest.yml",
+        "edition": "v1-obsidian",
+        "size_bytes": 345,
+        "size_formatted": "345 B",
+        "sha256": "36dc6ddeafc59ff6cad45265457543dbf6374e3e5685a12005018125204fb902",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-latest.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-latest.yml"
+      },
+      "NEXUS-V1-Obsidian-latest-web.yml": {
+        "filename": "NEXUS-V1-Obsidian-latest-web.yml",
+        "edition": "v1-obsidian",
+        "size_bytes": 580,
+        "size_formatted": "580 B",
+        "sha256": "e3ecbece8282f9d2923057ad52cb39b7b19aa69b10482545c238a9c85b44b153",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-latest-web.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-latest-web.yml"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.img": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.img",
+        "edition": "v1-obsidian",
+        "size_bytes": 33554432,
+        "size_formatted": "32.0 MB",
+        "sha256": "00e54c37b44cef096e4722d681f6edd8e67edb4fdc85cce6c75fdacdf52416dd",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.img",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.img"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.iso": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.iso",
+        "edition": "v1-obsidian",
+        "size_bytes": 1513472,
+        "size_formatted": "1.4 MB",
+        "sha256": "00ff10be617c4ab069fa27b21f352da8e55b22befafc4e8358e785fdf3241c9a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.iso",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Linux-x86_64.iso"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-Local-x86_64.AppImage": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-Local-x86_64.AppImage",
+        "edition": "v1-obsidian",
+        "size_bytes": 1605632,
+        "size_formatted": "1.5 MB",
+        "sha256": "6943d3352719a321b9ca2c3c54cc170dd0689100e9fbe94f1912e0f81b84e37a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Local-x86_64.AppImage",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Local-x86_64.AppImage"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-macOS-Bundle.app.zip": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-macOS-Bundle.app.zip",
+        "edition": "v1-obsidian",
+        "size_bytes": 1496174,
+        "size_formatted": "1.4 MB",
+        "sha256": "a425f3802bdb6770ddc0a4a6d3812c81537ffaaed26936b5d8d10217b99c2e50",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-macOS-Bundle.app.zip",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-macOS-Bundle.app.zip"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-macOS-Local.dmg": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-macOS-Local.dmg",
+        "edition": "v1-obsidian",
+        "size_bytes": 1536512,
+        "size_formatted": "1.5 MB",
+        "sha256": "2157beed355612c05218b721336c7b98b58ec54a52563a78254c05742e97f253",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-macOS-Local.dmg",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-macOS-Local.dmg"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-macOS-WebInstaller.command": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-macOS-WebInstaller.command",
+        "edition": "v1-obsidian",
+        "size_bytes": 2021,
+        "size_formatted": "2.0 KB",
+        "sha256": "05f79839ec6af34474077c96ce28932487b124b1ce8624d21a9965751be23bd6",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-macOS-WebInstaller.command",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-macOS-WebInstaller.command"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-Linux-WebInstaller.sh": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-Linux-WebInstaller.sh",
+        "edition": "v1-obsidian",
+        "size_bytes": 1422,
+        "size_formatted": "1.4 KB",
+        "sha256": "3abd7d02dc836d405afefbb51ef4aa59adaacc5c6359676868153dc515c75779",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Linux-WebInstaller.sh",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Linux-WebInstaller.sh"
+      },
+      "NEXUS-V1-Obsidian-v5.0.0-Windows-WebBootstrap.ps1": {
+        "filename": "NEXUS-V1-Obsidian-v5.0.0-Windows-WebBootstrap.ps1",
+        "edition": "v1-obsidian",
+        "size_bytes": 432,
+        "size_formatted": "432 B",
+        "sha256": "b0ef4141392efe2e73a4adff7d2bbb5d572f9623a4910dab12e91988f6d04875",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Windows-WebBootstrap.ps1",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V1-Obsidian-v5.0.0-Windows-WebBootstrap.ps1"
+      }
+    },
+    "v2-cockpit": {
+      "NEXUS-V2-Cockpit-v5.0.0-Portable.exe": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-Portable.exe",
+        "edition": "v2-cockpit",
+        "size_bytes": 91973456,
+        "size_formatted": "87.7 MB",
+        "sha256": "df478f2abefeebf345632be3b66380c18a21298d870537223f4d65a7853a85fe",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Portable.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Portable.exe"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-Setup.exe": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-Setup.exe",
+        "edition": "v2-cockpit",
+        "size_bytes": 92602219,
+        "size_formatted": "88.3 MB",
+        "sha256": "5fe58ef10251c762bde715078bb6d7745c61135d64cc48eb4ac54ffc613d577a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Setup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Setup.exe"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-WebSetup.exe": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-WebSetup.exe",
+        "edition": "v2-cockpit",
+        "size_bytes": 1304937,
+        "size_formatted": "1.2 MB",
+        "sha256": "f7e79e9e9bd373e8e06daccb98cdf96d7bb1971dcb2a88061f70c370507f7b09",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-WebSetup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-WebSetup.exe"
+      },
+      "nexus-v2-cockpit-5.0.0-x64.nsis.7z": {
+        "filename": "nexus-v2-cockpit-5.0.0-x64.nsis.7z",
+        "edition": "v2-cockpit",
+        "size_bytes": 91423472,
+        "size_formatted": "87.2 MB",
+        "sha256": "b9605fde6578ac93b48c7bf657bc656dd321d64ce722187bcf598a00a1c608ea",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/nexus-v2-cockpit-5.0.0-x64.nsis.7z",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/nexus-v2-cockpit-5.0.0-x64.nsis.7z"
+      },
+      "NEXUS-V2-Cockpit-latest.yml": {
+        "filename": "NEXUS-V2-Cockpit-latest.yml",
+        "edition": "v2-cockpit",
+        "size_bytes": 343,
+        "size_formatted": "343 B",
+        "sha256": "9db599a78e29ecee686c9c3d2972538687dae9e035369cd6004793ad34695efb",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-latest.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-latest.yml"
+      },
+      "NEXUS-V2-Cockpit-latest-web.yml": {
+        "filename": "NEXUS-V2-Cockpit-latest-web.yml",
+        "edition": "v2-cockpit",
+        "size_bytes": 576,
+        "size_formatted": "576 B",
+        "sha256": "ed96be9969d76f66ceeb8e432d2b8552a94712f332979f42b194e8f677b54703",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-latest-web.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-latest-web.yml"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.img": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.img",
+        "edition": "v2-cockpit",
+        "size_bytes": 33554432,
+        "size_formatted": "32.0 MB",
+        "sha256": "b7421b6ea162007763bfad995b8878d1be8b977c49db29515c62a530e099a489",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.img",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.img"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.iso": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.iso",
+        "edition": "v2-cockpit",
+        "size_bytes": 1492992,
+        "size_formatted": "1.4 MB",
+        "sha256": "56732a9eaf6c05dee0cd57029d34e48ab1fea73f8e7aabf55cb993688f4c0e31",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.iso",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Linux-x86_64.iso"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-Local-x86_64.AppImage": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-Local-x86_64.AppImage",
+        "edition": "v2-cockpit",
+        "size_bytes": 1585152,
+        "size_formatted": "1.5 MB",
+        "sha256": "f3e59eb29d67042f4e554b4e668622f518fdd3ab4432cb38dc53f2bd44a006c7",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Local-x86_64.AppImage",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Local-x86_64.AppImage"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-macOS-Bundle.app.zip": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-macOS-Bundle.app.zip",
+        "edition": "v2-cockpit",
+        "size_bytes": 1474483,
+        "size_formatted": "1.4 MB",
+        "sha256": "972fa91bb1b4c437aacd56ccdf76fe04920704d085054527501fd287f9c5ac1d",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-macOS-Bundle.app.zip",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-macOS-Bundle.app.zip"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-macOS-Local.dmg": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-macOS-Local.dmg",
+        "edition": "v2-cockpit",
+        "size_bytes": 1513984,
+        "size_formatted": "1.4 MB",
+        "sha256": "ebc124a974a0d4e903a5f93a9c59a34ee8eb25e16878bb6af8a0c64297e1d0cd",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-macOS-Local.dmg",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-macOS-Local.dmg"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-macOS-WebInstaller.command": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-macOS-WebInstaller.command",
+        "edition": "v2-cockpit",
+        "size_bytes": 2012,
+        "size_formatted": "2.0 KB",
+        "sha256": "d05b4f872d85a50d1c5d83fede356264c5f954854f9c880ed43c5ea6b1fa4d89",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-macOS-WebInstaller.command",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-macOS-WebInstaller.command"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-Linux-WebInstaller.sh": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-Linux-WebInstaller.sh",
+        "edition": "v2-cockpit",
+        "size_bytes": 1419,
+        "size_formatted": "1.4 KB",
+        "sha256": "e2d589002373c376dd0717a00f4fe41e092694ec3a2575527cff5e5101b827b5",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Linux-WebInstaller.sh",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Linux-WebInstaller.sh"
+      },
+      "NEXUS-V2-Cockpit-v5.0.0-Windows-WebBootstrap.ps1": {
+        "filename": "NEXUS-V2-Cockpit-v5.0.0-Windows-WebBootstrap.ps1",
+        "edition": "v2-cockpit",
+        "size_bytes": 428,
+        "size_formatted": "428 B",
+        "sha256": "ae24a85637a188c9de163bb7c025f71ad83ad62a0968a91a91c80c8d76c25e2e",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Windows-WebBootstrap.ps1",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V2-Cockpit-v5.0.0-Windows-WebBootstrap.ps1"
+      }
+    },
+    "v3-spatial": {
+      "NEXUS-V3-Spatial-v5.0.0-Portable.exe": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-Portable.exe",
+        "edition": "v3-spatial",
+        "size_bytes": 91971842,
+        "size_formatted": "87.7 MB",
+        "sha256": "1c5981d6f477e430f6d16f6812362e45705e8452c94d31007c34e7e9d1b0ad20",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Portable.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Portable.exe"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-Setup.exe": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-Setup.exe",
+        "edition": "v3-spatial",
+        "size_bytes": 92600630,
+        "size_formatted": "88.3 MB",
+        "sha256": "1a7440c25ffb480735854874d9e949a182661660701752bd7f44ac90a4811f9a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Setup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Setup.exe"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-WebSetup.exe": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-WebSetup.exe",
+        "edition": "v3-spatial",
+        "size_bytes": 1304959,
+        "size_formatted": "1.2 MB",
+        "sha256": "a95a69e7064273eda369a5748d8b332a0285ab1e31eba296c4d7a82ea1d29f4f",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-WebSetup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-WebSetup.exe"
+      },
+      "nexus-v3-spatial-5.0.0-x64.nsis.7z": {
+        "filename": "nexus-v3-spatial-5.0.0-x64.nsis.7z",
+        "edition": "v3-spatial",
+        "size_bytes": 91421860,
+        "size_formatted": "87.2 MB",
+        "sha256": "0d36ffb23e1609441f11a5679058231b2b753cd5918a8df400e86c122ae26ee9",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/nexus-v3-spatial-5.0.0-x64.nsis.7z",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/nexus-v3-spatial-5.0.0-x64.nsis.7z"
+      },
+      "NEXUS-V3-Spatial-latest.yml": {
+        "filename": "NEXUS-V3-Spatial-latest.yml",
+        "edition": "v3-spatial",
+        "size_bytes": 343,
+        "size_formatted": "343 B",
+        "sha256": "90e3b5c07c710b35c63b2143a15cfb01ddb8e41e2d787c94c468a023771450ae",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-latest.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-latest.yml"
+      },
+      "NEXUS-V3-Spatial-latest-web.yml": {
+        "filename": "NEXUS-V3-Spatial-latest-web.yml",
+        "edition": "v3-spatial",
+        "size_bytes": 576,
+        "size_formatted": "576 B",
+        "sha256": "81bc9c7882a825ca3a10cdbbf85b80d2b1d62de37aa97608d6c5b2ff6b0a52a2",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-latest-web.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-latest-web.yml"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.img": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.img",
+        "edition": "v3-spatial",
+        "size_bytes": 33554432,
+        "size_formatted": "32.0 MB",
+        "sha256": "005f8ad56e9654433f5f4c156af9d299858841963ed292f8df411ad575e0530c",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.img",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.img"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.iso": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.iso",
+        "edition": "v3-spatial",
+        "size_bytes": 1472512,
+        "size_formatted": "1.4 MB",
+        "sha256": "69aba8c5f6c7a93a5ae3952e5a5e5fe8e17b63d1df94760af278a94862e9ac65",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.iso",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Linux-x86_64.iso"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-Local-x86_64.AppImage": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-Local-x86_64.AppImage",
+        "edition": "v3-spatial",
+        "size_bytes": 1564672,
+        "size_formatted": "1.5 MB",
+        "sha256": "7e8b4edc8eec47a53ad879855aaee09fbc26731fb6144b47968f09ca96fcd399",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Local-x86_64.AppImage",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Local-x86_64.AppImage"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-macOS-Bundle.app.zip": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-macOS-Bundle.app.zip",
+        "edition": "v3-spatial",
+        "size_bytes": 1455680,
+        "size_formatted": "1.4 MB",
+        "sha256": "a1494421026791427f442c18f62d50f8e48b6718fb98b4dee19991e68c1c973a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-macOS-Bundle.app.zip",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-macOS-Bundle.app.zip"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-macOS-Local.dmg": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-macOS-Local.dmg",
+        "edition": "v3-spatial",
+        "size_bytes": 1495552,
+        "size_formatted": "1.4 MB",
+        "sha256": "e9fbe50fcec11164af1e80f72c2aed800e5f0cea496240e41799f2bb6dbd4ef6",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-macOS-Local.dmg",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-macOS-Local.dmg"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-macOS-WebInstaller.command": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-macOS-WebInstaller.command",
+        "edition": "v3-spatial",
+        "size_bytes": 2012,
+        "size_formatted": "2.0 KB",
+        "sha256": "978e877aa8b5ce416d8a76086b1877b56a2a6adcf095d8d15ac57587ec0054b7",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-macOS-WebInstaller.command",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-macOS-WebInstaller.command"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-Linux-WebInstaller.sh": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-Linux-WebInstaller.sh",
+        "edition": "v3-spatial",
+        "size_bytes": 1419,
+        "size_formatted": "1.4 KB",
+        "sha256": "363838698803d680fa5eaa1745335f2958968e2764bdc976220e7d03c16024b3",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Linux-WebInstaller.sh",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Linux-WebInstaller.sh"
+      },
+      "NEXUS-V3-Spatial-v5.0.0-Windows-WebBootstrap.ps1": {
+        "filename": "NEXUS-V3-Spatial-v5.0.0-Windows-WebBootstrap.ps1",
+        "edition": "v3-spatial",
+        "size_bytes": 428,
+        "size_formatted": "428 B",
+        "sha256": "1302b8773ed3a86dd8a4a370621cc81f6f413da3cdb83c81b82525117a42d237",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Windows-WebBootstrap.ps1",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V3-Spatial-v5.0.0-Windows-WebBootstrap.ps1"
+      }
+    },
+    "v4-minimal": {
+      "NEXUS-V4-Minimal-v5.0.0-Portable.exe": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-Portable.exe",
+        "edition": "v4-minimal",
+        "size_bytes": 91975506,
+        "size_formatted": "87.7 MB",
+        "sha256": "bc7ba321252fb782dc4b18d1df7df83e0b57410c2fa4ddc127e104f36b5367f1",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Portable.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Portable.exe"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-Setup.exe": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-Setup.exe",
+        "edition": "v4-minimal",
+        "size_bytes": 92604278,
+        "size_formatted": "88.3 MB",
+        "sha256": "8997ad4bb7c2dbe0f95ead35a67743032c0f843bc7bb6897bb1ea81bb5a2f308",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Setup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Setup.exe"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-WebSetup.exe": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-WebSetup.exe",
+        "edition": "v4-minimal",
+        "size_bytes": 1304877,
+        "size_formatted": "1.2 MB",
+        "sha256": "bf75b8285e009906c4502a832b0563376637483a12f1755bf96528d91a451e7c",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-WebSetup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-WebSetup.exe"
+      },
+      "nexus-v4-minimal-5.0.0-x64.nsis.7z": {
+        "filename": "nexus-v4-minimal-5.0.0-x64.nsis.7z",
+        "edition": "v4-minimal",
+        "size_bytes": 91425524,
+        "size_formatted": "87.2 MB",
+        "sha256": "f6929a982b5017c5b558ffd82cc9a3c4d0177d43500031b5216cc85f0bb3d97b",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/nexus-v4-minimal-5.0.0-x64.nsis.7z",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/nexus-v4-minimal-5.0.0-x64.nsis.7z"
+      },
+      "NEXUS-V4-Minimal-latest.yml": {
+        "filename": "NEXUS-V4-Minimal-latest.yml",
+        "edition": "v4-minimal",
+        "size_bytes": 343,
+        "size_formatted": "343 B",
+        "sha256": "62b130ddc0ec1c5661aa275926449d146b42f56c934df60fb1b33beefba2b99b",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-latest.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-latest.yml"
+      },
+      "NEXUS-V4-Minimal-latest-web.yml": {
+        "filename": "NEXUS-V4-Minimal-latest-web.yml",
+        "edition": "v4-minimal",
+        "size_bytes": 576,
+        "size_formatted": "576 B",
+        "sha256": "92d1a9c8372a2e0f2ccbdf996aec267391eac1d2f32d95c7f89d231f040902f6",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-latest-web.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-latest-web.yml"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.img": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.img",
+        "edition": "v4-minimal",
+        "size_bytes": 33554432,
+        "size_formatted": "32.0 MB",
+        "sha256": "450b576eb0b2c710f910693932b8630a1fe6f391230f4cfeae397257b7527624",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.img",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.img"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.iso": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.iso",
+        "edition": "v4-minimal",
+        "size_bytes": 1503232,
+        "size_formatted": "1.4 MB",
+        "sha256": "959f4916b7252ee75c8027dd5a291e7ed916d78f34780d708bc5858f94aadd9d",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.iso",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Linux-x86_64.iso"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-Local-x86_64.AppImage": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-Local-x86_64.AppImage",
+        "edition": "v4-minimal",
+        "size_bytes": 1595392,
+        "size_formatted": "1.5 MB",
+        "sha256": "f1ae9e0d86b0f989de17bd52dfd2eccb6f11847baed3f232d50dace8a966c65d",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Local-x86_64.AppImage",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Local-x86_64.AppImage"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-macOS-Bundle.app.zip": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-macOS-Bundle.app.zip",
+        "edition": "v4-minimal",
+        "size_bytes": 1489766,
+        "size_formatted": "1.4 MB",
+        "sha256": "0be28f5f9163ede96d871d247fb60d87b930881dee6728698086b4f3cec9e1e1",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-macOS-Bundle.app.zip",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-macOS-Bundle.app.zip"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-macOS-Local.dmg": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-macOS-Local.dmg",
+        "edition": "v4-minimal",
+        "size_bytes": 1530368,
+        "size_formatted": "1.5 MB",
+        "sha256": "1864b63ce66955178924de522494282642bd56f1cf1f0fb14aa1fece095e4010",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-macOS-Local.dmg",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-macOS-Local.dmg"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-macOS-WebInstaller.command": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-macOS-WebInstaller.command",
+        "edition": "v4-minimal",
+        "size_bytes": 2012,
+        "size_formatted": "2.0 KB",
+        "sha256": "a113df1b323cca46ce729341b6feeb5f802c11f1d3bf36ffe4d8787c9694eb1e",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-macOS-WebInstaller.command",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-macOS-WebInstaller.command"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-Linux-WebInstaller.sh": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-Linux-WebInstaller.sh",
+        "edition": "v4-minimal",
+        "size_bytes": 1419,
+        "size_formatted": "1.4 KB",
+        "sha256": "e6892b793efe44123834abc1c83f5e3eee899fac29ffbd10110d7b205f1e2610",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Linux-WebInstaller.sh",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Linux-WebInstaller.sh"
+      },
+      "NEXUS-V4-Minimal-v5.0.0-Windows-WebBootstrap.ps1": {
+        "filename": "NEXUS-V4-Minimal-v5.0.0-Windows-WebBootstrap.ps1",
+        "edition": "v4-minimal",
+        "size_bytes": 428,
+        "size_formatted": "428 B",
+        "sha256": "a2674b1e356d562457e2cc49eca2b0fb6ad34a945418a58f4374fd0567a5e02a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Windows-WebBootstrap.ps1",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V4-Minimal-v5.0.0-Windows-WebBootstrap.ps1"
+      }
+    },
+    "v5-command": {
+      "NEXUS-V5-Command-v5.0.0-Portable.exe": {
+        "filename": "NEXUS-V5-Command-v5.0.0-Portable.exe",
+        "edition": "v5-command",
+        "size_bytes": 91976010,
+        "size_formatted": "87.7 MB",
+        "sha256": "1866635c0f3c2ebfd268b219fe8508d9ec5011d6c79c1547165df93694acc04f",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Portable.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Portable.exe"
+      },
+      "NEXUS-V5-Command-v5.0.0-Setup.exe": {
+        "filename": "NEXUS-V5-Command-v5.0.0-Setup.exe",
+        "edition": "v5-command",
+        "size_bytes": 92604748,
+        "size_formatted": "88.3 MB",
+        "sha256": "9029372d58ee253265f503e69f1f6c54ef228be221e0509d719368d1df488b12",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Setup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Setup.exe"
+      },
+      "NEXUS-V5-Command-v5.0.0-WebSetup.exe": {
+        "filename": "NEXUS-V5-Command-v5.0.0-WebSetup.exe",
+        "edition": "v5-command",
+        "size_bytes": 1304828,
+        "size_formatted": "1.2 MB",
+        "sha256": "e4311f4a00aa48c868ddcf3b411038734fc0728fd5b2eca2bf42b22d7626a7ab",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-WebSetup.exe",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-WebSetup.exe"
+      },
+      "nexus-v5-command-5.0.0-x64.nsis.7z": {
+        "filename": "nexus-v5-command-5.0.0-x64.nsis.7z",
+        "edition": "v5-command",
+        "size_bytes": 91426034,
+        "size_formatted": "87.2 MB",
+        "sha256": "c5fb5183866c5b3a5d80784eef2e812cc5afa99058333a5bc6fe4d3fbd567b62",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/nexus-v5-command-5.0.0-x64.nsis.7z",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/nexus-v5-command-5.0.0-x64.nsis.7z"
+      },
+      "NEXUS-V5-Command-latest.yml": {
+        "filename": "NEXUS-V5-Command-latest.yml",
+        "edition": "v5-command",
+        "size_bytes": 343,
+        "size_formatted": "343 B",
+        "sha256": "cac285f7c561ddff155451e704b3b2ac3386cda71e4e77c7dcd22bbcf6d2ceb0",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-latest.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-latest.yml"
+      },
+      "NEXUS-V5-Command-latest-web.yml": {
+        "filename": "NEXUS-V5-Command-latest-web.yml",
+        "edition": "v5-command",
+        "size_bytes": 576,
+        "size_formatted": "576 B",
+        "sha256": "adaf14268dbfbb96958429830e7729ad7bd72509b16d3eab9ccb01710cfc0942",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-latest-web.yml",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-latest-web.yml"
+      },
+      "NEXUS-V5-Command-v5.0.0-Linux-x86_64.img": {
+        "filename": "NEXUS-V5-Command-v5.0.0-Linux-x86_64.img",
+        "edition": "v5-command",
+        "size_bytes": 33554432,
+        "size_formatted": "32.0 MB",
+        "sha256": "6c25425b6f2e6acf5b2286ea86afda1d2560cd87a08ef2b3e08b9aadd5e50c58",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Linux-x86_64.img",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Linux-x86_64.img"
+      },
+      "NEXUS-V5-Command-v5.0.0-Linux-x86_64.iso": {
+        "filename": "NEXUS-V5-Command-v5.0.0-Linux-x86_64.iso",
+        "edition": "v5-command",
+        "size_bytes": 1513472,
+        "size_formatted": "1.4 MB",
+        "sha256": "4f3ffaa4b57c6b333a5c836b656dca89d2f652e5d9949e4d54ae9b647d2369df",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Linux-x86_64.iso",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Linux-x86_64.iso"
+      },
+      "NEXUS-V5-Command-v5.0.0-Local-x86_64.AppImage": {
+        "filename": "NEXUS-V5-Command-v5.0.0-Local-x86_64.AppImage",
+        "edition": "v5-command",
+        "size_bytes": 1605632,
+        "size_formatted": "1.5 MB",
+        "sha256": "14b3fdfc7fdd00cee74e7c54914886f2f865f0962bc29e8d363ddf99f095c3d0",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Local-x86_64.AppImage",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Local-x86_64.AppImage"
+      },
+      "NEXUS-V5-Command-v5.0.0-macOS-Bundle.app.zip": {
+        "filename": "NEXUS-V5-Command-v5.0.0-macOS-Bundle.app.zip",
+        "edition": "v5-command",
+        "size_bytes": 1490734,
+        "size_formatted": "1.4 MB",
+        "sha256": "3b959b820d72790ee459c4d10cd1d330654deb7e515834e66e9fbb2b9d952182",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-macOS-Bundle.app.zip",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-macOS-Bundle.app.zip"
+      },
+      "NEXUS-V5-Command-v5.0.0-macOS-Local.dmg": {
+        "filename": "NEXUS-V5-Command-v5.0.0-macOS-Local.dmg",
+        "edition": "v5-command",
+        "size_bytes": 1530368,
+        "size_formatted": "1.5 MB",
+        "sha256": "687f10f546390015a2def54a0c9b694d66424c3ecfce68b68e4ef8406d179cea",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-macOS-Local.dmg",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-macOS-Local.dmg"
+      },
+      "NEXUS-V5-Command-v5.0.0-macOS-WebInstaller.command": {
+        "filename": "NEXUS-V5-Command-v5.0.0-macOS-WebInstaller.command",
+        "edition": "v5-command",
+        "size_bytes": 2012,
+        "size_formatted": "2.0 KB",
+        "sha256": "40a583a74099969f12b1886a717126dbc97656866fe96cbd57ebc10bf563dc51",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-macOS-WebInstaller.command",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-macOS-WebInstaller.command"
+      },
+      "NEXUS-V5-Command-v5.0.0-Linux-WebInstaller.sh": {
+        "filename": "NEXUS-V5-Command-v5.0.0-Linux-WebInstaller.sh",
+        "edition": "v5-command",
+        "size_bytes": 1419,
+        "size_formatted": "1.4 KB",
+        "sha256": "38ea225b396cfa48011aec07840e39a0a8d3a73665ecf9d977f5cb6fc0b8190a",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Linux-WebInstaller.sh",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Linux-WebInstaller.sh"
+      },
+      "NEXUS-V5-Command-v5.0.0-Windows-WebBootstrap.ps1": {
+        "filename": "NEXUS-V5-Command-v5.0.0-Windows-WebBootstrap.ps1",
+        "edition": "v5-command",
+        "size_bytes": 428,
+        "size_formatted": "428 B",
+        "sha256": "65919e1f8ca05ba29fc9d69f473784a0c5e2487bfbbb1558d4f1efcbc0e430f9",
+        "edge_url": "https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Windows-WebBootstrap.ps1",
+        "github_url": "https://github.com/NiranX-Resolute/NEXUS-OS/releases/download/v5.1.0-editions/NEXUS-V5-Command-v5.0.0-Windows-WebBootstrap.ps1"
+      }
+    }
+  }
+}

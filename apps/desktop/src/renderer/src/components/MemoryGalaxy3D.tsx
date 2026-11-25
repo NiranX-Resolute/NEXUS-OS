@@ -168,90 +168,6 @@ const CLUSTER_CENTROIDS: Record<string, [number, number, number]> = {
   DEFAULT: [0.0, 0.0, 0.0]
 }
 
-// Seed Nodes if DB is in initial boot phase
-const INITIAL_SEED_NODES: MemoryNodeData[] = [
-  {
-    id: 'mem-seed-core-01',
-    title: 'Nexus Sovereign Engine Architecture',
-    content: 'Zero-subscription sovereign edge-to-desktop runtime. Enforces 6 GRAVITAS invariants, local DPAPI vault, and loopback 127.0.0.1:47630 IPC.',
-    namespace: 'DEV',
-    metadata: { tags: ['architecture', 'gravitas', 'ipc'], pinned: true, importance: 98 },
-    created_at: Date.now() - 86400000 * 3
-  },
-  {
-    id: 'mem-seed-core-02',
-    title: 'FTS5 & sqlite-vec Hybrid Mesh',
-    content: 'Full-text BM25 index with porter unicode61 tokenizer coupled with sqlite-vec 384-dimensional cosine vector embeddings.',
-    namespace: 'DEV',
-    metadata: { tags: ['fts5', 'sqlite-vec', 'database'], pinned: true, importance: 95 },
-    created_at: Date.now() - 86400000 * 2
-  },
-  {
-    id: 'mem-seed-study-01',
-    title: 'ArXiv Deep Research Synthesis Workflow',
-    content: 'Multi-provider paper ingestion pipeline with real-time KaTeX notes rendering and DPAPI RAG codebase ingest.',
-    namespace: 'STUDY',
-    metadata: { tags: ['arxiv', 'scholar', 'katex'], pinned: false, importance: 88 },
-    created_at: Date.now() - 86400000 * 4
-  },
-  {
-    id: 'mem-seed-study-02',
-    title: 'AST Worktree & ContextKeeper Protocol',
-    content: 'Persistent session cache storing git branch state, active diffs, and LLM context tokens under ~/.nexus-agent/db/.',
-    namespace: 'STUDY',
-    metadata: { tags: ['ast', 'contextkeeper', 'git'], pinned: true, importance: 90 },
-    created_at: Date.now() - 86400000 * 1
-  },
-  {
-    id: 'mem-seed-studio-01',
-    title: 'Custom Shader Engine & Audio FFT',
-    content: '5 WebGL GLSL fragment shaders (nebula_vortex, plasma_waves, cyber_grid) with live Web Audio 3-band FFT reactivity.',
-    namespace: 'STUDIO',
-    metadata: { tags: ['glsl', 'shaders', 'audio-fft'], pinned: false, importance: 84 },
-    created_at: Date.now() - 86400000 * 5
-  },
-  {
-    id: 'mem-seed-studio-02',
-    title: 'Blueprint Holographic Canvas Engine',
-    content: 'Vector design surface with snap grids, connector wires, and lossless PNG/PDF export pipeline.',
-    namespace: 'STUDIO',
-    metadata: { tags: ['blueprint', 'canvas', 'design'], pinned: false, importance: 82 },
-    created_at: Date.now() - 86400000 * 2
-  },
-  {
-    id: 'mem-seed-silent-01',
-    title: 'Local DPAPI Master Key Cryptography',
-    content: 'Zero-cloud credential encryption using Windows CryptProtectData DPAPI APIs. All secrets remain strictly jailed in RAM and encrypted on disk.',
-    namespace: 'SILENT',
-    metadata: { tags: ['dpapi', 'crypto', 'vault'], pinned: true, importance: 99 },
-    created_at: Date.now() - 86400000 * 6
-  },
-  {
-    id: 'mem-seed-silent-02',
-    title: 'ScopeGuard Invariant Sentinel',
-    content: 'Path traversal jailing, Win32 desktop surface isolation WinSta0\\Default, and HITL authorization for high-risk actions.',
-    namespace: 'SILENT',
-    metadata: { tags: ['scopeguard', 'security', 'isolation'], pinned: false, importance: 94 },
-    created_at: Date.now() - 86400000 * 3
-  },
-  {
-    id: 'mem-seed-res-01',
-    title: 'Federated Compute Pool & QuotaGuard',
-    content: 'Headless Kaggle GPU fallback with 15-minute cooldown guard and multi-cloud serverless orchestration.',
-    namespace: 'RESEARCH',
-    metadata: { tags: ['compute', 'gpu', 'quotaguard'], pinned: false, importance: 87 },
-    created_at: Date.now() - 86400000 * 4
-  },
-  {
-    id: 'mem-seed-sys-01',
-    title: 'Notch HUD Dynamic HITL Gate',
-    content: 'PySide6 transparent overlay window interacting with desktop drag-shelf, MCP shared files, and system estop.',
-    namespace: 'SYSTEM',
-    metadata: { tags: ['notch_hud', 'pyside6', 'hitl'], pinned: true, importance: 96 },
-    created_at: Date.now() - 86400000 * 7
-  }
-]
-
 // Hash string helper for deterministic pseudo-random 3D coordinates
 function hashToCoords(str: string, centroid: [number, number, number], spread = 2.4): [number, number, number] {
   let hash1 = 0
@@ -734,7 +650,7 @@ export const MemoryGalaxy3D: React.FC<MemoryGalaxy3DProps> = ({
   const [selectedNamespace, setSelectedNamespace] = useState<string>(activeNamespace)
 
   // Nodes & Spatial Graph State
-  const [allNodes, setAllNodes] = useState<MemoryNodeData[]>(INITIAL_SEED_NODES)
+  const [allNodes, setAllNodes] = useState<MemoryNodeData[]>([])
   const [nodePositions, setNodePositions] = useState<Map<string, [number, number, number]>>(
     new Map()
   )
@@ -813,16 +729,12 @@ export const MemoryGalaxy3D: React.FC<MemoryGalaxy3DProps> = ({
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const resp = await fetch('http://127.0.0.1:47630/api/auth/token').catch(() => null)
-        if (resp && resp.ok) {
-          const data = await resp.json()
-          if (data.token) {
-            setAuthToken(data.token)
-          }
-        }
+        const { getIpcToken } = await import('@renderer/services/ipc-client')
+        const tok = await getIpcToken()
+        if (tok) setAuthToken(tok)
       } catch {}
     }
-    fetchToken()
+    void fetchToken()
   }, [])
 
   // 2. Fetch Initial Memories from GET /api/memory
@@ -830,54 +742,34 @@ export const MemoryGalaxy3D: React.FC<MemoryGalaxy3DProps> = ({
     setLoading(true)
     const startTime = performance.now()
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (authToken) headers['Authorization'] = `Bearer ${authToken}`
-
-      const resp = await fetch('http://127.0.0.1:47630/api/memory?limit=100', { headers }).catch(
-        () => null
-      )
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/memory?limit=100').catch(() => null)
       const duration = parseFloat((performance.now() - startTime).toFixed(2))
 
       if (resp && resp.ok) {
         const data = await resp.json()
-        if (Array.isArray(data.memories) && data.memories.length > 0) {
-          // Merge fetched memories with seed nodes ensuring uniqueness
-          const fetchedMap = new Map<string, MemoryNodeData>()
-          data.memories.forEach((m: any) => {
-            fetchedMap.set(m.id || `mem-${Math.random()}`, {
-              id: m.id,
-              title: m.title || 'Untitled Memory',
-              content: m.content || '',
-              namespace: m.namespace || 'DEV',
-              metadata: typeof m.metadata === 'object' ? m.metadata : {},
-              created_at: m.created_at || Date.now(),
-              updated_at: m.updated_at || Date.now()
-            })
-          })
-
-          INITIAL_SEED_NODES.forEach((seed) => {
-            if (!fetchedMap.has(seed.id)) {
-              fetchedMap.set(seed.id, seed)
-            }
-          })
-
-          const combined = Array.from(fetchedMap.values())
-          setAllNodes(combined)
-          addLog('SYNC', `Hydrated ${combined.length} nodes from SQLite WAL`, duration, 'OK')
-        } else {
-          setAllNodes(INITIAL_SEED_NODES)
-          addLog('INFO', `Initialized Sovereign Memory galaxy with core seed topology`, duration, 'INFO')
-        }
+        const rawList = Array.isArray(data.memories) ? data.memories : []
+        const hydrated: MemoryNodeData[] = rawList.map((m: any) => ({
+          id: m.id || `mem-${Math.random().toString(36).slice(2, 8)}`,
+          title: m.title || 'Untitled Memory',
+          content: m.content || '',
+          namespace: m.namespace || 'DEV',
+          metadata: typeof m.metadata === 'object' && m.metadata ? m.metadata : {},
+          created_at: m.created_at || Date.now(),
+          updated_at: m.updated_at || Date.now()
+        }))
+        setAllNodes(hydrated)
+        addLog('SYNC', `Hydrated ${hydrated.length} nodes from SQLite WAL`, duration, 'OK')
       } else {
-        setAllNodes(INITIAL_SEED_NODES)
-        addLog('INFO', `IPC store offline; operating in local sovereign standby cache`, duration, 'INFO')
+        setAllNodes([])
+        addLog('INFO', `IPC store unreachable (${resp?.status ?? 'offline'})`, duration, 'WARN')
       }
     } catch {
-      setAllNodes(INITIAL_SEED_NODES)
+      setAllNodes([])
     } finally {
       setLoading(false)
     }
-  }, [authToken, addLog])
+  }, [addLog])
 
   useEffect(() => {
     fetchMemories()
@@ -1076,9 +968,9 @@ export const MemoryGalaxy3D: React.FC<MemoryGalaxy3DProps> = ({
         }
       }
 
-      const resp = await fetch('http://127.0.0.1:47630/api/memory', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/memory', {
         method: 'POST',
-        headers,
         body: JSON.stringify(payload)
       }).catch(() => null)
 
@@ -1122,12 +1014,9 @@ export const MemoryGalaxy3D: React.FC<MemoryGalaxy3DProps> = ({
 
     // Sync to backend
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (authToken) headers['Authorization'] = `Bearer ${authToken}`
-
-      await fetch('http://127.0.0.1:47630/api/memory', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/memory', {
         method: 'POST',
-        headers,
         body: JSON.stringify({
           title: updatedNode.title,
           content: updatedNode.content,
@@ -1163,12 +1052,9 @@ export const MemoryGalaxy3D: React.FC<MemoryGalaxy3DProps> = ({
 
     // Call forget endpoint if available
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (authToken) headers['Authorization'] = `Bearer ${authToken}`
-
-      await fetch(`http://127.0.0.1:47630/api/memory/forget`, {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch(`/api/memory/forget`, {
         method: 'POST',
-        headers,
         body: JSON.stringify({ id: forgottenId, title: forgottenTitle })
       }).catch(() => null)
 
@@ -1206,9 +1092,9 @@ export const MemoryGalaxy3D: React.FC<MemoryGalaxy3DProps> = ({
       }
 
       let generatedId = `mem-user-${Date.now()}`
-      const resp = await fetch('http://127.0.0.1:47630/api/memory', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/memory', {
         method: 'POST',
-        headers,
         body: JSON.stringify(payload)
       }).catch(() => null)
 

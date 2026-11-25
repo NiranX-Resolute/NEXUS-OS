@@ -1,0 +1,111 @@
+name: "NEXUS OS — Build & Release 5 Editions (Win / macOS / Linux)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub Release tag for editions"
+        required: true
+        default: "v5.1.0-editions"
+
+permissions:
+  contents: write
+
+jobs:
+  build-editions:
+    name: "${{ matrix.os }} // ${{ matrix.edition }}"
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: linux, runner: ubuntu-24.04, edition: nexus-v1-obsidian, prefix: NEXUS-V1-Obsidian, display: "NEXUS V1 Obsidian", bid: io.github.niranx-resolute.nexus-v1-obsidian }
+          - { os: linux, runner: ubuntu-24.04, edition: nexus-v2-cockpit,  prefix: NEXUS-V2-Cockpit,  display: "NEXUS V2 Cockpit",  bid: io.github.niranx-resolute.nexus-v2-cockpit }
+          - { os: linux, runner: ubuntu-24.04, edition: nexus-v3-spatial,  prefix: NEXUS-V3-Spatial,  display: "NEXUS V3 Spatial",  bid: io.github.niranx-resolute.nexus-v3-spatial }
+          - { os: linux, runner: ubuntu-24.04, edition: nexus-v4-minimal,  prefix: NEXUS-V4-Minimal,  display: "NEXUS V4 Minimal",  bid: io.github.niranx-resolute.nexus-v4-minimal }
+          - { os: linux, runner: ubuntu-24.04, edition: nexus-v5-command,  prefix: NEXUS-V5-Command,  display: "NEXUS V5 Command",  bid: io.github.niranx-resolute.nexus-v5-command }
+          - { os: macos, runner: macos-15,     edition: nexus-v1-obsidian, prefix: NEXUS-V1-Obsidian, display: "NEXUS V1 Obsidian", bid: io.github.niranx-resolute.nexus-v1-obsidian }
+          - { os: macos, runner: macos-15,     edition: nexus-v2-cockpit,  prefix: NEXUS-V2-Cockpit,  display: "NEXUS V2 Cockpit",  bid: io.github.niranx-resolute.nexus-v2-cockpit }
+          - { os: macos, runner: macos-15,     edition: nexus-v3-spatial,  prefix: NEXUS-V3-Spatial,  display: "NEXUS V3 Spatial",  bid: io.github.niranx-resolute.nexus-v3-spatial }
+          - { os: macos, runner: macos-15,     edition: nexus-v4-minimal,  prefix: NEXUS-V4-Minimal,  display: "NEXUS V4 Minimal",  bid: io.github.niranx-resolute.nexus-v4-minimal }
+          - { os: macos, runner: macos-15,     edition: nexus-v5-command,  prefix: NEXUS-V5-Command,  display: "NEXUS V5 Command",  bid: io.github.niranx-resolute.nexus-v5-command }
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Edition Dependencies
+        working-directory: apps/${{ matrix.edition }}
+        run: npm install --no-audit --no-fund
+
+      - name: Build Production Bundle
+        working-directory: apps/${{ matrix.edition }}
+        run: npx tsc --noEmit && npm run build
+
+      - name: Package Linux AppImage & Deb
+        if: matrix.os == 'linux'
+        working-directory: apps/${{ matrix.edition }}
+        run: npx electron-builder --linux AppImage deb --x64 --config electron-builder.yml --publish never
+
+      - name: Package macOS Universal DMG, ZIP & Tiny WebSetup PKG
+        if: matrix.os == 'macos'
+        working-directory: apps/${{ matrix.edition }}
+        run: |
+          npx electron-builder --mac dmg zip --universal --config electron-builder.yml --publish never
+          # Create tiny (~20 KB) macOS .pkg Web-Installer that downloads & installs the DMG/ZIP on demand
+          mkdir -p pkg_empty pkg_scripts release
+          TAG="${{ github.event.inputs.release_tag || 'v5.1.0-editions' }}"
+          DMG_NAME="${{ matrix.prefix }}-v5.0.0-macOS-Universal.dmg"
+          cat <<'POSTEOF' | sed 's/^            //' > pkg_scripts/postinstall
+            #!/usr/bin/env bash
+            set -euo pipefail
+            URL="https://nexus-releases.barhateniranjan725.workers.dev/${{ github.event.inputs.release_tag || 'v5.1.0-editions' }}/${{ matrix.prefix }}-v5.0.0-macOS-Universal.dmg"
+            TMP="$(mktemp -d)"
+            trap 'rm -rf "$TMP"' EXIT
+            curl -fL "$URL" -o "$TMP/${{ matrix.prefix }}-v5.0.0-macOS-Universal.dmg"
+            MNT="$TMP/mnt"
+            mkdir -p "$MNT"
+            hdiutil attach "$TMP/${{ matrix.prefix }}-v5.0.0-macOS-Universal.dmg" -nobrowse -quiet -mountpoint "$MNT"
+            SRC_APP="$(find "$MNT" -maxdepth 2 -name "*.app" | head -n 1)"
+            rm -rf "/Applications/${{ matrix.display }}.app"
+            cp -R "$SRC_APP" "/Applications/${{ matrix.display }}.app"
+            hdiutil detach "$MNT" -quiet || true
+            xattr -cr "/Applications/${{ matrix.display }}.app" || true
+            exit 0
+            POSTEOF
+          chmod +x pkg_scripts/postinstall
+          pkgbuild --nopayload --scripts pkg_scripts --identifier "${{ matrix.bid }}.webinstaller" --version "5.0.0" "release/${{ matrix.prefix }}-v5.0.0-macOS-WebSetup.pkg"
+
+      - name: Upload Artifacts to Job Staging
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-${{ matrix.edition }}
+          path: |
+            apps/${{ matrix.edition }}/release/*.dmg
+            apps/${{ matrix.edition }}/release/*.pkg
+            apps/${{ matrix.edition }}/release/*mac*.zip
+            apps/${{ matrix.edition }}/release/*.AppImage
+            apps/${{ matrix.edition }}/release/*.deb
+
+  publish-release:
+    needs: build-editions
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download Built Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: staged-artifacts
+          merge-multiple: true
+
+      - name: Upload to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.inputs.release_tag || 'v5.1.0-editions' }}"
+          gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1 || gh release create "$TAG" --repo "${{ github.repository }}" --title "NEXUS OS v5.0 — 5 Standalone Editions" --notes "Self-contained installers across Windows, macOS, and Linux."
+          gh release upload "$TAG" staged-artifacts/* --repo "${{ github.repository }}" --clobber

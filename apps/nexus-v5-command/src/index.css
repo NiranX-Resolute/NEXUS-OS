@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+
+  /* Nexus V5 — Cyber Matrix Redux Palette */
+  --bg: #05080b;
+  --bg-elevated: #090e14;
+  --panel: rgba(9, 15, 22, 0.82);
+  --panel-solid: #0a1119;
+  --accent: #10b981;
+  --accent-bright: #34d399;
+  --accent-cyan: #22d3ee;
+  --accent-danger: #ef4444;
+  --accent-amber: #f59e0b;
+
+  /* Holographic Neural Glows & Hairlines */
+  --glow-emerald: rgba(16, 185, 129, 0.28);
+  --glow-cyan: rgba(34, 211, 238, 0.24);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-matrix: rgba(16, 185, 129, 0.24);
+  --border-cyan: rgba(34, 211, 238, 0.26);
+
+  --text-primary: #ecfdf5;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Carbon Cyber Matrix Backdrop & Restrained Neural Grid */
+.matrix-carbon-bg {
+  background:
+    radial-gradient(circle at 22% 14%, rgba(16, 185, 129, 0.11), transparent 36%),
+    radial-gradient(circle at 82% 84%, rgba(34, 211, 238, 0.09), transparent 34%),
+    linear-gradient(180deg, #060a0f 0%, #05080b 60%, #030507 100%);
+}
+
+.matrix-grid {
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.matrix-panel {
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+}
+
+.matrix-border {
+  border: 1px solid var(--border-matrix);
+}
+
+.matrix-glow {
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.22),
+    0 0 22px -4px rgba(16, 185, 129, 0.32);
+}
+
+.matrix-glow-cyan {
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.26),
+    0 0 22px -4px rgba(34, 211, 238, 0.3);
+}
+
+.matrix-text-glow {
+  text-shadow: 0 0 14px rgba(16, 185, 129, 0.45);
+}
+
+.matrix-cyan-glow {
+  text-shadow: 0 0 14px rgba(34, 211, 238, 0.45);
+}
+
+/* Frameless Window Drag Regions */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag,
+button,
+input,
+textarea,
+select,
+a {
+  -webkit-app-region: no-drag;
+}
+
+/* Cyber Matrix Orbital & Neural Keyframes */
+@keyframes matrix-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes matrix-orbit-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes neural-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes holo-sweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.35;
+  }
+  80% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes matrix-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-matrix-orbit {
+  animation: matrix-orbit 24s linear infinite;
+}
+
+.animate-matrix-orbit-reverse {
+  animation: matrix-orbit-reverse 18s linear infinite;
+}
+
+.animate-neural-pulse {
+  animation: neural-pulse 3.2s ease-in-out infinite;
+}
+
+.animate-matrix-in {
+  animation: matrix-fade-in 0.22s ease-out both;
+}
+
+.holo-ring {
+  position: relative;
+}
+
+.holo-ring::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.45), rgba(34, 211, 238, 0.35), transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Precision Thin Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.48);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-matrix-orbit,
+  .animate-matrix-orbit-reverse,
+  .animate-neural-pulse,
+  .animate-matrix-in {
+    animation: none !important;
+  }
+}

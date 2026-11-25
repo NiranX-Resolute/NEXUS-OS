@@ -460,19 +460,20 @@ export function AgentTownCanvas() {
         // Pick next destination distinct from current
         const nextDest = destinations[Math.floor(Math.random() * destinations.length)]
 
-        // Send real HTTP POST to /api/slices/dispatch
+        // Send real HTTP POST to http://127.0.0.1:47630/api/slices/dispatch
         try {
-          fetch('http://127.0.0.1:47630/api/slices/dispatch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              slice_id: sliceId,
-              agent_id: id,
-              action: 'dispatch',
-              task_summary: randomTask,
-              target: { x: nextDest.x, y: nextDest.y }
-            })
-          }).catch(() => {})
+          import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+            void ipcFetch('http://127.0.0.1:47630/api/slices/dispatch', {
+              method: 'POST',
+              body: JSON.stringify({
+                slice_id: sliceId,
+                agent_id: id,
+                action: 'dispatch',
+                task_summary: randomTask,
+                target: { x: nextDest.x, y: nextDest.y }
+              })
+            }).catch(() => {})
+          })
         } catch {}
 
         dispatchAgentMovement(id, nextDest, 'EXECUTING', randomTask, sliceId)

@@ -1,0 +1,100 @@
+appId: io.github.niranx-resolute.nexus-v1-obsidian
+productName: NEXUS V1 Obsidian
+copyright: Copyright © 2026 NiranX-Resolute
+electronVersion: "41.2.1"
+directories:
+  buildResources: resources
+  output: release
+files:
+  - dist/**/*
+  - electron/**/*
+  - resources/**/*
+  - package.json
+  - "!node_modules/**/*"
+asar: true
+
+win:
+  executableName: NEXUS-V1-Obsidian
+  icon: resources/icon.ico
+  signAndEditExecutable: false
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+    - target: nsis-web
+      arch:
+        - x64
+
+nsis:
+  artifactName: NEXUS-V1-Obsidian-v${version}-Setup.${ext}
+  shortcutName: NEXUS V1 Obsidian
+  uninstallDisplayName: NEXUS V1 Obsidian
+  differentialPackage: false
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico
+  installerHeaderIcon: resources/icon.ico
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  runAfterFinish: false
+
+nsisWeb:
+  artifactName: NEXUS-V1-Obsidian-v${version}-WebSetup.${ext}
+  shortcutName: NEXUS V1 Obsidian
+  uninstallDisplayName: NEXUS V1 Obsidian
+  appPackageUrl: https://nexus-releases.barhateniranjan725.workers.dev/v5.1.0-editions
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico
+  installerHeaderIcon: resources/icon.ico
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  runAfterFinish: false
+
+portable:
+  artifactName: NEXUS-V1-Obsidian-v${version}-Portable.${ext}
+
+mac:
+  category: public.app-category.developer-tools
+  icon: resources/icon.icns
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+  notarize: false
+  target:
+    - target: dmg
+      arch:
+        - universal
+    - target: zip
+      arch:
+        - universal
+dmg:
+  artifactName: NEXUS-V1-Obsidian-v${version}-macOS-Universal.${ext}
+
+linux:
+  icon: resources/icon.png
+  maintainer: NiranX-Resolute
+  category: Development
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+appImage:
+  artifactName: NEXUS-V1-Obsidian-v${version}-x86_64.${ext}
+deb:
+  artifactName: NEXUS-V1-Obsidian-v${version}-amd64.${ext}
+
+npmRebuild: false
+publish:
+  - provider: github
+    owner: NiranX-Resolute
+    repo: NEXUS-OS

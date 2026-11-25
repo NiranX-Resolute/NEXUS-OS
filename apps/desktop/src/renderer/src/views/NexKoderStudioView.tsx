@@ -332,9 +332,10 @@ export function NexKoderStudioView() {
 
   // --- Live Workspace Loading & IPC ---
   const refreshWorkspace = useCallback(async () => {
+    const { ipcFetch } = await import('@renderer/services/ipc-client')
     // 1. Fetch live Git Status
     try {
-      const gitRes = await fetch('http://127.0.0.1:47630/api/git/status')
+      const gitRes = await ipcFetch('/api/git/status')
       if (gitRes.ok) {
         const gitData = await gitRes.json()
         setGitStatus({
@@ -353,11 +354,16 @@ export function NexKoderStudioView() {
 
     // 2. Fetch live File Tree via ScopeGuard
     try {
-      const fsRes = await fetch('http://127.0.0.1:47630/api/fs/tree')
+      const fsRes = await ipcFetch('/api/fs/tree')
       if (fsRes.ok) {
         const fsData = await fsRes.json()
-        if (fsData && Array.isArray(fsData.files)) {
-          const mapped: WorkspaceFile[] = fsData.files
+        const rawList = Array.isArray(fsData?.files)
+          ? fsData.files
+          : Array.isArray(fsData?.items)
+          ? fsData.items
+          : []
+        if (rawList.length > 0) {
+          const mapped: WorkspaceFile[] = rawList
             .filter((f: any) => !f.is_dir)
             .map((f: any, idx: number) => ({
               id: `f-${idx}-${f.name}`,
@@ -399,7 +405,8 @@ export function NexKoderStudioView() {
   // --- Load File Content ---
   const loadFileContent = async (filePath: string, fileId: string) => {
     try {
-      const res = await fetch(`http://127.0.0.1:47630/api/fs/read?path=${encodeURIComponent(filePath)}`)
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch(`/api/fs/read?path=${encodeURIComponent(filePath)}`)
       if (res.ok) {
         const data = await res.json()
         if (data && data.success) {
@@ -455,9 +462,9 @@ export function NexKoderStudioView() {
     if (!activeFile.path) return
     appendTerminalLog(`[PATCH] Accepting diff for ${activeFile.name}...`)
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/fs/write', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/fs/write', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           path: activeFile.path,
           content: activeFile.modifiedCode
@@ -508,9 +515,9 @@ export function NexKoderStudioView() {
     const newCkId = `CK-${Math.floor(1000 + Math.random() * 9000)}-v5.0`
 
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/context-keeper/save', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/context-keeper/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           goal: 'Nexus OS v5.0 Master Desktop Spatial Architecture',
           left_off: `Edited ${activeFile.name}`,
@@ -542,9 +549,9 @@ export function NexKoderStudioView() {
   const handleCkResume = async (ck: CheckpointInfo) => {
     appendTerminalLog(`[CK RESUME] Resuming context from ${ck.id}...`)
     try {
-      await fetch('http://127.0.0.1:47630/api/context-keeper/resume', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/context-keeper/resume', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
       })
       setActiveCheckpoint(ck)
@@ -570,9 +577,9 @@ export function NexKoderStudioView() {
     )
 
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/exec/verify', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/exec/verify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ command: 'npx tsc -b' })
       })
       const data = await res.json()
@@ -616,9 +623,9 @@ export function NexKoderStudioView() {
     appendTerminalLog(`[SEC-01] Initiating ScopeGuard SEC-01 Invariant Scan...`)
 
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/security/shield-scan', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/security/shield-scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: activeFile.modifiedCode,
           filename: activeFile.name

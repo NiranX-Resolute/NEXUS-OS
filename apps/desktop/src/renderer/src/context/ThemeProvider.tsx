@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import { getIpcToken } from '../services/ipc-client'
 
 export interface ThemeTokens {
   void_bg?: string
@@ -245,7 +246,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   const fetchWithAuth = useCallback(async (endpoint: string, options: RequestInit = {}) => {
-    const token = await resolveIpcAuthToken()
+    const token = (await getIpcToken()) || (await resolveIpcAuthToken())
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -257,20 +258,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
 
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
-    const candidateUrls = [`${IPC_ORIGIN}${path}`, path]
-
-    let lastError: Error | null = null
-    for (const url of candidateUrls) {
-      try {
-        const response = await fetch(url, { ...options, headers })
-        if (response.ok) {
-          return await response.json()
-        }
-      } catch (err: any) {
-        lastError = err
+    try {
+      const response = await fetch(`${IPC_ORIGIN}${path}`, { ...options, headers })
+      if (response.ok) {
+        return await response.json()
       }
+      throw new Error(`HTTP ${response.status} requesting ${endpoint}`)
+    } catch (err: any) {
+      throw err instanceof Error ? err : new Error(`Network failure requesting ${endpoint}`)
     }
-    throw lastError || new Error(`Network failure requesting ${endpoint}`)
   }, [])
 
   const refreshThemes = useCallback(async () => {

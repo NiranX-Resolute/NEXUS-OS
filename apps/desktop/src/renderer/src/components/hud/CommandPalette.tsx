@@ -28,6 +28,8 @@ import {
 } from 'lucide-react'
 import { HudBracketCard } from './HudBracketCard'
 import { KineticText } from './KineticText'
+import { ipcFetch } from '../../services/ipc-client'
+import { demandComponentManager } from '../../services/demand-component-manager'
 
 export type CommandCategory = 'views' | 'settings' | 'widgets' | 'tools' | 'actions'
 
@@ -251,6 +253,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         action: () => onNavigateView?.('interview')
       },
       {
+        id: 'view-chat',
+        title: '02 // AI Chat & Multi-Model Fleet',
+        description: 'Direct streaming AI chat with provider routing, attachments, and model switching',
+        category: 'views',
+        keywords: ['chat', 'ai', 'llm', 'prompt', 'conversation', 'puter', 'gemini'],
+        shortcut: '2',
+        icon: Sparkles,
+        action: () => onNavigateView?.('chat')
+      },
+      {
         id: 'view-world',
         title: '06 // World & Planet Watch',
         description: 'Spatial Orbital Globe Telemetry & Agent Town Multi-Agent 2D Canvas',
@@ -277,8 +289,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         category: 'views',
         keywords: ['theme', 'wallpaper', 'forge', 'shaders', 'cyberpunk', 'neon', 'colors'],
         shortcut: '8',
+        badge: 'THEME',
         icon: Palette,
-        action: () => onNavigateView?.('themes')
+        action: () => onNavigateView?.('theme')
       },
       {
         id: 'view-profile',
@@ -350,9 +363,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         keywords: ['tars', 'persona', 'wit', 'sarcasm', 'direct', 'humor'],
         icon: Sliders,
         action: () => {
-          fetch('http://127.0.0.1:47630/api/persona/activate', {
+          ipcFetch('/api/persona/activate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ persona_id: 'tars_prime' })
           }).catch(() => {})
         }
@@ -374,7 +386,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         keywords: ['security', 'scopeguard', 'invariants', 'audit', 'sandbox'],
         icon: ShieldCheck,
         action: () => {
-          fetch('http://127.0.0.1:47630/api/security/audit', { method: 'POST' }).catch(() => {})
+          ipcFetch('/api/security/audit', { method: 'POST' }).catch(() => {})
         }
       },
 
@@ -386,7 +398,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         category: 'widgets',
         keywords: ['stock', 'ticker', 'finance', 'market', 'nasdaq', 'crypto'],
         icon: TrendingUp,
-        action: () => onNavigateView?.('core')
+        action: () => {
+          onNavigateView?.('core')
+          demandComponentManager.demandComponent('stock', { symbol: 'NVDA' }, 'command-palette')
+        }
       },
       {
         id: 'widget-memory-search',
@@ -408,12 +423,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       },
       {
         id: 'widget-fft-audio',
-        title: 'Widget: Audio FFT Spectrogram',
-        description: 'Real-time microphone frequency spectrum and RMS volume meter',
+        title: 'Widget: Live Terminal & Command Deck',
+        description: 'Summon floating Ghost Terminal / on-demand tactical overlay',
         category: 'widgets',
-        keywords: ['audio', 'fft', 'spectrogram', 'mic', 'frequency', 'rms'],
-        icon: Volume2,
-        action: () => onNavigateView?.('core')
+        keywords: ['terminal', 'shell', 'audio', 'fft', 'spectrogram', 'mic'],
+        icon: Terminal,
+        action: () => demandComponentManager.demandComponent('terminal', {}, 'command-palette')
       },
 
       // === 4. AUTONOMOUS TOOLS ===
@@ -426,9 +441,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         badge: 'SWARM',
         icon: Sparkles,
         action: () => {
-          fetch('http://127.0.0.1:47630/api/swarm/mitosis', {
+          ipcFetch('/api/swarm/mitosis', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ count: 5, template: 'full_dev_cluster' })
           }).catch(() => {})
         }
@@ -471,7 +485,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         shortcut: 'E-STOP',
         icon: Flame,
         action: () => {
-          fetch('http://127.0.0.1:47630/api/system/estop', { method: 'POST' }).catch(() => {})
+          ipcFetch('/api/estop/trigger', { method: 'POST' }).catch(() => {})
         }
       },
       {
@@ -482,7 +496,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         keywords: ['sync', 'cloud', 'cloudflare', 'd1', 'backup', 'edge'],
         icon: FolderSync,
         action: () => {
-          fetch('http://127.0.0.1:47630/api/memory/sync', { method: 'POST' }).catch(() => {})
+          ipcFetch('/api/memory/sync', { method: 'POST' }).catch(() => {})
         }
       },
       {

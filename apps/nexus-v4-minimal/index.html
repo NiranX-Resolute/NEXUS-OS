@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Nexus V4 — Zen Linear Monograph</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2'><rect x='4' y='4' width='16' height='16' rx='3'/><circle cx='12' cy='12' r='3' stroke='%23f59e0b'/></svg>"
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:* data: blob:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' http://127.0.0.1:* http://localhost:*;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' data: https://fonts.gstatic.com;
+        connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:* https://*;
+        img-src 'self' data: blob: file: http://127.0.0.1:* https://*;
+        media-src 'self' data: blob: file:;
+      "
+    />
+    <style>
+      html,
+      body,
+      #root {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #090a0c;
+        color: #f4f4f5;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body class="bg-[#090a0c] text-[#f4f4f5] antialiased selection:bg-[#10b981]/25 selection:text-[#ecfdf5]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

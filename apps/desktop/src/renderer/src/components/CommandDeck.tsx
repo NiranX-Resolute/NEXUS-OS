@@ -28,6 +28,7 @@ import {
 } from 'react-icons/ri'
 import { AbliteratedWarningBanner, checkIsAbliterated } from './AbliteratedWarningBanner'
 import { nexusService } from '@renderer/services/nexus-voice-ai'
+import { ipcFetch } from '@renderer/services/ipc-client'
 
 export interface CommandDeckProps {
   isSystemActive?: boolean
@@ -265,7 +266,6 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
     }
 
     const dataArray = new Uint8Array(32)
-    let phase = 0
 
     const renderFft = () => {
       if (!mounted) return
@@ -282,31 +282,12 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
         if (typeof window !== 'undefined') {
           ;(window as any).__NEXUS_AUDIO_RMS__ = rms
         }
-        if (maxVal > 0.04) {
-          setFftBars([b0, b1, b2, b3, b4])
-        } else {
-          phase += 0.1
-          setFftBars([
-            0.2 + 0.15 * Math.sin(phase),
-            0.35 + 0.25 * Math.sin(phase + 1),
-            0.55 + 0.35 * Math.sin(phase + 2),
-            0.35 + 0.25 * Math.sin(phase + 3),
-            0.2 + 0.15 * Math.sin(phase + 4)
-          ])
-        }
+        setFftBars(maxVal > 0.01 ? [b0, b1, b2, b3, b4] : [0.06, 0.08, 0.1, 0.08, 0.06])
       } else {
-        phase += 0.14
-        const simulatedRms = 0.25 + 0.15 * Math.sin(phase)
         if (typeof window !== 'undefined') {
-          ;(window as any).__NEXUS_AUDIO_RMS__ = simulatedRms
+          ;(window as any).__NEXUS_AUDIO_RMS__ = 0
         }
-        setFftBars([
-          0.25 + 0.2 * Math.sin(phase),
-          0.45 + 0.35 * Math.sin(phase + 1.2),
-          0.7 + 0.3 * Math.sin(phase + 2.4),
-          0.45 + 0.35 * Math.sin(phase + 3.6),
-          0.25 + 0.2 * Math.sin(phase + 4.8)
-        ])
+        setFftBars([0.06, 0.08, 0.1, 0.08, 0.06])
       }
 
       animFrameRef.current = requestAnimationFrame(renderFft)
@@ -412,7 +393,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
   // Poll active task slices from SQLite WAL & telemetry
   const fetchActiveSlices = useCallback(async () => {
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/tasks?status=RUNNING').catch(() => null)
+      const resp = await ipcFetch('/api/tasks?status=RUNNING').catch(() => null)
       if (resp && resp.ok) {
         const data = await resp.json()
         if (Array.isArray(data.tasks)) {
@@ -423,7 +404,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
       }
 
       // Check compute pool for active model
-      const poolResp = await fetch('http://127.0.0.1:47630/api/compute/pool').catch(() => null)
+      const poolResp = await ipcFetch('/api/compute/pool').catch(() => null)
       if (poolResp && poolResp.ok) {
         const poolData = await poolResp.json()
         if (poolData?.routes?.[0]?.model) {
@@ -523,9 +504,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
           : `Binary media [${file.type}], size: ${file.size} bytes`
 
       // Persist into Sovereign Store via IPC
-      await fetch('http://127.0.0.1:47630/api/memory', {
+      await ipcFetch('/api/memory', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: `Upload: ${file.name}`,
           content: textSnippet,
@@ -584,9 +564,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
     if (onSteerPrompt) {
       await onSteerPrompt(trimmed, activeRoute || undefined)
     } else {
-      await fetch('http://127.0.0.1:47630/api/action', {
+      await ipcFetch('/api/action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'STEER_AGENT',
           payload: {
@@ -627,9 +606,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
     if (trimmed.startsWith('/ck:')) {
       const action = trimmed.replace('/ck:', '').trim().toLowerCase()
       if (action === 'save') {
-        await fetch('http://127.0.0.1:47630/api/context-keeper/save', {
+        await ipcFetch('/api/context-keeper/save', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ label: `Snapshot ${new Date().toLocaleTimeString()}` })
         }).catch(() => null)
         setInputText('')
@@ -637,9 +615,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
         return
       }
       if (action === 'resume') {
-        await fetch('http://127.0.0.1:47630/api/context-keeper/resume', {
+        await ipcFetch('/api/context-keeper/resume', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({})
         }).catch(() => null)
         setInputText('')
@@ -647,9 +624,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
         return
       }
       if (action === 'init') {
-        await fetch('http://127.0.0.1:47630/api/context-keeper/init', {
+        await ipcFetch('/api/context-keeper/init', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({})
         }).catch(() => null)
         setInputText('')
@@ -657,7 +633,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
         return
       }
       if (action === 'status') {
-        const res = await fetch('http://127.0.0.1:47630/api/context-keeper/status').catch(() => null)
+        const res = await ipcFetch('/api/context-keeper/status').catch(() => null)
         const d = res && res.ok ? await res.json() : null
         setInputText('')
         setDeckStatus(d ? `✓ CK Slots: ${d.active_slots || 0}` : '✓ Context Keeper Active')
@@ -674,7 +650,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
         if (window.nexusTelemetry?.triggerEStop) {
           await window.nexusTelemetry.triggerEStop()
         }
-        await fetch('http://127.0.0.1:47630/api/estop', { method: 'POST' }).catch(() => null)
+        await ipcFetch('/api/estop/trigger', { method: 'POST' }).catch(() => null)
         setInputText('')
         setDeckStatus('🛑 E-STOP EXECUTED')
         return
@@ -685,9 +661,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
         if (window.nexusTelemetry?.switchWorkspace) {
           await window.nexusTelemetry.switchWorkspace(mode)
         }
-        await fetch('http://127.0.0.1:47630/api/workspace/mode', {
+        await ipcFetch('/api/workspace/mode', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mode })
         }).catch(() => null)
         setInputText('')
@@ -696,9 +671,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
       }
 
       if (reflex === 'mute' || reflex === 'unmute') {
-        await fetch('http://127.0.0.1:47630/api/action', {
+        await ipcFetch('/api/action', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'MUTE_AUDIO', payload: {} })
         }).catch(() => null)
         setInputText('')
@@ -714,14 +688,14 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
       }
 
       if (reflex === 'purge') {
-        await fetch('http://127.0.0.1:47630/api/system/purge', { method: 'POST' }).catch(() => null)
+        await ipcFetch('/api/system/purge', { method: 'POST' }).catch(() => null)
         setInputText('')
         setDeckStatus('✓ GPU/VRAM Caches Purged')
         return
       }
 
       if (reflex === 'audit') {
-        await fetch('http://127.0.0.1:47630/api/audit/run', { method: 'POST' }).catch(() => null)
+        await ipcFetch('/api/audit/run', { method: 'POST' }).catch(() => null)
         setInputText('')
         setDeckStatus('✓ ScopeGuard 6/6 Invariant Audit Started')
         return
@@ -746,9 +720,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
     if (skillMatch) {
       const skillSlug = skillMatch[1]
       const skillPayload = skillMatch[2] || ''
-      await fetch('http://127.0.0.1:47630/api/command', {
+      await ipcFetch('/api/command', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           command: `/skill:${skillSlug} ${skillPayload}`,
           skill_slug: skillSlug,
@@ -766,9 +739,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
     if (onSubmitPrompt) {
       await onSubmitPrompt(finalPrompt, targetAgent || undefined)
     } else {
-      await fetch('http://127.0.0.1:47630/api/tasks', {
+      await ipcFetch('/api/tasks', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: finalPrompt,
           command_type: targetAgent ? `AGENT_${targetAgent}` : 'GENERAL',
@@ -789,9 +761,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
       onToggleVision()
     } else {
       const nextActive = !(isVideoOn && visionMode === 'screen')
-      await fetch('http://127.0.0.1:47630/api/vision/stream', {
+      await ipcFetch('/api/vision/stream', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: nextActive, source: 'screen' })
       }).catch(() => null)
     }
@@ -803,9 +774,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
       onToggleCamera()
     } else {
       const nextActive = !(isVideoOn && visionMode === 'camera')
-      await fetch('http://127.0.0.1:47630/api/vision/stream', {
+      await ipcFetch('/api/vision/stream', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: nextActive, source: 'camera' })
       }).catch(() => null)
     }
@@ -829,9 +799,8 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
     setDeckStatus(`Model active: ${model.name}`)
 
     try {
-      await fetch('http://127.0.0.1:47630/api/compute/pool', {
+      await ipcFetch('/api/compute/pool', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active_model: model.id, provider: model.provider })
       }).catch(() => null)
 
@@ -848,7 +817,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
   // Cancel a task slice
   const handleCancelSlice = async (sliceId: string) => {
     try {
-      await fetch(`http://127.0.0.1:47630/api/tasks/${sliceId}/cancel`, { method: 'POST' }).catch(() => null)
+      await ipcFetch(`/api/tasks/${sliceId}/cancel`, { method: 'POST' }).catch(() => null)
       setSlicesList((prev) => prev.filter((s) => s.id !== sliceId))
       setActiveSlicesCount((prev) => Math.max(0, prev - 1))
     } catch {}

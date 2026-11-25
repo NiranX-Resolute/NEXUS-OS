@@ -92,9 +92,9 @@ export default function ObscuraInspectorView() {
     }
 
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/bridge/browser-engine', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/bridge/browser-engine', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ engine: engineMap[mode], action: 'switch' })
       }).catch(() => null)
 
@@ -119,9 +119,9 @@ export default function ObscuraInspectorView() {
         'WARM CHROMIUM': 'chromium_persistent'
       }
 
-      const resp = await fetch('http://127.0.0.1:47630/api/bridge/browser-engine', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/bridge/browser-engine', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           engine: engineMap[engineMode],
           action: 'navigate',
@@ -146,9 +146,9 @@ export default function ObscuraInspectorView() {
   const handleElementClick = async (elementId: number) => {
     setActiveElementId(elementId)
     try {
-      await fetch('http://127.0.0.1:47630/api/action', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'WEB_CLICK',
           payload: { element_id: elementId }
@@ -161,9 +161,9 @@ export default function ObscuraInspectorView() {
   // TARS TTS Playback
   const handleSpeakTars = async (text: string) => {
     try {
-      await fetch('http://127.0.0.1:47630/api/persona/preview', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/persona/preview', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
       })
       setStatusMessage('TARS Commentary audio streaming...')
@@ -173,9 +173,9 @@ export default function ObscuraInspectorView() {
   // Pin to Sovereign Memory
   const handlePinMemory = async (evt: WebIngestEvent) => {
     try {
-      await fetch('http://127.0.0.1:47630/api/memory', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/memory', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: `Pinned: ${evt.title || evt.url}`,
           content: `Prompt:\n${evt.prompt}\n\nResponse:\n${evt.response_text}\n\nTARS:\n${evt.tars_commentary}`,

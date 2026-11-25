@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --nexus-bg: #0b1016;
+  --nexus-bg-deep: #070b10;
+  --nexus-surface: rgba(17, 24, 34, 0.72);
+  --nexus-surface-hover: rgba(24, 34, 48, 0.82);
+  --nexus-dock-bg: rgba(14, 21, 30, 0.78);
+  --nexus-border: rgba(255, 255, 255, 0.09);
+  --nexus-border-strong: rgba(52, 211, 153, 0.34);
+  --nexus-accent: #34d399;
+  --nexus-accent-dim: rgba(52, 211, 153, 0.14);
+  --nexus-accent-glow: rgba(52, 211, 153, 0.32);
+  --nexus-text: #f1f5f9;
+  --nexus-text-muted: #94a3b8;
+  --ease-spatial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--nexus-bg);
+  color: var(--nexus-text);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Spatial Ambient Canvas */
+.spatial-canvas {
+  background:
+    radial-gradient(62% 52% at 18% 8%, rgba(52, 211, 153, 0.09) 0%, transparent 65%),
+    radial-gradient(54% 48% at 86% 88%, rgba(16, 185, 129, 0.07) 0%, transparent 62%),
+    radial-gradient(46% 42% at 52% 48%, rgba(30, 41, 59, 0.32) 0%, transparent 72%),
+    linear-gradient(180deg, #0b1016 0%, #090e14 55%, #070b10 100%);
+}
+
+/* Frosted Glass Surfaces */
+.spatial-panel {
+  background: var(--nexus-surface);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  border: 1px solid var(--nexus-border);
+  box-shadow:
+    0 20px 50px -18px rgba(0, 0, 0, 0.68),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    background-color 220ms var(--ease-spatial),
+    border-color 220ms var(--ease-spatial),
+    box-shadow 220ms var(--ease-spatial),
+    transform 220ms var(--ease-spatial);
+}
+
+.spatial-panel-interactive:hover {
+  background: var(--nexus-surface-hover);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.spatial-dock {
+  background: var(--nexus-dock-bg);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 26px 64px -14px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(52, 211, 153, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  transition:
+    transform 240ms var(--ease-spatial),
+    box-shadow 240ms var(--ease-spatial),
+    border-color 240ms var(--ease-spatial);
+}
+
+.spatial-pill {
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    background-color 180ms var(--ease-spatial),
+    border-color 180ms var(--ease-spatial),
+    color 180ms var(--ease-spatial),
+    transform 180ms var(--ease-spatial),
+    box-shadow 180ms var(--ease-spatial);
+}
+
+.spatial-pill:hover {
+  background: rgba(255, 255, 255, 0.085);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.spatial-pill-active {
+  background: var(--nexus-accent-dim);
+  border-color: var(--nexus-border-strong);
+  color: #a7f3d0;
+  box-shadow: 0 0 22px -6px var(--nexus-accent-glow);
+}
+
+.mint-glow {
+  box-shadow: 0 0 26px -6px var(--nexus-accent-glow);
+}
+
+/* Electron Window Drag Helpers */
+.app-drag {
+  -webkit-app-region: drag;
+}
+
+.app-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Smooth Spatial Transitions */
+@keyframes spatial-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mint-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+  }
+}
+
+.animate-spatial-enter {
+  animation: spatial-enter 260ms var(--ease-spatial) both;
+}
+
+.animate-mint-breathe {
+  animation: mint-breathe 2.6s ease-in-out infinite;
+}
+
+/* Sleek Graphite Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.22);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(52, 211, 153, 0.45);
+}

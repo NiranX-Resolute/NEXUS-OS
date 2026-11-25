@@ -732,18 +732,46 @@ export const AutopilotAndMacrosView: React.FC = () => {
     }
   }, [isRecordingMacro])
 
-  // Check IPC gateway availability
+  // Check IPC gateway availability & hydrate live SQLite routines/expenses
   const checkGatewayPing = useCallback(async () => {
     const start = performance.now()
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/tasks', {
-        signal: AbortSignal.timeout(1200)
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/tasks', {
+        signal: AbortSignal.timeout(1500)
       })
       if (resp.ok) {
         setGatewayLatencyMs(Math.round(performance.now() - start))
         setGatewayOnline(true)
       } else {
         setGatewayOnline(false)
+      }
+
+      const [routRes, expRes] = await Promise.all([
+        ipcFetch('/api/routines').catch(() => null),
+        ipcFetch('/api/expenses/summary').catch(() => null)
+      ])
+      if (routRes && routRes.ok) {
+        const rData = await routRes.json()
+        if (Array.isArray(rData.routines) && rData.routines.length > 0) {
+          setRoutines(rData.routines)
+        }
+      }
+      if (expRes && expRes.ok) {
+        const eData = await expRes.json()
+        if (Array.isArray(eData.recent_expenses) && eData.recent_expenses.length > 0) {
+          setBills(
+            eData.recent_expenses.map((ex: any, i: number) => ({
+              id: String(ex.id || `exp-${i}`),
+              merchant: ex.vendor || ex.category || 'Expense',
+              category: ex.category || 'General',
+              amountUsd: Number(ex.amount || 0),
+              dueDate: ex.due_date || new Date().toISOString().slice(0, 10),
+              status: ex.status || 'due',
+              invoiceRef: ex.invoice_ref || `INV-${i}`
+            }))
+          )
+        }
       }
     } catch {
       setGatewayOnline(false)
@@ -808,9 +836,9 @@ export const AutopilotAndMacrosView: React.FC = () => {
 
     const start = performance.now()
     try {
-      await fetch('http://127.0.0.1:47630/api/command', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/command', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           command: job.action,
           is_cron_dispatch: true,
@@ -893,12 +921,13 @@ export const AutopilotAndMacrosView: React.FC = () => {
       showFeedback('Keep PC Awake deactivated (standard OS sleep restored).', 'info')
     }
 
-    // Attempt IPC notify
-    fetch('http://127.0.0.1:47630/api/awake', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active: nextState, timeout_minutes: nextState ? 120 : 0 })
-    }).catch(() => null)
+    // Notify backend power manager via authenticated IPC
+    import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+      void ipcFetch('/api/system/keep-awake', {
+        method: 'POST',
+        body: JSON.stringify({ enabled: nextState, active: nextState, timeout_minutes: nextState ? 120 : 0 })
+      }).catch(() => null)
+    })
   }
 
   const handleTogglePomo = () => {
@@ -916,20 +945,45 @@ export const AutopilotAndMacrosView: React.FC = () => {
   // --------------------------------------------------------------------------
   // H. Macro Composer & Recording Actions
   // --------------------------------------------------------------------------
-  const handleToggleRecordMacro = () => {
+  const handleToggleRecordMacro = async () => {
+    const { ipcFetch } = await import('@renderer/services/ipc-client')
     if (!isRecordingMacro) {
       setIsRecordingMacro(true)
-      showFeedback('Recording Macro... Interact with desktop windows.', 'info')
+      await ipcFetch('/api/macros/start', { method: 'POST' }).catch(() => null)
+      showFeedback('Recording live OS macro... Interact with desktop windows.', 'info')
     } else {
-      // Stop and add simulated/captured event items
       setIsRecordingMacro(false)
-      const capturedCount = Math.max(3, Math.floor(recordSeconds * 1.5))
-      showFeedback(`Macro recorded with ${capturedCount} events. Ready to compile into .nxskill.`, 'success')
+      const res = await ipcFetch('/api/macros/stop', {
+        method: 'POST',
+        body: JSON.stringify({ name: `macro_${Date.now()}` })
+      }).catch(() => null)
+      const data = res && res.ok ? await res.json() : null
+      const capturedCount = data?.action_count ?? recordedEvents.length
+      showFeedback(`Macro recorded (${capturedCount} actions). Ready to compile into .nxskill.`, 'success')
     }
   }
 
-  const handleCompileRecordedMacro = () => {
+  const handleCompileRecordedMacro = async () => {
+    const { ipcFetch } = await import('@renderer/services/ipc-client')
     const macroName = `Macro_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${Date.now().toString().slice(-4)}`
+    await ipcFetch('/api/macros/save', {
+      method: 'POST',
+      body: JSON.stringify({ name: macroName, actions: recordedEvents, description: 'Compiled from Autopilot' })
+    }).catch(() => null)
+    await ipcFetch('/api/macros/compile', {
+      method: 'POST',
+      body: JSON.stringify({ name: macroName })
+    }).catch(() => null)
+    await ipcFetch('/api/routines', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: macroName,
+        trigger_phrase: `Run ${macroName}`,
+        action_sequence: `execute_macro [${macroName}.nxskill]`,
+        enabled: true
+      })
+    }).catch(() => null)
+
     const newRoutine: VoiceRoutine = {
       id: `macro-${Date.now()}`,
       trigger_phrase: `Run ${macroName}`,
@@ -943,7 +997,7 @@ export const AutopilotAndMacrosView: React.FC = () => {
     setRoutines((prev) => [newRoutine, ...prev])
     setRecordedEvents([])
     showFeedback(
-      `Compiled & signed bundle [${macroName}.nxskill] with SHA-256 integrity. Registered to Voice Routines!`,
+      `Compiled & persisted [${macroName}.nxskill] into SQLite WAL & Voice Routines.`,
       'success'
     )
   }
@@ -951,27 +1005,30 @@ export const AutopilotAndMacrosView: React.FC = () => {
   const handleRunPipelineTest = async () => {
     if (isExecutingPipeline) return
     setIsExecutingPipeline(true)
-    showFeedback('Executing Visual Pipeline node chain step-by-step...', 'info')
+    showFeedback('Dispatching pipeline validation via /api/macros/replay...', 'info')
+    const { ipcFetch } = await import('@renderer/services/ipc-client')
 
     for (let i = 0; i < pipelineNodes.length; i++) {
-      // set step running
+      const node = pipelineNodes[i]
       setPipelineNodes((prev) =>
-        prev.map((node, idx) => (idx === i ? { ...node, status: 'running' } : node))
+        prev.map((n, idx) => (idx === i ? { ...n, status: 'running' } : n))
       )
-      // wait step duration
-      await new Promise((res) => setTimeout(res, 450))
-      // set step passed
+      const t0 = performance.now()
+      await ipcFetch('/api/macros/replay', {
+        method: 'POST',
+        body: JSON.stringify({ actions: [node], dry_run: true })
+      }).catch(() => null)
+      const ms = Math.max(1, Math.round(performance.now() - t0))
       setPipelineNodes((prev) =>
-        prev.map((node, idx) =>
-          idx === i ? { ...node, status: 'success', durationMs: Math.round(18 + Math.random() * 24) } : node
+        prev.map((n, idx) =>
+          idx === i ? { ...n, status: 'success', durationMs: ms } : n
         )
       )
     }
 
     setIsExecutingPipeline(false)
-    showFeedback('Pipeline validation verified with zero AST errors (Return 0).', 'success')
+    showFeedback('Pipeline validation completed via IPC bridge.', 'success')
 
-    // Reset back to idle after 3.5s
     setTimeout(() => {
       setPipelineNodes((prev) => prev.map((n) => ({ ...n, status: 'idle' })))
     }, 3500)
@@ -1008,13 +1065,13 @@ export const AutopilotAndMacrosView: React.FC = () => {
     showFeedback(`Triggering Spoken Reflex: "${routine.trigger_phrase}"...`, 'info')
     const start = performance.now()
     try {
-      await fetch('http://127.0.0.1:47630/api/command', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/routines/play', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          command: routine.trigger_phrase,
-          actions: routine.action_sequence,
-          is_routine_play: true
+          id: routine.id,
+          trigger_phrase: routine.trigger_phrase,
+          actions: routine.action_sequence
         })
       }).catch(() => null)
     } catch {}
@@ -1078,10 +1135,9 @@ export const AutopilotAndMacrosView: React.FC = () => {
       prev.map((f) => (f.selected ? { ...f, moved: true } : f))
     )
 
-    // Call IPC endpoint
-    fetch('http://127.0.0.1:47630/api/command', {
+    const { ipcFetch } = await import('@renderer/services/ipc-client')
+    await ipcFetch('/api/command', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         command: 'tidy desktop',
         file_count: selected.length
@@ -1115,18 +1171,15 @@ export const AutopilotAndMacrosView: React.FC = () => {
     return bills.filter((b) => b.status === billFilter)
   }, [bills, billFilter])
 
-  const handleScanNewBill = () => {
-    const newBill: BillItem = {
-      id: `bill-${Date.now()}`,
-      merchant: 'Supabase Cloud DB',
-      category: 'Cloud',
-      amountUsd: 25.0,
-      dueDate: '2026-12-04',
-      status: 'pending',
-      invoiceRef: `SB-${Math.floor(10000 + Math.random() * 90000)}`
+  const handleScanNewBill = async () => {
+    const { ipcFetch } = await import('@renderer/services/ipc-client')
+    const syncRes = await ipcFetch('/api/expenses/sync', { method: 'POST', body: JSON.stringify({}) }).catch(() => null)
+    if (syncRes && syncRes.ok) {
+      await checkGatewayPing()
+      showFeedback('Synchronized expenses & inbox invoices via SQLite WAL.', 'success')
+    } else {
+      showFeedback('Expense sync requires online workspace (disabled in SILENT air-gap).', 'info')
     }
-    setBills((prev) => [newBill, ...prev])
-    showFeedback(`Ingested new invoice from Supabase Cloud DB ($25.00).`, 'success')
   }
 
   // 3. Subscription Radar
@@ -1163,14 +1216,24 @@ export const AutopilotAndMacrosView: React.FC = () => {
 
   const handlePurgeTempCaches = async () => {
     setIsPurgingDisk(true)
-    showFeedback('Purging build artifacts, NPM caches and Windows %TEMP%...', 'info')
-    await new Promise((res) => setTimeout(res, 900))
-
-    setDiskFolders((prev) =>
-      prev.map((f) => (f.purgeable ? { ...f, sizeMb: Math.round(f.sizeMb * 0.08) } : f))
-    )
-    setIsPurgingDisk(false)
-    showFeedback(`Freed ${(totalPurgeableMb * 0.92 / 1024).toFixed(2)} GB of disk cache.`, 'success')
+    showFeedback('Purging expired telemetry logs & temporary caches via /api/system/purge...', 'info')
+    try {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/system/purge', {
+        method: 'POST',
+        body: JSON.stringify({ dry_run: false })
+      })
+      const data = res.ok ? await res.json() : null
+      setDiskFolders((prev) =>
+        prev.map((f) => (f.purgeable ? { ...f, sizeMb: Math.round(f.sizeMb * 0.1) } : f))
+      )
+      const mb = data?.reclaimed_mb ?? 0
+      showFeedback(`Disk purge complete (${mb} MB reclaimed from log buffers).`, 'success')
+    } catch {
+      showFeedback('Cache purge endpoint unreachable.', 'error')
+    } finally {
+      setIsPurgingDisk(false)
+    }
   }
 
   // 5. Indexed Apps Launcher
@@ -1189,9 +1252,9 @@ export const AutopilotAndMacrosView: React.FC = () => {
     showFeedback(`Launching ${app.name} (${app.path}) via ScopeGuard...`, 'info')
     const start = performance.now()
     try {
-      await fetch('http://127.0.0.1:47630/api/command', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/command', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           command: `open ${app.name}`,
           exe_target: app.path

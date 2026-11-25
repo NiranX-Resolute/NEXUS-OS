@@ -2561,15 +2561,20 @@ class NexusIPCServer(ThreadingHTTPServer):
         dry_run_hardware: bool = False,
         token: Optional[str] = None,
         strict_auth: bool = False,
+        headless: bool = False,
     ):
         # Strict security enforcement: Bind exclusively to 127.0.0.1 loopback interface
         if host not in ("127.0.0.1", "localhost", "::1"):
             logger.warning("Rejecting external binding host '%s'; enforcing loopback '127.0.0.1' for security", host)
             host = "127.0.0.1"
-        super().__init__((host, port), NexusIPCRequestHandler)
+        if headless:
+            self.server_address = (host, port)
+        else:
+            super().__init__((host, port), NexusIPCRequestHandler)
         self.start_time = time.time()
         self.dry_run_hardware = dry_run_hardware
         self.strict_auth = strict_auth
+        self.headless = headless
 
         if db_path is None:
             self.db_path = Path.home() / ".nexus-agent" / "db" / "agent_local.db"
@@ -2642,9 +2647,13 @@ class NexusIPCServer(ThreadingHTTPServer):
         self._init_db()
 
         # Background Persistent Timer Watcher
-        self._timer_watcher_running = True
-        self._timer_thread = threading.Thread(target=self._timer_watcher_loop, daemon=True)
-        self._timer_thread.start()
+        if not headless:
+            self._timer_watcher_running = True
+            self._timer_thread = threading.Thread(target=self._timer_watcher_loop, daemon=True)
+            self._timer_thread.start()
+        else:
+            self._timer_watcher_running = False
+            self._timer_thread = None
 
     def get_release_manifest(self) -> Dict[str, Any]:
         """Returns the canonical release manifest with live artifact sizes and SHA-256 digests."""

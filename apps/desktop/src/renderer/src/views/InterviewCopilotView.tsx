@@ -51,7 +51,7 @@ interface PracticeQuestion {
   title: string
   question: string
   expectedComplexity?: string
-  mockAnswer: string
+  referenceSolution: string
 }
 
 const PRESET_QUESTIONS: PracticeQuestion[] = [
@@ -62,7 +62,7 @@ const PRESET_QUESTIONS: PracticeQuestion[] = [
     question:
       'Design a data structure that follows the constraints of a Least Recently Used (LRU) cache. Implement get(key) and put(key, value) in O(1) average time complexity.',
     expectedComplexity: 'Time: O(1) | Space: O(capacity)',
-    mockAnswer: `### 1. Executive Thesis
+    referenceSolution: `### 1. Executive Thesis
 Pair a **Doubly Linked List** with a **Hash Map**. The map provides $O(1)$ key lookup directly to node pointers, while the doubly linked list permits $O(1)$ node eviction from the tail and insertion at the head without memory reallocation.
 
 ### 2. Algorithmic Intuition & Invariants
@@ -156,7 +156,7 @@ export class LRUCache {
     question:
       'You are given an array of k linked-lists lists, each linked-list is sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return it.',
     expectedComplexity: 'Time: O(N log K) | Space: O(K)',
-    mockAnswer: `### 1. Executive Thesis
+    referenceSolution: `### 1. Executive Thesis
 Utilize a **Min-Heap (Priority Queue)** initialized with the root node of all $K$ lists. Repeatedly pop the minimal node into the result stream and push its \`next\` successor until all $K$ streams are exhausted.
 
 ### 2. Algorithmic Intuition
@@ -240,7 +240,7 @@ export function mergeKLists(lists: Array<ListNode | null>): ListNode | null {
     question:
       'Architect a low-latency real-time chat application (Discord/Slack scale) supporting 50M DAU, 1-on-1 DMs, group channels, and message persistence with P99 < 100ms.',
     expectedComplexity: 'P99 Latency < 100ms | 99.99% Availability',
-    mockAnswer: `### 1. Executive Thesis
+    referenceSolution: `### 1. Executive Thesis
 Decouple stateless REST operations from stateful duplex connections using an edge **WebSocket Gateway Cluster** backed by distributed **Redis Pub/Sub** message buses and a wide-column store (**ScyllaDB / Cassandra**) partitioned for sequential time-series pagination.
 
 ### 2. Architecture & Data Flow
@@ -278,7 +278,7 @@ CREATE TABLE channel_messages (
     question:
       'Design a distributed rate-limiting service capable of evaluating 1,000,000 requests per second across multi-region edge gateways with zero race conditions.',
     expectedComplexity: 'Throughput > 1M RPS | Latency < 2ms',
-    mockAnswer: `### 1. Executive Thesis
+    referenceSolution: `### 1. Executive Thesis
 Implement a **Sliding Window Counter** or **Token Bucket** algorithm executed atomically directly inside Redis memory via **Lua scripts**, supplemented by regional local memory token pre-allocations to shield central storage.
 
 ### 2. Architecture & Mechanics
@@ -315,7 +315,7 @@ If regional Redis clusters become temporarily partitioned, gateways switch to lo
     question:
       'Tell me about an ambitious architectural project where you had to push boundaries and overcome technical constraints.',
     expectedComplexity: 'Impact: 100% Free-Tier Sovereign Computing',
-    mockAnswer: `### 1. Executive Thesis
+    referenceSolution: `### 1. Executive Thesis
 As Creator of the Nexus OS ecosystem, I engineered a distributed, zero-subscription desktop-to-edge agent mesh delivering sovereign AI computing without relying on costly enterprise SaaS models.
 
 ### 2. STAR Method Breakdown
@@ -335,7 +335,7 @@ As Creator of the Nexus OS ecosystem, I engineered a distributed, zero-subscript
     question:
       'Describe a time when a critical production system experienced high-severity failures and how you led the triage and resolution under pressure.',
     expectedComplexity: 'Impact: Restored 99.99% Availability & Prevented Cascading DB Crash',
-    mockAnswer: `### 1. Executive Thesis
+    referenceSolution: `### 1. Executive Thesis
 During a sudden 15x traffic surge on our payment authorization gateway, thread pool exhaustion caused cascading connection pool deadlocks across database clusters. I took charge as Incident Commander, implemented emergency load shedding, and resolved the architectural bottleneck.
 
 ### 2. STAR Method Breakdown
@@ -396,7 +396,7 @@ export const InterviewCopilotView = () => {
   const [activeCategory, setActiveCategory] = useState<InterviewMode>('Coding')
   const [activeQuestion, setActiveQuestion] = useState<PracticeQuestion>(PRESET_QUESTIONS[0])
   const [customQuestion, setCustomQuestion] = useState('')
-  const [displayedAnswer, setDisplayedAnswer] = useState(PRESET_QUESTIONS[0].mockAnswer)
+  const [displayedAnswer, setDisplayedAnswer] = useState(PRESET_QUESTIONS[0].referenceSolution)
   const [isStreaming, setIsStreaming] = useState(false)
   const [latencyMs, setLatencyMs] = useState<number | null>(340)
   const [copiedAll, setCopiedAll] = useState(false)
@@ -1235,7 +1235,7 @@ export const InterviewCopilotView = () => {
                 const first = PRESET_QUESTIONS.find((q) => q.category === mode)
                 if (first) {
                   setActiveQuestion(first)
-                  setDisplayedAnswer(first.mockAnswer)
+                  setDisplayedAnswer(first.referenceSolution)
                 }
               }}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-mono text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer border ${
@@ -1397,7 +1397,7 @@ export const InterviewCopilotView = () => {
                 key={q.id}
                 onClick={() => {
                   setActiveQuestion(q)
-                  setDisplayedAnswer(q.mockAnswer)
+                  setDisplayedAnswer(q.referenceSolution)
                   setShowPromptsDrawer(false)
                 }}
                 className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${

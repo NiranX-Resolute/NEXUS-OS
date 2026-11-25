@@ -28,6 +28,7 @@ import {
   FolderMinus,
   Layers
 } from 'lucide-react'
+import { ipcFetch } from '../services/ipc-client'
 
 export interface VoiceRoutine {
   id: string
@@ -156,7 +157,7 @@ export const MacrosAndRoutinesView: React.FC = () => {
     setLoading(true)
     const startTime = performance.now()
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/routines', {
+      const resp = await ipcFetch('/api/routines', {
         headers: { Accept: 'application/json' }
       })
 
@@ -259,7 +260,7 @@ export const MacrosAndRoutinesView: React.FC = () => {
 
     try {
       // Attempt to save to backend API
-      const resp = await fetch('http://127.0.0.1:47630/api/routines', {
+      const resp = await ipcFetch('/api/routines', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -302,15 +303,16 @@ export const MacrosAndRoutinesView: React.FC = () => {
   const handleDeleteRoutine = async (id: string, phrase: string) => {
     try {
       // Call backend DELETE endpoint, with fallback to POST /api/routines/delete
-      await fetch(`http://127.0.0.1:47630/api/routines/${encodeURIComponent(id)}`, {
+      const delResp = await ipcFetch(`/api/routines/${encodeURIComponent(id)}`, {
         method: 'DELETE'
-      }).catch(async () => {
-        return fetch('http://127.0.0.1:47630/api/routines/delete', {
+      }).catch(() => null)
+      if (!delResp || !delResp.ok) {
+        await ipcFetch('/api/routines/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: id, routine_id: id })
         }).catch(() => null)
-      })
+      }
 
       setRoutines((prev) => {
         const updated = prev.filter((r) => r.id !== id)
@@ -336,12 +338,12 @@ export const MacrosAndRoutinesView: React.FC = () => {
         if (r.id === id) {
           const nextState = !r.enabled
           // Attempt async toggle to backend
-          fetch('http://127.0.0.1:47630/api/routines/toggle', {
+          ipcFetch('/api/routines/toggle', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: id, enabled: nextState })
           }).catch(() => {
-            return fetch(`http://127.0.0.1:47630/api/routines/${encodeURIComponent(id)}`, {
+            return ipcFetch(`/api/routines/${encodeURIComponent(id)}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ enabled: nextState })
@@ -364,7 +366,7 @@ export const MacrosAndRoutinesView: React.FC = () => {
 
     try {
       // 1. First attempt /api/routines/play, fallback to /api/command
-      let resp = await fetch('http://127.0.0.1:47630/api/routines/play', {
+      let resp = await ipcFetch('/api/routines/play', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -375,7 +377,7 @@ export const MacrosAndRoutinesView: React.FC = () => {
       }).catch(() => null)
 
       if (!resp || !resp.ok) {
-        resp = await fetch('http://127.0.0.1:47630/api/command', {
+        resp = await ipcFetch('/api/command', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

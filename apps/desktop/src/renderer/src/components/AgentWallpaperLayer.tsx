@@ -563,7 +563,8 @@ export const AgentWallpaperLayer: React.FC<AgentWallpaperLayerProps> = ({
     let isMounted = true
     const fetchActive = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:47630/api/wallpapers?mode=${mode || 'GLOBAL'}`)
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        const res = await ipcFetch(`/api/wallpapers?mode=${mode || 'GLOBAL'}`)
         if (res.ok && isMounted) {
           const data = await res.json()
           if (data.success && data.active_wallpaper) {

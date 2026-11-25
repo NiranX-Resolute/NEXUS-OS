@@ -508,21 +508,23 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
     let isMounted = true;
     const fetchPersona = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:47630/api/persona').catch(() => null);
+        const { ipcFetch } = await import('@renderer/services/ipc-client');
+        const res = await ipcFetch('/api/persona').catch(() => null);
         if (res && res.ok) {
           const data = await res.json();
           if (isMounted && data) {
-            if (typeof data.humor === 'number') setPersonaHumor(data.humor);
-            if (typeof data.honesty === 'number') setPersonaHonesty(data.honesty);
-            if (typeof data.empathy === 'number') setPersonaEmpathy(data.empathy);
-            if (typeof data.verbosity === 'number') setPersonaVerbosity(data.verbosity);
-            if (typeof data.voice === 'string') setPersonaVoice(data.voice);
-            if (typeof data.preset === 'string') setActivePreset(data.preset);
+            const p = data.persona || data;
+            if (typeof p.humor === 'number' || typeof p.humor_pct === 'number') setPersonaHumor(p.humor ?? p.humor_pct);
+            if (typeof p.honesty === 'number' || typeof p.candor_pct === 'number') setPersonaHonesty(p.honesty ?? p.candor_pct);
+            if (typeof p.empathy === 'number' || typeof p.empathy_pct === 'number') setPersonaEmpathy(p.empathy ?? p.empathy_pct);
+            if (typeof p.verbosity === 'number' || typeof p.verbosity_pct === 'number') setPersonaVerbosity(p.verbosity ?? p.verbosity_pct);
+            if (typeof (p.voice || p.voice_id) === 'string') setPersonaVoice(p.voice || p.voice_id);
+            if (typeof (p.preset || p.active_preset) === 'string') setActivePreset(p.preset || p.active_preset);
           }
         }
       } catch {}
     };
-    fetchPersona();
+    void fetchPersona();
     return () => {
       isMounted = false;
     };
@@ -531,7 +533,8 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   // 2. Fetch DPAPI Vault Status
   const fetchVaultStatus = useCallback(async () => {
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/vault/status').catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/vault/status').catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         setVaultStatus(data.status || {});
@@ -540,14 +543,15 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   }, []);
 
   useEffect(() => {
-    fetchVaultStatus();
+    void fetchVaultStatus();
   }, [fetchVaultStatus]);
 
   // 3. Fetch MCP Tools
   const fetchMcpTools = useCallback(async () => {
     setLoadingMcp(true);
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/mcp/tools').catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/mcp/tools').catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         setMcpTools(data.tools || []);
@@ -558,14 +562,15 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
 
   useEffect(() => {
     if (activeTab === 'mcp_plugins') {
-      fetchMcpTools();
+      void fetchMcpTools();
     }
   }, [activeTab, fetchMcpTools]);
 
   // 4. Fetch AgentShield security status
   const fetchShieldStatus = useCallback(async () => {
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/security/shield-status').catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/security/shield-status').catch(() => null);
       if (res && res.ok) {
         const d = await res.json();
         setShieldScore(d.score ?? 100);
@@ -578,9 +583,9 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   const runShieldScan = useCallback(async () => {
     setIsScanningShield(true);
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/security/shield-scan', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/security/shield-scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       }).catch(() => null);
       if (res && res.ok) {
@@ -595,43 +600,64 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
 
   useEffect(() => {
     if (activeTab === 'scope_guard') {
-      fetchShieldStatus();
+      void fetchShieldStatus();
     }
   }, [activeTab, fetchShieldStatus]);
 
   // 5. Fetch QR Pairing & Git Log
   useEffect(() => {
     if (activeTab === 'system_qr') {
-      fetch('http://127.0.0.1:47630/api/remote/qr-pairing')
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.qr_payload) setQrPairingData((prev) => ({ ...prev, ...d }));
-        })
-        .catch(() => {});
+      import('@renderer/services/ipc-client').then(({ ipcFetch }) => {
+        ipcFetch('/api/remote/qr-pairing?format=json')
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.qr_payload) setQrPairingData((prev) => ({ ...prev, ...d }));
+          })
+          .catch(() => {});
 
-      fetch('http://127.0.0.1:47630/api/system/git-log')
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.commit) setGitStatus(d);
-        })
-        .catch(() => {});
+        ipcFetch('/api/system/git-log')
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.commit || d.commits) setGitStatus(d);
+          })
+          .catch(() => {});
+      });
     }
   }, [activeTab]);
 
-  // 6. Live Mic RMS Audio meter interval & hardware thermal HUD simulation
+  // 6. Real Mic RMS Audio meter & Live NVML/WMI Hardware Thermal Polling
   useEffect(() => {
-    const audioInterval = setInterval(() => {
-      setMicRms(0.015 + Math.random() * 0.045);
-    }, 180);
+    let mounted = true;
+    const pollAudio = async () => {
+      try {
+        const { nexusService } = await import('@renderer/services/nexus-voice-ai');
+        if (mounted) {
+          setMicRms(nexusService.getUserAudioVolume());
+        }
+      } catch {}
+    };
 
-    const thermalInterval = setInterval(() => {
-      setGpuTemp((prev) => Math.min(85, Math.max(40, prev + (Math.random() * 2 - 1))));
-      setCpuTemp((prev) => Math.min(80, Math.max(38, prev + (Math.random() * 2 - 1))));
-      setGpuLoadPct((prev) => Math.min(100, Math.max(10, Math.round(prev + (Math.random() * 6 - 3)))));
-      setFanRpm((prev) => Math.round(prev + (Math.random() * 40 - 20)));
-    }, 2000);
+    const pollHardware = async () => {
+      try {
+        const { ipcFetch } = await import('@renderer/services/ipc-client');
+        const res = await ipcFetch('/api/telemetry/hardware').catch(() => null);
+        if (res && res.ok && mounted) {
+          const data = await res.json();
+          const hw = data.hardware || data;
+          if (typeof hw.gpu_temp_c === 'number') setGpuTemp(Math.round(hw.gpu_temp_c));
+          if (typeof hw.cpu_temp_c === 'number') setCpuTemp(Math.round(hw.cpu_temp_c));
+          if (typeof hw.gpu_util_pct === 'number') setGpuLoadPct(Math.round(hw.gpu_util_pct));
+          if (typeof hw.fan_rpm === 'number') setFanRpm(Math.round(hw.fan_rpm));
+        }
+      } catch {}
+    };
+
+    void pollHardware();
+    const audioInterval = setInterval(pollAudio, 180);
+    const thermalInterval = setInterval(pollHardware, 2500);
 
     return () => {
+      mounted = false;
       clearInterval(audioInterval);
       clearInterval(thermalInterval);
     };
@@ -676,9 +702,9 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   const handleSavePersona = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/persona', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/persona', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           humor: personaHumor,
           honesty: personaHonesty,
@@ -709,9 +735,9 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   const handlePreviewVoice = async () => {
     setPreviewPlaying(true);
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/persona/preview', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/persona/preview', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           voice: personaVoice,
           engine: voiceEngine,
@@ -749,14 +775,14 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
     const val = vaultKeys[keyName];
     if (!val) return;
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/vault/save', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/vault/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: keyName, value: val }),
+        body: JSON.stringify({ key_name: keyName, secret_value: val, key: keyName, value: val }),
       });
       if (res.ok) {
         setVaultKeys((prev) => ({ ...prev, [keyName]: '' }));
-        fetchVaultStatus();
+        void fetchVaultStatus();
         setSaveStatus(`Encrypted ${keyName} to Windows DPAPI`);
         setTimeout(() => setSaveStatus(null), 3000);
       }
@@ -767,14 +793,16 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   const handleTestKey = async (provider: string) => {
     setVaultTestStatus((prev) => ({ ...prev, [provider]: 'testing' }));
     try {
-      const res = await fetch(`http://127.0.0.1:47630/api/vault/test?provider=${provider}`).catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch(`/api/vault/test?provider=${encodeURIComponent(provider)}`).catch(() => null);
       if (res && res.ok) {
-        setVaultTestStatus((prev) => ({ ...prev, [provider]: 'valid' }));
+        const d = await res.json().catch(() => null);
+        setVaultTestStatus((prev) => ({ ...prev, [provider]: d?.success === false ? 'invalid' : 'valid' }));
       } else {
-        setVaultTestStatus((prev) => ({ ...prev, [provider]: 'valid' }));
+        setVaultTestStatus((prev) => ({ ...prev, [provider]: 'invalid' }));
       }
     } catch {
-      setVaultTestStatus((prev) => ({ ...prev, [provider]: 'valid' }));
+      setVaultTestStatus((prev) => ({ ...prev, [provider]: 'invalid' }));
     }
     setTimeout(() => {
       setVaultTestStatus((prev) => ({ ...prev, [provider]: 'idle' }));
@@ -807,26 +835,24 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   const handlePullModel = async (modelName: string) => {
     setPullingModel(modelName);
     try {
-      await fetch('http://127.0.0.1:47630/api/ollama/pull', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      await ipcFetch('/api/ollama/pull', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: modelName }),
       }).catch(() => null);
     } catch {}
-    setTimeout(() => {
-      setPullingModel(null);
-      setSaveStatus(`Ollama pull completed: ${modelName}`);
-      setTimeout(() => setSaveStatus(null), 3000);
-    }, 2500);
+    setPullingModel(null);
+    setSaveStatus(`Ollama pull queued/completed: ${modelName}`);
+    setTimeout(() => setSaveStatus(null), 3000);
   };
 
   // Trigger Dependency Install for MCP
   const handleInstallDep = async (toolName: string) => {
     setInstallingDep(toolName);
     try {
-      await fetch('http://127.0.0.1:47630/api/mcp/install-dep', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      await ipcFetch('/api/mcp/install-dep', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tool: toolName }),
       });
       await fetchMcpTools();
@@ -840,9 +866,9 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
     document.documentElement.style.setProperty('--accent-primary', theme.accentColor);
     document.documentElement.style.setProperty('--bg-void', theme.bgHex);
     try {
-      await fetch('http://127.0.0.1:47630/api/themes/activate', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      await ipcFetch('/api/themes/activate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ theme_id: theme.id }),
       }).catch(() => null);
     } catch {}
@@ -853,9 +879,9 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   // Sync Theme with Notch HUD
   const handleSyncNotch = async () => {
     try {
-      await fetch('http://127.0.0.1:47630/api/themes/sync-notch', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      await ipcFetch('/api/themes/sync-notch', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ theme_id: currentTheme }),
       }).catch(() => null);
       setSaveStatus('Notch HUD QSS synced with active theme');
@@ -893,31 +919,22 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   // Regenerate Mobile Pairing PIN
   const handleRegeneratePin = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/remote/qr-regenerate', { method: 'POST' }).catch(() => null);
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/remote/qr-regenerate', { method: 'POST' }).catch(() => null);
       if (res && res.ok) {
         const d = await res.json();
         setQrPairingData((prev) => ({
           ...prev,
-          pin: d.pin || Math.floor(100000 + Math.random() * 900000).toString(),
-          qr_payload: d.qr_payload || `nexus://pair?host=${prev.host}&port=${prev.port}&pin=${d.pin}`,
+          pin: d.pin || prev.pin,
+          qr_payload: d.qr_payload || `nexus://pair?host=${prev.host}&port=${prev.port}&pin=${d.pin || prev.pin}`,
         }));
+        setSaveStatus('Regenerated companion pairing token');
       } else {
-        const newPin = Math.floor(100000 + Math.random() * 900000).toString();
-        setQrPairingData((prev) => ({
-          ...prev,
-          pin: newPin,
-          qr_payload: `nexus://pair?host=${prev.host}&port=${prev.port}&pin=${newPin}`,
-        }));
+        setSaveStatus('QR pairing endpoint offline');
       }
     } catch {
-      const newPin = Math.floor(100000 + Math.random() * 900000).toString();
-      setQrPairingData((prev) => ({
-        ...prev,
-        pin: newPin,
-        qr_payload: `nexus://pair?host=${prev.host}&port=${prev.port}&pin=${newPin}`,
-      }));
+      setSaveStatus('QR pairing endpoint offline');
     }
-    setSaveStatus('Regenerated companion PIN');
     setTimeout(() => setSaveStatus(null), 3000);
   };
 
@@ -925,10 +942,11 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   const handleWalCheckpoint = async () => {
     setIsCheckpointingWal(true);
     try {
-      await fetch('http://127.0.0.1:47630/api/system/wal-checkpoint', { method: 'POST' }).catch(() => null);
-      setSaveStatus('SQLite WAL Checkpoint: PRAGMA wal_checkpoint(TRUNCATE) OK');
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/system/wal-checkpoint', { method: 'POST' }).catch(() => null);
+      setSaveStatus(res && res.ok ? 'SQLite WAL Checkpoint: PRAGMA wal_checkpoint(TRUNCATE) OK' : 'WAL checkpoint failed');
     } catch {
-      setSaveStatus('WAL Checkpoint complete');
+      setSaveStatus('WAL checkpoint failed');
     }
     setIsCheckpointingWal(false);
     setTimeout(() => setSaveStatus(null), 3000);
@@ -938,7 +956,8 @@ export const SettingsCommandCenter: React.FC<SettingsCommandCenterProps> = () =>
   const handleBackup = async () => {
     setIsBackingUp(true);
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/system/backup', { method: 'POST' });
+      const { ipcFetch } = await import('@renderer/services/ipc-client');
+      const res = await ipcFetch('/api/system/backup', { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         setBackupResult(data.backup_path || 'agent_local.db backup created in ~/.nexus-agent/backups/');

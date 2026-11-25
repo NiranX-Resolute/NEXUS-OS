@@ -221,17 +221,8 @@ export const ProfileEnclaveView: React.FC = () => {
   // Fetch AgentShield Status
   const fetchShieldStatus = useCallback(async () => {
     try {
-      let token = ''
-      try {
-        if (window.nexusAuth?.getAuthToken) {
-          token = await window.nexusAuth.getAuthToken()
-        }
-      } catch {}
-
-      const headers: Record<string, string> = {}
-      if (token) headers['Authorization'] = `Bearer ${token}`
-
-      const res = await fetch('http://127.0.0.1:47630/api/security/shield-status', { headers }).catch(() => null)
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/security/shield-status').catch(() => null)
       if (res && res.ok) {
         const data = await res.json()
         setShieldData({
@@ -350,19 +341,9 @@ export const ProfileEnclaveView: React.FC = () => {
     setIsRunningAudit(true)
     setGlobalNotice(null)
     try {
-      let token = ''
-      try {
-        if (window.nexusAuth?.getAuthToken) {
-          token = await window.nexusAuth.getAuthToken()
-        }
-      } catch {}
-
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (token) headers['Authorization'] = `Bearer ${token}`
-
-      const res = await fetch('http://127.0.0.1:47630/api/security/shield-scan', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/security/shield-scan', {
         method: 'POST',
-        headers,
         body: JSON.stringify({ scan_plugins: true, target_path: 'core/mcp/plugins' })
       })
 
@@ -388,16 +369,9 @@ export const ProfileEnclaveView: React.FC = () => {
         throw new Error(`IPC audit server responded with HTTP ${res.status}`)
       }
     } catch (err: any) {
-      console.warn('[ProfileEnclaveView] AgentShield scan simulated verification:', err)
-      setShieldData((prev) => ({
-        ...prev,
-        score: 100,
-        status: 'CLEAN',
-        scanned_at: new Date().toISOString()
-      }))
       setGlobalNotice({
-        type: 'success',
-        message: 'AgentShield AST Scan Completed: All 6 Sovereign Invariants verified cleanly.'
+        type: 'error',
+        message: err?.message || 'AgentShield scan failed to reach local IPC gateway.'
       })
     } finally {
       setIsRunningAudit(false)
@@ -409,31 +383,19 @@ export const ProfileEnclaveView: React.FC = () => {
     setIsCheckpointingWal(true)
     setWalStatusMessage(null)
     try {
-      let token = ''
-      try {
-        if (window.nexusAuth?.getAuthToken) {
-          token = await window.nexusAuth.getAuthToken()
-        }
-      } catch {}
-
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (token) headers['Authorization'] = `Bearer ${token}`
-
-      // Attempt endpoint or command dispatcher
-      const res = await fetch('http://127.0.0.1:47630/api/command', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const res = await ipcFetch('/api/system/wal-checkpoint', {
         method: 'POST',
-        headers,
-        body: JSON.stringify({ command: 'PRAGMA wal_checkpoint(TRUNCATE);', timestamp: Date.now() })
+        body: JSON.stringify({})
       }).catch(() => null)
 
       if (res && res.ok) {
-        setWalStatusMessage('WAL Checkpoint complete: Log truncated to 0 frames, latency locked at <1.2ms.')
+        setWalStatusMessage('WAL Checkpoint complete: PRAGMA wal_checkpoint(TRUNCATE) committed cleanly.')
       } else {
-        // Fallback IPC call or local verification
-        setWalStatusMessage('PRAGMA wal_checkpoint(TRUNCATE) committed to ~/.nexus-agent/db/agent_local.db.')
+        setWalStatusMessage('Unable to reach IPC gateway for WAL checkpoint.')
       }
     } catch {
-      setWalStatusMessage('PRAGMA wal_checkpoint(TRUNCATE) verified on local SQLite WAL mesh.')
+      setWalStatusMessage('WAL checkpoint request failed.')
     } finally {
       setIsCheckpointingWal(false)
       setTimeout(() => setWalStatusMessage(null), 5000)

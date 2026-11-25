@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { ipcFetch } from '../services/ipc-client';
 
 export interface Agent {
   id: string;
@@ -45,6 +46,7 @@ export interface SystemTelemetry {
   edgeLatencyMs: number;
   quantumSync: boolean;
   securityState: 'NOMINAL' | 'ELEVATED' | 'LOCKED';
+  workspaceMode?: string;
   uptimeSecs: number;
 }
 
@@ -71,6 +73,7 @@ interface AgentStoreState {
   tasks: Task[];
   logs: SystemLog[];
   telemetry: SystemTelemetry;
+  workspace: { active_mode: string };
   persona: PersonaTelemetry;
   availableVoices: VoiceOption[];
 }
@@ -186,7 +189,8 @@ let currentState: AgentStoreState = {
   agents: initialAgents,
   tasks: initialTasks,
   logs: initialLogs,
-  telemetry: initialTelemetry,
+  telemetry: { ...initialTelemetry, workspaceMode: 'DEV' },
+  workspace: { active_mode: 'DEV' },
   persona: initialPersona,
   availableVoices: initialVoices,
 };
@@ -268,7 +272,7 @@ export const agentStore = {
   async syncWithBackend() {
     try {
       // 1. Live Win32 Telemetry
-      const resTel = await fetch('http://127.0.0.1:47630/api/telemetry');
+      const resTel = await ipcFetch('/api/telemetry');
       if (resTel.ok) {
         const data = await resTel.json();
         if (data && data.telemetry) {
@@ -287,7 +291,7 @@ export const agentStore = {
 
     try {
       // 2. Live Tasks from SQLite WAL
-      const resTasks = await fetch('http://127.0.0.1:47630/api/tasks?limit=50');
+      const resTasks = await ipcFetch('/api/tasks?limit=50');
       if (resTasks.ok) {
         const data = await resTasks.json();
         if (data && Array.isArray(data.tasks)) {
@@ -326,7 +330,7 @@ export const agentStore = {
 
     try {
       // 3. Live Telemetry Logs from SQLite WAL
-      const resLogs = await fetch('http://127.0.0.1:47630/api/telemetry/logs?limit=50');
+      const resLogs = await ipcFetch('/api/telemetry/logs?limit=50');
       if (resLogs.ok) {
         const data = await resLogs.json();
         if (data && Array.isArray(data.logs)) {
@@ -368,7 +372,7 @@ export const agentStore = {
 
     try {
       // 4. Live Persona & Emotional Telemetry from SQLite WAL
-      const resPersona = await fetch('http://127.0.0.1:47630/api/persona');
+      const resPersona = await ipcFetch('/api/persona');
       if (resPersona.ok) {
         const data = await resPersona.json();
         if (data && data.persona) {
@@ -394,6 +398,30 @@ export const agentStore = {
     } catch {
       // Persona endpoint currently unreachable
     }
+
+    try {
+      // 5. Live Workspace Mode & Security Lock State
+      const resWs = await ipcFetch('/api/workspace/mode');
+      if (resWs.ok) {
+        const ws = await resWs.json();
+        const mode = String(ws.mode || ws.active_mode || currentState.workspace.active_mode).toUpperCase();
+        const sec = String(ws.security_state || currentState.telemetry.securityState).toUpperCase();
+        const validSec: SystemTelemetry['securityState'] =
+          sec === 'LOCKED' ? 'LOCKED' : sec === 'ELEVATED' ? 'ELEVATED' : 'NOMINAL';
+        currentState = {
+          ...currentState,
+          workspace: { active_mode: mode },
+          telemetry: {
+            ...currentState.telemetry,
+            workspaceMode: mode,
+            securityState: ws.estop_active ? 'LOCKED' : validSec,
+          },
+        };
+        notify();
+      }
+    } catch {
+      // Workspace endpoint currently unreachable
+    }
   },
 
   async updatePersona(updates: Partial<PersonaTelemetry>) {
@@ -408,9 +436,8 @@ export const agentStore = {
     notify();
 
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/persona', {
+      const res = await ipcFetch('/api/persona', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
       if (res.ok) {
@@ -445,7 +472,7 @@ export const agentStore = {
 
   async previewPersona(sampleText?: string): Promise<{ success: boolean; preview_text?: string }> {
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/persona/preview', {
+      const res = await ipcFetch('/api/persona/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: sampleText || '' }),
@@ -462,9 +489,8 @@ export const agentStore = {
 
   async submitTaskToBackend(title: string, category: Task['category'] = 'core') {
     try {
-      const res = await fetch('http://127.0.0.1:47630/api/tasks', {
+      const res = await ipcFetch('/api/tasks', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: title, command_type: category.toUpperCase() }),
       });
       if (res.ok) {
@@ -493,7 +519,31 @@ export const agentStore = {
     };
     notify();
   },
+
+  setWorkspaceModeLocal(mode: string) {
+    const norm = String(mode || 'DEV').toUpperCase();
+    currentState = {
+      ...currentState,
+      workspace: {
+        ...currentState.workspace,
+        active_mode: norm,
+      },
+      telemetry: {
+        ...currentState.telemetry,
+        workspaceMode: norm,
+      },
+    };
+    notify();
+  },
 };
+
+if (typeof window !== 'undefined') {
+  (window as any).__RETICLE_STORES__ = {
+    ...((window as any).__RETICLE_STORES__ || {}),
+    agentStore,
+  };
+  (window as any).agentStore = agentStore;
+}
 
 export function useAgentStore(): AgentStoreState {
   return useSyncExternalStore(agentStore.subscribe, agentStore.getState);

@@ -105,11 +105,15 @@ export default function LoginPage() {
       const name = displayName.trim() || normalizedEmail.split('@')[0] || 'Nexus Operator'
 
       if (!supabase) {
+        const ipc = (window as any)?.electron?.ipcRenderer
+        if (!ipc?.invoke) {
+          throw new Error('Electron IPC preload unavailable in browser mode. Use "Local Operator Direct Access" below.')
+        }
         if (mode === 'create') {
           if (password !== confirmPassword) throw new Error('Passwords do not match.')
           if (name.length < 2) throw new Error('Enter a display name.')
 
-          const res = await (window as any).electron.ipcRenderer.invoke('email-auth:register', {
+          const res = await ipc.invoke('email-auth:register', {
             name,
             email: normalizedEmail,
             password
@@ -124,7 +128,7 @@ export default function LoginPage() {
           localStorage.setItem('nexus_user_name', res.user.name)
           setAuthSession({ token: res.token, mode: 'app', user: res.user })
         } else {
-          const res = await (window as any).electron.ipcRenderer.invoke('email-auth:login', {
+          const res = await ipc.invoke('email-auth:login', {
             email: normalizedEmail,
             password
           })
@@ -301,27 +305,45 @@ export default function LoginPage() {
       const localName = 'Nexus Operator'
       const localPass = 'nexusOperator2026!'
 
-      let res = await (window as any).electron.ipcRenderer.invoke('email-auth:login', {
-        email: localEmail,
-        password: localPass
-      })
-
-      if (!res?.ok) {
-        res = await (window as any).electron.ipcRenderer.invoke('email-auth:register', {
-          name: localName,
+      const ipc = (window as any)?.electron?.ipcRenderer
+      if (ipc?.invoke) {
+        let res = await ipc.invoke('email-auth:login', {
           email: localEmail,
           password: localPass
         })
-      }
 
-      if (res?.ok && res?.token) {
-        persistPreferredDesktopAuthMode('app')
-        persistStoredAppAuthToken(res.token)
-        localStorage.setItem('nexus_user_name', res.user.name || localName)
-        setAuthSession({ token: res.token, mode: 'app', user: res.user })
-        handlePostLoginSuccess()
+        if (!res?.ok) {
+          res = await ipc.invoke('email-auth:register', {
+            name: localName,
+            email: localEmail,
+            password: localPass
+          })
+        }
+
+        if (res?.ok && res?.token) {
+          persistPreferredDesktopAuthMode('app')
+          persistStoredAppAuthToken(res.token)
+          localStorage.setItem('nexus_user_name', res.user.name || localName)
+          setAuthSession({ token: res.token, mode: 'app', user: res.user })
+          handlePostLoginSuccess()
+        } else {
+          throw new Error(res?.error || 'Failed to initialize local operator session.')
+        }
       } else {
-        throw new Error(res?.error || 'Failed to initialize local operator session.')
+        const healthResp = await fetch('http://127.0.0.1:47630/api/health').catch(() => null)
+        if (!healthResp || !healthResp.ok) {
+          throw new Error('Local Nexus Gateway on 127.0.0.1:47630 is offline.')
+        }
+        const webToken = `local-web-operator-${Date.now()}`
+        persistPreferredDesktopAuthMode('app')
+        persistStoredAppAuthToken(webToken)
+        localStorage.setItem('nexus_user_name', localName)
+        setAuthSession({
+          token: webToken,
+          mode: 'app',
+          user: { name: localName, email: localEmail }
+        })
+        handlePostLoginSuccess()
       }
     } catch (err: any) {
       setError(err?.message || 'Local login error.')

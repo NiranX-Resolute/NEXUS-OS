@@ -1073,7 +1073,8 @@ export const PlanetWatchView: React.FC = () => {
       // Check if current workspace mode is SILENT (air-gapped)
       let isSilentMode = false
       try {
-        const modeResp = await fetch('http://127.0.0.1:47630/api/workspace', { signal: AbortSignal.timeout(1000) })
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        const modeResp = await ipcFetch('/api/workspace', { signal: AbortSignal.timeout(1000) })
         if (modeResp.ok) {
           const mData = await modeResp.json()
           if (mData.mode === 'SILENT') isSilentMode = true

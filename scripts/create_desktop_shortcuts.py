@@ -4,7 +4,9 @@ from pathlib import Path
 
 desktop = Path(os.path.expanduser(r"~\Desktop"))
 repo_root = Path(r"C:\Users\NiranX\Documents\antigravity\Nexus Desktop")
-icon_exe = repo_root / r"apps\desktop\release\win-unpacked\nexus-ai.exe"
+icon_exe = repo_root / r"apps\desktop\release\win-unpacked\NEXUS-OS.exe"
+if not icon_exe.exists():
+    icon_exe = repo_root / r"apps\desktop\build\icon.ico"
 
 shortcuts = [
     {

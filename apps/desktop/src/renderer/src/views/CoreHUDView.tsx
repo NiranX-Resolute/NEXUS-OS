@@ -330,9 +330,8 @@ export const CoreHUDView: React.FC<CoreHUDViewProps> = ({
     let isMounted = true
     const checkCheckpoint = async () => {
       try {
-        const resp = await fetch('http://127.0.0.1:47630/api/agent/slices/reboot-checkpoint', {
-          headers: { 'Content-Type': 'application/json' }
-        }).catch(() => null)
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        const resp = await ipcFetch('/api/agent/slices/reboot-checkpoint').catch(() => null)
         if (resp && resp.ok) {
           const data = await resp.json()
           if (isMounted && data.has_checkpoint && data.checkpoint) {
@@ -501,9 +500,9 @@ export const CoreHUDView: React.FC<CoreHUDViewProps> = ({
 
       // Sync with visual preferences API if running
       try {
-        await fetch('http://127.0.0.1:47630/api/visuals/preferences', {
+        const { ipcFetch } = await import('@renderer/services/ipc-client')
+        await ipcFetch('/api/visuals/preferences', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             reactor_shape: selected?.shapeKey || 'dyson',
             morphology: m
@@ -537,9 +536,9 @@ export const CoreHUDView: React.FC<CoreHUDViewProps> = ({
     showToast(`RESUMING ${rebootCheckpoint.sliceId} FROM CHECKPOINT...`)
 
     try {
-      const resp = await fetch('http://127.0.0.1:47630/api/agent/slice/resume', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      const resp = await ipcFetch('/api/agent/slice/resume', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slice_id: rebootCheckpoint.sliceId })
       }).catch(() => null)
 
@@ -563,9 +562,9 @@ export const CoreHUDView: React.FC<CoreHUDViewProps> = ({
     showToast(`REPLAYING ${rebootCheckpoint.sliceId} FROM SAFE WAL CHECKPOINT...`)
 
     try {
-      await fetch('http://127.0.0.1:47630/api/agent/slice/replay', {
+      const { ipcFetch } = await import('@renderer/services/ipc-client')
+      await ipcFetch('/api/agent/slice/replay', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slice_id: rebootCheckpoint.sliceId })
       }).catch(() => null)
     } catch {}

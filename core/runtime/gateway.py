@@ -1000,7 +1000,11 @@ def create_gateway_app(db_path: Optional[Union[str, Path]] = None, dry_run_hardw
     @app.get("/api/workspace/mode")
     async def get_workspace_mode():
         mode = workspace_governor.get_mode()
-        rules = workspace_governor.get_rules()
+        rules = (
+            workspace_governor.get_rules()
+            if hasattr(workspace_governor, "get_rules")
+            else workspace_governor.get_workspace_config(mode)
+        )
         return {
             "success": True,
             "mode": mode,
@@ -1122,15 +1126,16 @@ def create_gateway_app(db_path: Optional[Union[str, Path]] = None, dry_run_hardw
             return {"success": False, "error": str(exc)}
 
     @app.post("/api/vault/save")
-    async def post_vault_save(body: Dict[str, Any] = Body(...)):
+    async def post_vault_save(request: Request, body: Dict[str, Any] = Body(...)):
+        _verify_bearer_token(request)
         from core.security.vault import VaultManager
-        key_name = body.get("key_name")
-        secret_value = body.get("secret_value")
+        key_name = body.get("key_name") or body.get("key")
+        secret_value = body.get("secret_value") if body.get("secret_value") is not None else body.get("value")
         if not key_name or secret_value is None:
-            raise HTTPException(status_code=400, detail="Missing key_name or secret_value")
+            raise HTTPException(status_code=400, detail="Missing key_name/key or secret_value/value")
         try:
             vault = VaultManager()
-            vault.set_secret(key_name, secret_value)
+            vault.set_secret(str(key_name), str(secret_value))
             return {"success": True, "key_name": key_name, "status": "SAVED_TO_DPAPI"}
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
@@ -1170,25 +1175,47 @@ def create_gateway_app(db_path: Optional[Union[str, Path]] = None, dry_run_hardw
     # Repository File Tree & Verification (NexKoder Studio)
     # -------------------------------------------------------------------------
     @app.get("/api/fs/tree")
-    async def get_fs_tree(path: Optional[str] = None):
-        base_dir = Path(path).resolve() if path else Path(__file__).resolve().parent.parent.parent
+    async def get_fs_tree(request: Request, path: Optional[str] = None, dir: Optional[str] = None):
+        _verify_bearer_token(request)
+        repo_root = Path(__file__).resolve().parent.parent.parent
+        sub = (dir or path or "").strip()
+        if sub:
+            candidate = Path(sub)
+            base_dir = candidate.resolve() if candidate.is_absolute() else (repo_root / candidate).resolve()
+        else:
+            base_dir = repo_root
+        if not scope_guard.validate_path(str(base_dir), [str(repo_root)]):
+            raise HTTPException(status_code=403, detail="Path outside workspace scope")
         tree = []
         try:
-            for item in sorted(base_dir.iterdir()):
-                if item.name.startswith(".") or item.name in ["node_modules", "__pycache__", "dist", "supporting_files"]:
+            for item in sorted(base_dir.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
+                if item.name.startswith(".") or item.name in ["node_modules", "__pycache__", "dist", "out", "supporting_files", ".venv", "venv"]:
                     continue
+                try:
+                    rel_path = str(item.relative_to(repo_root)).replace("\\", "/")
+                except ValueError:
+                    rel_path = str(item)
                 tree.append({
                     "name": item.name,
-                    "path": str(item),
+                    "path": rel_path,
+                    "abs_path": str(item),
                     "is_dir": item.is_dir(),
-                    "size": item.stat().st_size if item.is_file() else 0
+                    "size": item.stat().st_size if item.is_file() else 0,
+                    "ext": item.suffix if item.is_file() else "",
                 })
-            return {"success": True, "root": str(base_dir), "items": tree}
+            return {"success": True, "root": str(base_dir), "items": tree, "files": tree}
         except Exception as exc:
-            return {"success": False, "error": str(exc), "items": []}
+            return {"success": False, "error": str(exc), "items": [], "files": []}
 
     @app.post("/api/exec/verify")
-    async def post_exec_verify(body: Dict[str, Any] = Body(default_factory=dict)):
+    async def post_exec_verify(request: Request, body: Dict[str, Any] = Body(default_factory=dict)):
+        _verify_bearer_token(request)
+        if body.get("command"):
+            from core.runtime.gateway_ipc_bridge import _get_delegate
+            return await asyncio.to_thread(
+                _get_delegate(target_db, dry_run_hardware, workspace_governor, compute_pool).exec_verify,
+                str(body["command"]),
+            )
         test_target = body.get("target", "tests/test_nexus_v5_complete.py")
         import subprocess
         proc = subprocess.run(["python", "-m", "pytest", test_target, "-v"], capture_output=True, text=True, timeout=20)
@@ -1203,31 +1230,27 @@ def create_gateway_app(db_path: Optional[Union[str, Path]] = None, dry_run_hardw
     # Scholar Research & arXiv Search
     # -------------------------------------------------------------------------
     @app.get("/api/scholar/search")
-    async def get_scholar_search(query: str = Query(...)):
-        import urllib.request
-        import xml.etree.ElementTree as ET
-        papers = []
-        try:
-            url = f"http://export.arxiv.org/api/query?search_query=all:{urllib.parse.quote(query)}&start=0&max_results=5"
-            req = urllib.request.Request(url, headers={"User-Agent": "NexusOS/5.0"})
-            with urllib.request.urlopen(req, timeout=5.0) as resp:
-                xml_data = resp.read()
-            root = ET.fromstring(xml_data)
-            for entry in root.findall("{http://www.w3.org/2005/Atom}entry"):
-                title = entry.find("{http://www.w3.org/2005/Atom}title")
-                summary = entry.find("{http://www.w3.org/2005/Atom}summary")
-                id_elem = entry.find("{http://www.w3.org/2005/Atom}id")
-                papers.append({
-                    "title": title.text.strip().replace("\n", " ") if title is not None and title.text else "Untitled",
-                    "summary": summary.text.strip().replace("\n", " ")[:300] + "..." if summary is not None and summary.text else "",
-                    "link": id_elem.text.strip() if id_elem is not None and id_elem.text else "",
-                    "category": "arXiv:cs.AI"
-                })
-        except Exception as exc:
-            papers = [
-                {"title": f"Recent Advances in Sovereign Edge-to-Desktop Systems: {query}", "summary": "Foundational architecture exploring local-first AI runtimes and sub-50ms deterministic command routing.", "link": "https://arxiv.org/abs/2401.00001", "category": "arXiv:cs.OS"}
-            ]
-        return {"success": True, "query": query, "papers": papers}
+    async def get_scholar_search(request: Request, query: str = Query(""), q: str = Query(""), limit: int = Query(10, ge=1, le=50)):
+        _verify_bearer_token(request)
+        search_q = (query or q).strip()
+        if not search_q:
+            raise HTTPException(status_code=422, detail="Query parameter 'query' or 'q' is required")
+        from core.runtime.gateway_ipc_bridge import _get_delegate
+        raw_papers = await asyncio.to_thread(
+            _get_delegate(target_db, dry_run_hardware, workspace_governor, compute_pool).scholar_search,
+            search_q,
+            limit,
+        )
+        papers = [
+            {
+                **p,
+                "summary": p.get("summary") or p.get("abstract", ""),
+                "link": p.get("link") or (p.get("id") if str(p.get("id", "")).startswith("http") else ""),
+                "category": p.get("category") or p.get("venue", "arXiv:cs.AI"),
+            }
+            for p in raw_papers
+        ]
+        return {"success": True, "query": search_q, "papers": papers, "results": papers}
 
     # -------------------------------------------------------------------------
     # File Staging Shelf
@@ -1581,6 +1604,16 @@ def create_gateway_app(db_path: Optional[Union[str, Path]] = None, dry_run_hardw
             except Exception as exc:
                 pass
         return {"success": False, "error": "Catalog not found. Run scripts/build_marketplace_catalog.py"}
+
+    from core.runtime.gateway_ipc_bridge import register_ipc_bridge_routes
+    register_ipc_bridge_routes(
+        app=app,
+        db_path=target_db,
+        verify_bearer_fn=_verify_bearer_token,
+        governor=workspace_governor,
+        compute_pool=compute_pool,
+        dry_run_hardware=dry_run_hardware,
+    )
 
     return app
 
